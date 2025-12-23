@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Beurs Demo - Scanner Ready</title>
+    <style>
+        /* --- STYLING (Matrix / Tech look) --- */
+        body {
+            background-color: #050505;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background 1s ease;
+            cursor: none; /* Verberg muis voor kiosk gevoel */
+        }
+
+        #main-container {
+            width: 80%;
+            max-width: 900px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Startscherm */
+        #idle-screen {
+            display: block;
+            animation: breathe 3s infinite ease-in-out;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin: 0;
+            letter-spacing: -2px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        /* De Chat Omgeving */
+        #chat-interface {
+            display: none;
+            text-align: left;
+        }
+
+        .agent-header {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            color: #aaa;
+        }
+
+        .chat-box {
+            font-size: 2.2rem;
+            line-height: 1.4;
+            min-height: 200px;
+            font-weight: bold;
+        }
+
+        .user-choice-display {
+            font-size: 1.5rem;
+            color: #4CAF50;
+            margin-bottom: 15px;
+            height: 30px;
+        }
+
+        /* VIDEO OVERLAY */
+        #video-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Of 'contain' als je zwarte balken wilt */
+        }
+
+        /* Animaties */
+        @keyframes breathe {
+            0% { opacity: 0.4; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.4; transform: scale(0.98); }
+        }
+
+        .cursor::after {
+            content: '█';
+            animation: blink 0.8s infinite;
+            margin-left: 5px;
+            color: inherit;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Timer Balk */
+        #timer-bar-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: #222;
+            z-index: 100;
+        }
+        #timer-bar {
+            height: 100%;
+            background: #fff;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="video-overlay">
+        <video id="main-video">
+            <source src="demo.mp4" type="video/mp4">
+            Jouw browser ondersteunt geen video.
+        </video>
+    </div>
+
+    <div id="main-container">
+        
+        <div id="idle-screen">
+            <h1>SYSTEM READY</h1>
+            <p class="subtitle">Scan toegangschip...</p>
+        </div>
+
+        <div id="chat-interface">
+            <div id="agent-name" class="agent-header">AGENT NAAM</div>
+            <div id="user-response" class="user-choice-display"></div>
+            <div id="ai-text" class="chat-box cursor"></div>
+        </div>
+
+    </div>
+
+    <div id="timer-bar-container"><div id="timer-bar"></div></div>
+
+<script>
+    // --- CONFIGURATIE ---
+    // Pas hier je codes aan!
+    const CHIP_DATABASE = {
+        "0382320900": { type: "agent", name: "DE STRATEEG", color: "#001f3f", text: "Jouw data vertelt een verhaal, maar klopt het plot wel? Laten we jouw strategie onder de loep nemen." },
+        "0433398276": { type: "agent", name: "DE DROMER", color: "#2e003e", text: "Ik zie oneindige mogelijkheden in jouw toekomst. Laten we samen buiten de kaders kleuren." },
+        "0416094468": { type: "video", src: "demo.mp4" }, // Power BI Demo chip
+        "0445676292": { type: "vote", val: "JA" },
+        "0000000000": { type: "vote", val: "NEE" } // Voorbeeld ID
+    };
+
+    const N8N_WEBHOOK_URL = "https://jouw-n8n-instantie.com/webhook/scan"; // Optioneel
+
+    // --- VARIABELEN ---
+    const idleScreen = document.getElementById('idle-screen');
+    const chatScreen = document.getElementById('chat-interface');
+    const aiTextField = document.getElementById('ai-text');
+    const userField = document.getElementById('user-response');
+    const agentNameField = document.getElementById('agent-name');
+    const timerBar = document.getElementById('timer-bar');
+    const videoOverlay = document.getElementById('video-overlay');
+    const videoPlayer = document.getElementById('main-video');
+    
+    let activeAgent = null;
+    let typeInterval;
+    let resetTimer;
+
+    // --- SCANNER LOGICA (Het luisteren naar de USB Scanner) ---
+    let scanBuffer = "";
+    let scanTimeout;
+
+    document.addEventListener('keydown', (event) => {
+        // Veel scanners sturen een 'Enter' aan het eind van de reeks
+        if (event.key === 'Enter') {
+            if(scanBuffer.length > 5) { // Simpele check om korte toevallige enters te negeren
+                handleScan(scanBuffer);
+            }
+            scanBuffer = "";
+        } else {
+            // Filter: alleen cijfers en letters toevoegen (geen Shift, Ctrl, etc)
+            if (event.key.length === 1) {
+                scanBuffer += event.key;
+            }
+        }
+
+        // Veiligheid: reset buffer als er te lang niet getypt wordt (voorkomt foutieve halve codes)
+        clearTimeout(scanTimeout);
+        scanTimeout = setTimeout(() => { scanBuffer = ""; }, 200); 
+    });
+
+    function handleScan(code) {
+        console.log("Gescand:", code);
+        restartInactivityTimer();
+
+        // 1. Stuur data naar N8N (vuur en vergeet)
+        sendToN8N(code);
+
+        // 2. Kijk of we de chip kennen
+        const action = CHIP_DATABASE[code];
+
+        if (action) {
+            if (action.type === 'agent') {
+                stopVideo();
+                loadAgent(action.name, action.color, action.text);
+            } else if (action.type === 'video') {
+                playVideo(action.src);
+            } else if (action.type === 'vote') {
+                stopVideo();
+                handleVote(action.val);
+            }
+        } else {
+            // Optioneel: Toon error voor onbekende chip
+            console.log("Onbekende chip ID");
+            // Je zou hier een generieke "Welkom" boodschap kunnen tonen
+        }
+    }
+
+    // --- CONNECTIVITEIT ---
+    async function sendToN8N(code) {
+        if(N8N_WEBHOOK_URL.includes("jouw-n8n")) return; // Niet ingesteld
+
+        try {
+            fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    chip_id: code, 
+                    timestamp: new Date().toISOString() 
+                })
+            });
+        } catch (e) {
+            console.error("Kon niet loggen naar N8N", e);
+        }
+    }
+
+    // --- DISPLAY FUNCTIES ---
+
+    function loadAgent(name, color, introText) {
+        activeAgent = name;
+        
+        idleScreen.style.display = 'none';
+        chatScreen.style.display = 'block';
+        videoOverlay.style.display = 'none';
+        
+        document.body.style.backgroundColor = color;
+        agentNameField.innerText = name;
+        userField.innerText = ""; 
+        
+        typeText(introText);
+    }
+
+    function playVideo(src) {
+        // Stop interface, start video
+        idleScreen.style.display = 'none';
+        chatScreen.style.display = 'none';
+        videoOverlay.style.display = 'flex';
+        
+        // Check of src veranderd moet worden (voor meerdere video's)
+        // videoPlayer.src = src; 
+        
+        videoPlayer.currentTime = 0;
+        videoPlayer.play();
+        
+        // Als video klaar is, ga terug naar start of blijf staan?
+        // Nu: terug naar start na afloop
+        videoPlayer.onended = () => {
+            resetSystem();
+        };
+    }
+
+    function stopVideo() {
+        videoPlayer.pause();
+        videoOverlay.style.display = 'none';
+    }
+
+    function handleVote(choice) {
+        if (!activeAgent) {
+            // Als er geen agent actief is, laden we een 'standaard' agent om te antwoorden
+            loadAgent("SYSTEM", "#333", "Stemming ontvangen. Analyse loopt...");
+            setTimeout(() => {
+                 aiTextField.innerHTML = `Je hebt gestemd: ${choice}. <br>Jouw mening is opgenomen in de dataset.`;
+            }, 1000);
+            return;
+        }
+
+        userField.innerText = ">> SCAN ONTVANGEN: " + choice;
+        
+        aiTextField.innerHTML = "...";
+        setTimeout(() => {
+            let response = "";
+            if (choice === "JA") {
+                response = "Geregistreerd: JA. Dank voor je input.";
+            } else {
+                response = "Geregistreerd: NEE. Interessant perspectief.";
+            }
+            typeText(response);
+        }, 800);
+    }
+
+    // --- TYPE EFFECT ---
+    function typeText(text) {
+        clearInterval(typeInterval);
+        aiTextField.innerHTML = "";
+        
+        let i = 0;
+        typeInterval = setInterval(() => {
+            aiTextField.innerHTML += text.charAt(i);
+            i++;
+            if (i >= text.length) clearInterval(typeInterval);
+        }, 30);
+    }
+
+    // --- RESET / TIMEOUT ---
+    function restartInactivityTimer() {
+        timerBar.style.transition = 'none';
+        timerBar.style.width = '100%';
+        void timerBar.offsetWidth;
+        
+        // 60 seconden tot reset
+        timerBar.style.transition = 'width 60s linear';
+        timerBar.style.width = '0%';
+
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(resetSystem, 60000);
+    }
+
+    function resetSystem() {
+        stopVideo();
+        idleScreen.style.display = 'block';
+        chatScreen.style.display = 'none';
+        document.body.style.backgroundColor = "#050505";
+        activeAgent = null;
+        restartInactivityTimer();
+    }
+
+    // Start
+    restartInactivityTimer();
+
+</script>
+</body>
+</html>
