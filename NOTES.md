@@ -89,20 +89,63 @@ Incident: 14:30 - Dashboard corrupted in Meeting Room
 
 ### n8n Agent Chat Systeem
 
-**Workflow architectuur:**
+## ✅ CORRECTE ARCHITECTUUR (na verduidelijking):
+
+**NFC Tags op Vaste Locaties:**
+- NFC tags zitten vastgeplakt op items (achterwand, statafel, etc.)
+- Tag bevat URL naar chat webinterface
+- Bezoeker scant met eigen mobiel
+- Chat opent op mobiel van bezoeker
+
+**Workflow architectuur met Supabase Edge Functions:**
 ```
-1. Bezoeker scant Agent NFC tag
-2. Flask detecteert agent_id + haalt actief scenario_id op
-3. Webhook call naar n8n workflow
-4. n8n workflow:
-   - Ontvangt: scenario_id, agent_id, game_state
-   - Haalt scenario data uit Supabase
-   - Kiest juiste AI prompt template voor agent
-   - Genereert contextual hint/alibi
-   - Return JSON met hint text
-5. Flask toont hint op scherm
-6. Game state update: agent_visited
+1. Bezoeker scant Agent NFC tag met mobiel
+   └─> NFC tag bevat URL: https://jouwproject.supabase.co/functions/v1/agent-chat?agent=1&game=ABC123
+
+2. Chat interface opent op mobiel
+   └─> Simpele HTML pagina (gehost op Supabase Storage of GitHub Pages)
+   └─> Haalt actief scenario_id op via game_id parameter
+   └─> Toont agent character (Schoonmaker/Receptionist/Stagiair)
+
+3. Bezoeker typt vraag in chat
+   └─> POST request naar Supabase Edge Function: /agent-chat
+
+4. Supabase Edge Function (Deno/TypeScript):
+   - Ontvangt: game_id, agent_id, user_message
+   - Haalt scenario context uit Supabase database
+   - Haalt scenario_hints voor deze agent/scenario combinatie
+   - Bouwt AI prompt met character + context
+   - Call naar OpenAI API (of Anthropic)
+   - Genereert contextual antwoord met alibi/hint
+   - Slaat chat message op in database (optioneel)
+   - Return antwoord naar chat interface
+
+5. Bezoeker leest antwoord op mobiel
+   └─> Kan meerdere vragen stellen
+   └─> Hints helpen bij eliminatie van verdachten
+   └─> Chat history blijft bewaard tijdens gesprek
+
+6. Game state update in Supabase:
+   - Track welke agents bezocht zijn (agent_visited array in games table)
+   - Log alle chat messages in chat_messages table voor analytics
 ```
+
+**Waarom Supabase Edge Functions perfect is:**
+- ✅ **Directe database toegang** - geen extra API calls nodig
+- ✅ **Serverless** - geen server onderhoud
+- ✅ **CORS vooraf geconfigureerd** - werkt direct met web requests
+- ✅ **AI integratie mogelijk** - OpenAI/Anthropic SDK's werken in Deno
+- ✅ **Gratis tier ruim genoeg** - 500K requests/maand
+- ✅ **1 platform** - database + functions + auth alles in Supabase
+- ✅ **TypeScript/Deno** - modern, veilig, snel
+
+**Voordelen van deze setup:**
+- ✅ Meerdere bezoekers kunnen tegelijk verschillende agents bevragen
+- ✅ Chat is privé (niet op groot scherm voor iedereen zichtbaar)
+- ✅ Bezoekers gebruiken eigen device (vertrouwd)
+- ✅ Tags blijven op vaste locaties (simpel)
+- ✅ Schaalbaarder (niet alles via 1 laptop)
+- ✅ Geen extra diensten nodig (alles in Supabase)
 
 **AI Prompt Engineering per Agent:**
 
@@ -148,13 +191,74 @@ Scenario context: {scenario_details}
 - Sneller spel
 - Duidelijkere flow
 
+### Game Start: Situatie Uitleg (Cluedo-stijl)
+
+**Bij START van het spel:**
+
+Net als bij Cluedo moet de situatie uitgelegd worden voordat spelers beginnen.
+
+**Template:**
+```
+### Open Vragen
+
+- [ ] Fysieke vs data-locaties besluit
+- [ ] Hoeveel tijd moet tussen events zitten? (15 min? 30 min?)
+- [ ] Moeten alle agents altijd beschikbaar zijn, of scenario-specifiek?
+- [ ] Limiet op aantal hints per spel?
+- [ ] Tonen we welke hints al gescand zijn?
+- [ ] Chat interface: n8n vs Supabase Edge Functions?
+- [ ] NFC URL structuur: hoe koppelen we session aan scenario?
+- [ ] Moeten chat messages opgeslagen worden in database?
+- [ ] Mogen bezoekers onbeperkt vragen stellen aan agents?
+
+---
+
+## 🎯 PRIORITEIT: Eerst Technisch Werkend Krijgen
+
+**Focus voor nu:**
+1. ✅ Basis game flow werkt (WIE/WAARMEE/WAAR) - DONE
+2. ⬜ Chat interface prototype maken
+3. ⬜ AI agent responses werkend krijgen
+4. ⬜ Session koppeling tussen laptop game en mobiele chat
+5. ⬜ Scenario START melding implementeren
+
+**Later verfijnen:**
+- Scenario content (tijdlijnen, details)
+- Locaties hermixen
+- Meer personen/wapens
+- Hint kwaliteit optimaliserenig stuk.
+
+Ik zag dat [specifiek detail dat richting geeft, bijv. "de 
+Financial Controller rond lunchtijd iets aan het uploaden was"].
+
+Ook hoorde ik dat [tweede hint/detail].
+
+We moeten SNEL weten: WIE heeft WAT gedaan en WAAR is het misgegaan?"
+
+Praat met getuigen (scan de NFC tags) en los de moord op!
+```
+
+**Waarom dit belangrijk is:**
+- ✅ Geeft context zoals Cluedo dat doet
+- ✅ Eerste hints geven richting (niet volledig blind)
+- ✅ Gevoel van urgentie
+- ✅ Duidelijk "WHO did WHAT WHERE" mechaniek
+- ✅ Moordenaarskaart concept uit Cluedo (mysterie)
+
+**Implementatie:**
+- Tekst tonen bij game start
+- Per scenario unieke melding met 2-3 concrete details
+- Details elimineren al 1-2 opties (niet alles)
+- Melder kan verschillende rollen hebben (IT Manager, CEO, Teamlead, etc.)
+
 ### Volgende Stappen
 
-1. **Locaties finaliseren** - brainstorm met team
-2. **Scenario's uitbreiden met tijdslijn** per scenario
-3. **n8n workflow bouwen** voor agent chat
+1. **Chat interface prototype** - Supabase Edge Function vs n8n
+2. **NFC URL structuur** - hoe koppelen we session aan scenario?
+3. **Scenario's uitbreiden met tijdslijn** + START melding per scenario
 4. **AI prompts testen** met verschillende scenarios
 5. **Hints kwaliteit valideren** - kunnen bezoekers echt elimineren?
+6. **Locaties finaliseren** - brainstorm fysiek vs digitaal
 
 ### Open Vragen
 
@@ -163,3 +267,68 @@ Scenario context: {scenario_details}
 - [ ] Moeten alle agents altijd beschikbaar zijn, of scenario-specifiek?
 - [ ] Limiet op aantal hints per spel?
 - [ ] Tonen we welke hints al gescand zijn?
+
+---
+
+## 🎯 Besluit: Auto-Detect Game met Status Check (24 dec 2024, 21:00)
+
+### Probleem dat we oplossen
+- NFC tags zitten vast in ruimte (niet bij laptop)
+- Bezoeker moet geen code hoeven in te typen
+- Oude browser sessies mogen nieuw spel niet verstoren
+- 2x2m stand = altijd maar 1 actief spel tegelijk
+
+### Gekozen Oplossing: Auto-Detect + Status Column
+
+**Database aanpassing:**
+```sql
+ALTER TABLE games 
+ADD COLUMN status TEXT DEFAULT 'active',
+ADD COLUMN visited_agents INTEGER[] DEFAULT '{}';
+
+-- Values: 'active', 'completed', 'abandoned'
+```
+
+**Workflow:**
+1. **Game start** → status = 'active'
+2. **Bezoeker scant NFC** → Edge Function haalt laatste actieve game op
+3. **Game eindigt** → standhouder update status = 'completed'
+4. **Oude browser refresh** → geen actieve game → error bericht
+
+**Voordelen:**
+✅ Zero friction voor bezoeker (geen code invullen)
+✅ Standhouder heeft controle (expliciete status update)
+✅ Oude sessies worden automatisch rejected
+✅ Fail-safe (time-based check als backup: 60 min)
+✅ Simpel te implementeren
+
+**Edge Function logica:**
+```javascript
+// 1. Auto-detect laatste actieve game
+const game = SELECT * FROM games 
+             WHERE status='active' 
+             ORDER BY created_at DESC LIMIT 1
+
+// 2. Valideer game niet expired
+if (!game || gameAge > 60min) {
+  return error: "Geen actief spel"
+}
+
+// 3. Process chat message
+```
+
+**Chat Interface gedrag:**
+- Bij laden: zoek actieve game
+- Bij error: toon "Vraag standhouder om nieuw spel te starten"
+- Bij refresh: opnieuw zoeken naar actieve game
+
+### Te Implementeren
+- [ ] SQL: ADD COLUMN status + visited_agents
+- [ ] Edge Function: auto-detect + status check
+- [ ] Chat Interface: error handling + auto-reload
+- [ ] Flask app: status update bij game end
+
+### Alternatieve oplossingen overwogen
+❌ **Session tokens** - te complex
+❌ **Manual code input** - bezoeker kan laptop niet zien bij NFC tags  
+❌ **Pure time-based** - geen controle bij crashes
