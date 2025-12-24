@@ -73,22 +73,27 @@
 - [ ] Scenarios in database ladenn kaart brengen
 ### 2.5 Hints & Alibi's Uitwerken 🔄
 - [x] 3 hint-agents bedenken
-- [x] Agent karakters uitgewerkt (Schoonmaker, Receptionist, Stagiair)
-- [ ] Per hint: dynamische content per scenario (voorbeelden maken)
+- [x] Agent karakters uitgewerkt (Schoonmaker, IT Specialist, Receptionist)
+- [x] scenario_hints tabel gevuld voor scenario 10 (Database Beheerder case)
+- [ ] **Agents mogen GEEN off-topic antwoorden geven (koekjesrecepten etc). System prompt moet strikt in-character houden - zie taak 2.6**
+- [ ] Per hint: dynamische content per scenario (voorbeelden maken voor andere 19 scenarios)
 - [ ] Alibi's die personen/wapens/locaties CONCREET uitsluiten
-- [ ] Hints met tijdsinformatie (wanneer gebeurde wat?)
+- [ ] Hints met tijdsinformatie (wanneer gebeurde wat?) - ✅ voor scenario 10
 - [ ] Test of hints voldoende aanknopingspunten geven voor eliminatie
 - [ ] Kwaliteitscheck: hints moeten logische deductie mogelijk maken
 
-### 2.6 n8n Agent Chat Systeem ⬜
-- [ ] n8n workflow opzetten voor agent chat
-- [ ] Webhook endpoint naar n8n vanaf Flask
-- [ ] Workflow: ontvang scenario_id + agent_id
-- [ ] AI prompt engineering per agent (Schoonmaker/Receptionist/Stagiair)
-- [ ] Prompt moet scenario context inladen
-- [ ] Return hint/alibi tekst naar Flask
-- [ ] Testen met verschillende scenario's
-- [ ] Hints moeten CONCRETE info geven (tijd, locatie, persoon gezien)
+### 2.6 Agent Chat Systeem ✅
+- [x] ~~n8n herzien! Is dit nodig> nu gaat het via de supabase edge function?~~ **BESLUIT: n8n geskipt, werken via Supabase Edge Functions. Lijkt prima te werken!**
+- [x] Edge Function opgezet voor agent chat (agent-chat)
+- [x] OpenAI integratie in Edge Function
+- [x] AI prompt engineering per agent (Schoonmaker/IT Specialist/Receptionist)
+- [x] Prompt laadt scenario context in (beschrijving, persoon, wapen, locatie)
+- [x] Chat interface deployed naar GitHub Pages
+- [x] Testen met verschillende agents (alle 3 werken)
+- [x] Hints geven CONCRETE info (tijd, locatie, persoon gezien)
+- [ ] **PROMPT TIGHTENING: Agents mogen ALLEEN in-character blijven. GEEN koekjesrecepten of off-topic antwoorden. Stricte system prompt met rol-enforcement toevoegen.**
+- [ ] **KRITIEK: Agents geven nu TE DIRECTE hints (wie/wat/waar). Agents mogen NIET rechtstreeks zeggen "persoon X is de dader" of "het wapen is Y". Ze mogen WEL zeggen wat ze hebben gezien (bijv. "ik zag persoon X bij locatie Y om 10:15" of "ik ben onschuldig, ik was ergens anders"). Ze mogen ook doorverwijzen ("misschien moet je eens met persoon A of B praten, ik zag dit of dat"). Hints moeten indirect/observaties zijn, geen conclusies. Speler moet zelf deduceren.**
+- [ ] **SCENARIO HINTS UITWERKEN: Alle 20 scenario's doornemen en voor elk scenario de 3 agent hints schrijven volgens bovenstaande regels (observaties, geen directe antwoorden, doorverwijzingen mogelijk)**
 
 ### 2.7 Locaties Heroverwegen 🔄
 - [ ] Brainstorm: fysieke locaties vs opslaglocaties
