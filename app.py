@@ -453,7 +453,8 @@ def force_reset_all():
         # Abort all incomplete games
         supabase.table('games').update({
             'aborted': True,
-            'end_time': datetime.utcnow().isoformat()
+            'end_time': datetime.utcnow().isoformat(),
+            'status': 'abandoned'
         }).eq('completed', False).eq('aborted', False).execute()
         
         return jsonify({'success': True, 'message': 'All games reset'})
