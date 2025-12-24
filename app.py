@@ -171,7 +171,8 @@ def start_game():
     game = supabase.table('games').insert({
         'session_code': session_code,
         'scenario_id': scenario['id'],
-        'start_time': datetime.utcnow().isoformat()
+        'start_time': datetime.utcnow().isoformat(),
+        'status': 'active'  # Mark as active for Edge Function auto-detect
     }).execute()
     
     # Return scenario beschrijving
@@ -275,7 +276,8 @@ def submit_answer():
         supabase.table('games').update({
             'completed': True,
             'end_time': end_time.isoformat(),
-            'total_time_seconds': total
+            'total_time_seconds': total,
+            'status': 'completed'
         }).eq('id', game_id).execute()
         
         # Deactivate scenario
@@ -427,7 +429,8 @@ def exit_game():
     # Update game as aborted
     supabase.table('games').update({
         'aborted': True,
-        'end_time': datetime.utcnow().isoformat()
+        'end_time': datetime.utcnow().isoformat(),
+        'status': 'abandoned'
     }).eq('id', game_id).execute()
     
     # Deactivate scenario
