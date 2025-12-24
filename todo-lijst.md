@@ -9,11 +9,11 @@
 
 ## Fase 1: Planning & Architectuur
 
-### 1.1 Technische Architectuur 🔄
+### 1.1 Technische Architectuur ✅
 - [x] Tech stack bepalen: Python Flask + Vanilla JS + Supabase
 - [x] Beslissen: Supabase met lokale fallback
 - [x] Input methode: USB RFID Reader (keyboard emulation)
-- [ ] NFC-ID mapping systeem ontwerpen
+- [x] NFC-ID mapping systeem ontwerpen
 - [x] Scenario generatie: Webhook naar Supabase Edge Function bij START
 - [x] State management bepalen:
   - Actief scenario-ID
@@ -24,8 +24,8 @@
 - [x] Reset functionaliteit: Standhouder pasje → reset naar homepage
 - [x] Test vs Productie: Knoppen (test) / NFC cijfers (productie)
 
-### 1.2 Data Structuur Ontwerp ⬜
-- [ ] Database schema/JSON structuur maken voor:
+### 1.2 Data Structuur Ontwerp ✅
+- [x] Database schema/JSON structuur maken voor:
   - Personen (verdachten)
   - Attributen (moordwapens)
   - Locaties (crime scenes)
@@ -33,54 +33,59 @@
   - Scenario's
   - Game states
   - Leaderboard/Tijden
-- [ ] NFC-ID mapping tabel ontwerpen
-- [ ] Relaties tussen entities definiëren
+- [x] NFC-ID mapping tabel ontwerpen
+- [x] Relaties tussen entities definiëren
+- [x] SQL scripts gemaakt (supabase_setup.sql)
 
 ### 1.3 Game Logic Specificatie 🔄
 - [x] Win-conditie: Correcte combinatie WIE + WAARMEE + WAAR
-- [x] Volgorde validatie: Moet in volgorde WIE → WAARMEE → WAAR
+- [x] Volgorde validatie: Alle 3 antwoorden invullen, dan pas validatie
 - [x] Foutafhandeling: 
-  - Verkeerde categorie = foutmelding + geen scan registratie
-  - Verkeerde combinatie = +15 sec straftijd (zichtbaar op scherm)
-- [ ] Hint-systeem logica uitwerken (scenario-specifiek via Edge Function)
-- [ ] Alibi/uitsluit mechanisme ontwerpen
+  - Verkeerde combinatie = +15 sec straftijd + reset alle 3 boxen
 - [x] Timer start: Bij START pasje scan
 - [x] Timer stop: Bij correcte combinatie (eindtijd = speeltijd + straftijd)
+- [ ] Hint-systeem logica uitwerken (scenario-specifiek via n8n chatbot)
+- [ ] Alibi/uitsluit mechanisme ontwerpen
+- [ ] **PRODUCTIE: Scenario text verbergen (toont nu antwoord!) - Add ?dev=true URL param voor development**
 
 ---
 
 ## Fase 2: Content Creatie
-
-### 2.1 Personen Brainstorm ⬜
-- [ ] 5-6 verdachten bedenken (Power BI persona's)
-- [ ] Karakterbeschrijvingen schrijven
+### 2.1 Personen Brainstorm ✅
+- [x] 3 verdachten bedenken (Power BI persona's)
+- [x] Karakterbeschrijvingen schrijven
+- [x] In database toegevoegdjven
 - [ ] Alibi's/achtergrond verhalen
 
-### 2.2 Attributen (Moordwapens) Brainstorm ⬜
-- [ ] 4-5 Power BI horror scenarios bedenken
-- [ ] Beschrijvingen per attribuut
-- [ ] Hoe deze het dashboard "vermoorden"
-
-### 2.3 Locaties Brainstorm ⬜
-- [ ] 4-5 herkenbare Power BI locaties
-- [ ] Beschrijvingen per locatie
-
-### 2.4 Scenario Matrix ⬜
-- [ ] Alle mogelijke combinaties in kaart brengen
-- [ ] Per scenario: logische samenhang checken
-- [ ] Scenario randomisatie logica
-
-### 2.5 Hints & Alibi's Uitwerken ⬜
-- [ ] ~5 hint-agents bedenken
+### 2.2 Attributen (Moordwapens) Brainstorm ✅
+- [x] 5 Power BI horror scenarios bedenken
+- [x] Beschrijvingen per attribuut
+- [x] Hoe deze het dashboard "vermoorden"
+- [x] In database toegevoegd
+### 2.3 Locaties Brainstorm ✅
+- [x] 4 herkenbare Power BI locaties
+- [x] Beschrijvingen per locatie
+- [x] In database toegevoegdcaties
+### 2.4 Scenario Matrix ✅
+- [x] 20 logische scenario's uitgewerkt met realistische context
+- [x] Per scenario: verhaal met timing/events (Q3, Heidag, etc.)
+- [x] SQL script gemaakt (seed_scenarios.sql)
+- [ ] Scenarios in database ladenn kaart brengen
+### 2.5 Hints & Alibi's Uitwerken 🔄
+- [x] 3 hint-agents bedenken
+- [x] Agent karakters uitgewerkt (Schoonmaker, Receptionist, Stagiair)
+- [ ] Per hint: dynamische content per scenario (voorbeelden maken)
+- [ ] Alibi's die personen uitsluiten
+- [ ] Test of hints voldoende aanknopingspunten geven
 - [ ] Per hint: dynamische content per scenario
 - [ ] Alibi's die personen uitsluiten
 - [ ] Test of hints voldoende aanknopingspunten geven
 
----
-
-## Fase 3: Development
-
-### 3.1 Basis Setup ⬜
+### 3.1 Basis Setup 🔄
+- [x] Project initialiseren
+- [ ] Dependencies installeren (Flask, Supabase client)
+- [ ] Development environment opzetten
+- [x] Git repository aangemaakt en gepusht naar GitHub
 - [ ] Project initialiseren
 - [ ] Dependencies installeren
 - [ ] Development environment opzetten
@@ -120,12 +125,15 @@
 - [ ] Alibi/uitsluit logica implementeren
 - [ ] (Nice-to-have: aantal gescande hints tonen)
 
-### 3.7 Murder Mystery - Win/Loss ⬜
-- [ ] Win-conditie check
-- [ ] Win-scherm met eindtijd
-- [ ] Leaderboard update
-- [ ] Optie: email voor leadgeneratie
-- [ ] Restart/nieuwe game optie
+### 3.7 Murder Mystery - Win/Loss/Exit ⬜
+- [ ] Win-conditie check (correcte combinatie)
+- [ ] EXIT pasje detectie (standhouder kan spel afbreken)
+- [ ] Test EXIT knop (voor development)
+- [ ] Win-scherm met eindtijd + session code
+- [ ] QR code genereren met session code
+- [ ] QR code weergave op scherm
+- [ ] Leaderboard update (completed = TRUE, aborted = FALSE)
+- [ ] Session code generator (unieke 4-6 character codes)
 
 ### 3.8 Reset Functionaliteit ⬜
 - [ ] Standhouder reset-pasje detectie
@@ -226,19 +234,32 @@
 - [ ] Meest gescande hints
 - [ ] Succes ratio
 
-### Marketing ⬜
-- [ ] Email capture bij win
-- [ ] Social media share functie
-- [ ] Foto van winnaar met tijd
-- [ ] QR code naar company website
+### Marketing & Leadgeneratie ⬜
+- [ ] n8n workflow: Post-game form
+  - [ ] Webhook endpoint maken
+  - [ ] Form design (naam + email input)
+  - [ ] Nieuwsbrief opt-in checkbox
+  - [ ] Database update (games.player_name, player_email)
+  - [ ] Bevestigingspagina
+- [ ] QR code generator integratie in app
 ## Huidige Status
-**Fase:** Planning & Architectuur (Fase 1.1 grotendeels afgerond)  
-**Volgende actie:** Data structuur ontwerpen (Fase 1.2)  
-**Laatste update:** 23 december 2025
+**Fase:** Fase 2 (Content) → Fase 3 (Development) transitie  
+**Volgende actie:** 
+1. Scenario hints voorbeelden maken (3-5 scenarios)
+2. Database vullen met scenarios + hints
+3. Flask applicatie opzetten en Supabase koppelen
+4. Eerste interface maken
+
+**Laatste update:** 24 december 2025
 
 ## Beslissingen Genomen
 - **Tech Stack:** Python Flask + Vanilla JS + Supabase
 - **RFID Input:** USB Reader met keyboard emulation (cijfer + Enter)
+- **Scenario Generatie:** Vooraf aangemaakte scenarios (20 stuks met realistische context)
+- **Straftijd:** +15 seconden per foute combinatie (zichtbaar op scherm)
+- **Volgorde:** WIE → WAARMEE → WAAR (strict enforced)
+- **Content:** 3 personen, 5 wapens, 4 locaties, 3 agents
+- **Post-game:** QR code + n8n form voor leadgeneratieijfer + Enter)
 - **Scenario Generatie:** Webhook naar Supabase Edge Function bij START
 - **Straftijd:** +15 seconden per foute combinatie (zichtbaar op scherm)
 - **Volgorde:** WIE → WAARMEE → WAAR (strict enforced)

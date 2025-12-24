@@ -1,0 +1,18 @@
+# Requirements voor Power BI Murder Mystery
+# Python dependencies
+
+# Web framework
+Flask==3.0.0
+Flask-CORS==4.0.0
+
+# Supabase client
+supabase==2.9.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# QR code generatie
+qrcode[pil]==7.4.2
+
+# Utilities
+requests==2.31.0

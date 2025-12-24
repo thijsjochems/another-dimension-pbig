@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Murder Mystery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        
+        .leaderboard-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            color: #f5576c;
+            margin-bottom: 40px;
+        }
+        
+        .leaderboard-table {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: rgba(102, 126, 234, 0.3);
+        }
+        
+        th {
+            padding: 20px;
+            text-align: left;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.1rem;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .rank {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .rank-1 {
+            color: #FFD700;
+        }
+        
+        .rank-2 {
+            color: #C0C0C0;
+        }
+        
+        .rank-3 {
+            color: #CD7F32;
+        }
+        
+        .back-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 30px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .back-button:hover {
+            background: #764ba2;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5rem;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="leaderboard-container">
+        <h1>🏆 LEADERBOARD 🏆</h1>
+        
+        <div class="leaderboard-table" id="leaderboardTable">
+            <p class="no-data">Loading...</p>
+        </div>
+        
+        <button class="back-button" onclick="goHome()">Terug naar Home</button>
+    </div>
+    
+    <script>
+        window.onload = async () => {
+            await loadLeaderboard();
+        };
+        
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard');
+                const data = await response.json();
+                
+                if (data.success && data.leaderboard.length > 0) {
+                    renderLeaderboard(data.leaderboard);
+                } else {
+                    document.getElementById('leaderboardTable').innerHTML = 
+                        '<p class="no-data">Nog geen gespeelde games</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('leaderboardTable').innerHTML = 
+                    '<p class="no-data">Error loading leaderboard</p>';
+            }
+        }
+        
+        function renderLeaderboard(entries) {
+            const medals = ['🥇', '🥈', '🥉'];
+            const rankClasses = ['rank-1', 'rank-2', 'rank-3'];
+            
+            let html = '<table><thead><tr>';
+            html += '<th>Rank</th>';
+            html += '<th>Naam</th>';
+            html += '<th>Tijd</th>';
+            html += '<th>Datum</th>';
+            html += '<th>Scenario</th>';
+            html += '</tr></thead><tbody>';
+            
+            entries.forEach((entry, index) => {
+                const rankClass = index < 3 ? rankClasses[index] : '';
+                const medal = index < 3 ? medals[index] : (index + 1);
+                
+                html += '<tr>';
+                html += `<td class="rank ${rankClass}">${medal}</td>`;
+                html += `<td>${entry.player_name || 'Anoniem'}</td>`;
+                html += `<td>${entry.total_time}</td>`;
+                html += `<td>${new Date(entry.completed_at).toLocaleString('nl-NL')}</td>`;
+                html += `<td>${entry.scenario_name || 'Unknown'}</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('leaderboardTable').innerHTML = html;
+        }
+        
+        function goHome() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

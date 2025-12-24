@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Another Dimension - Beurs Stand</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .logo {
+            width: 300px;
+            margin: 30px 0;
+        }
+        
+        .main-container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1000px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .service-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 40px 30px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .service-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .mystery-button {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            font-size: 2rem;
+            padding: 50px 30px;
+        }
+        
+        .mystery-button:hover {
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.6);
+        }
+        
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>Welkom bij Another Dimension</h1>
+        
+        <div class="button-grid">
+            <button class="service-button" onclick="showInfo('portfolio')">
+                <span class="icon">📊</span>
+                Power BI Portfolio
+            </button>
+            
+            <button class="service-button" onclick="showInfo('training')">
+                <span class="icon">🎓</span>
+                Power BI Training
+            </button>
+            
+            <button class="service-button" onclick="showInfo('ai')">
+                <span class="icon">🤖</span>
+                AI Automation
+            </button>
+            
+            <button class="service-button mystery-button" onclick="startGame()">
+                <span class="icon">🔍</span>
+                🚨 Who Killed the Power BI Dashboard? 🚨
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function showInfo(service) {
+            const messages = {
+                portfolio: '📊 We bouwen Power BI dashboards die jouw data tot leven brengen!\n\nScan de QR code voor meer info.',
+                training: '🎓 Word een Power BI expert met onze hands-on trainingen!\n\nScan de QR code voor meer info.',
+                ai: '🤖 Automatiseer je workflows met AI-integraties (n8n, Make, Zapier)!\n\nScan de QR code voor meer info.'
+            };
+            
+            alert(messages[service]);
+        }
+        
+        function startGame() {
+            window.location.href = '/game';
+        }
+    </script>
+</body>
+</html>
