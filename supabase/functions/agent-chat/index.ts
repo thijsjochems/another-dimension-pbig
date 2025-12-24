@@ -34,16 +34,7 @@ serve(async (req) => {
     // 1. Auto-detect active game (if no game_id provided) or validate provided game_id
     let gameQuery = supabaseClient
       .from('games')
-      .select(`
-        *,
-        scenarios (
-          id,
-          verhaal,
-          personen:persoon_id (naam, beschrijving),
-          wapens:wapen_id (naam, beschrijving),
-          locaties:locatie_id (naam, beschrijving)
-        )
-      `)
+      .select('*, scenarios(*)')
       .eq('status', 'active')
 
     if (game_id) {
@@ -79,8 +70,27 @@ serve(async (req) => {
       .eq('agent_id', agent_id)
       .maybeSingle()
 
-    // 4. Build AI prompt based on agent character
-    const systemPrompt = buildAgentPrompt(agent, game.scenarios, hint)
+    // 4. Get persoon, wapen, locatie details
+    const { data: persoon } = await supabaseClient
+      .from('personen')
+      .select('*')
+      .eq('id', game.scenarios.persoon_id)
+      .maybeSingle()
+
+    const { data: wapen } = await supabaseClient
+      .from('wapens')
+      .select('*')
+      .eq('id', game.scenarios.wapen_id)
+      .maybeSingle()
+
+    const { data: locatie } = await supabaseClient
+      .from('locaties')
+      .select('*')
+      .eq('id', game.scenarios.locatie_id)
+      .maybeSingle()
+
+    // 5. Build AI prompt based on agent character
+    const systemPrompt = buildAgentPrompt(agent, game.scenarios, hint, persoon, wapen, locatie)
 
     // 5. Call OpenAI API
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
@@ -155,17 +165,17 @@ serve(async (req) => {
 })
 
 // Build agent-specific prompt with scenario context
-function buildAgentPrompt(agent: any, scenario: any, hint: any): string {
+function buildAgentPrompt(agent: any, scenario: any, hint: any, persoon: any, wapen: any, locatie: any): string {
   const baseContext = `
 Je bent ${agent.naam}, ${agent.rol}.
 ${agent.beschrijving}
 
 SCENARIO CONTEXT:
 Een Power BI Dashboard is stuk gegaan. De feiten zijn:
-- Dader: ${scenario.personen.naam}
-- Wapen: ${scenario.wapens.naam}
-- Locatie: ${scenario.locaties.naam}
-${scenario.verhaal ? `\nVerhaal: ${scenario.verhaal}` : ''}
+- Dader: ${persoon?.naam || 'Onbekend'}
+- Wapen: ${wapen?.naam || 'Onbekend'}
+- Locatie: ${locatie?.naam || 'Onbekend'}
+${scenario.beschrijving ? `\nVerhaal: ${scenario.beschrijving}` : ''}
 
 ${hint ? `\nJOUW SPECIFIEKE KENNIS:\n${hint.hint_context}` : ''}
 
