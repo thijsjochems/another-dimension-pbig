@@ -75,11 +75,29 @@
 - [x] 3 hint-agents bedenken
 - [x] Agent karakters uitgewerkt (Schoonmaker, Receptionist, Stagiair)
 - [ ] Per hint: dynamische content per scenario (voorbeelden maken)
-- [ ] Alibi's die personen uitsluiten
-- [ ] Test of hints voldoende aanknopingspunten geven
-- [ ] Per hint: dynamische content per scenario
-- [ ] Alibi's die personen uitsluiten
-- [ ] Test of hints voldoende aanknopingspunten geven
+- [ ] Alibi's die personen/wapens/locaties CONCREET uitsluiten
+- [ ] Hints met tijdsinformatie (wanneer gebeurde wat?)
+- [ ] Test of hints voldoende aanknopingspunten geven voor eliminatie
+- [ ] Kwaliteitscheck: hints moeten logische deductie mogelijk maken
+
+### 2.6 n8n Agent Chat Systeem ⬜
+- [ ] n8n workflow opzetten voor agent chat
+- [ ] Webhook endpoint naar n8n vanaf Flask
+- [ ] Workflow: ontvang scenario_id + agent_id
+- [ ] AI prompt engineering per agent (Schoonmaker/Receptionist/Stagiair)
+- [ ] Prompt moet scenario context inladen
+- [ ] Return hint/alibi tekst naar Flask
+- [ ] Testen met verschillende scenario's
+- [ ] Hints moeten CONCRETE info geven (tijd, locatie, persoon gezien)
+
+### 2.7 Locaties Heroverwegen 🔄
+- [ ] Brainstorm: fysieke locaties vs opslaglocaties
+- [ ] Besluit: blijven we bij data-opslaglocaties of echte kantoorlocaties?
+- [ ] Opties evalueren:
+  - Data-opslag: Lakehouse, Datawarehouse, Excel Hell, Power BI Service
+  - Fysiek: Meeting Room, Server Room, Kantine, Werkplek
+- [ ] Scenarios aanpassen met tijdscomponent
+- [ ] Database locaties updaten indien nodig
 
 ### 3.1 Basis Setup 🔄
 - [x] Project initialiseren
@@ -222,8 +240,10 @@
 ## Optionele Verbeteringen (Nice-to-have)
 
 ### Spel Verbetering ⬜
-- [ ] "Beschuldig" knop in plaats van automatische check
-- [ ] Penalty tijd bij foute gok (+30 sec)
+- [ ] "Beschuldig" badge/chip in plaats van automatische check na 3e scan
+- [ ] Hint tracking: visueel tonen welke hints al gescand zijn
+- [ ] Database hints herstructureren naar uitsluit-logica
+- [ ] Notitieblok systeem (digitaal) om opties af te vinken
 - [ ] Animaties bij correcte scans
 - [ ] Moeilijkheidsgraden (easy/hard mode)
 - [ ] Geluid effecten
@@ -250,19 +270,42 @@
 3. Flask applicatie opzetten en Supabase koppelen
 4. Eerste interface maken
 
-**Laatste update:** 24 december 2025
-
 ## Beslissingen Genomen
 - **Tech Stack:** Python Flask + Vanilla JS + Supabase
 - **RFID Input:** USB Reader met keyboard emulation (cijfer + Enter)
 - **Scenario Generatie:** Vooraf aangemaakte scenarios (20 stuks met realistische context)
-- **Straftijd:** +15 seconden per foute combinatie (zichtbaar op scherm)
+- **Straftijd:** +15 seconden per foute combinatie - DIRECT gestraft (geen voorwaarschappelijke pogingen)
 - **Volgorde:** WIE → WAARMEE → WAAR (strict enforced)
 - **Content:** 3 personen, 5 wapens, 4 locaties, 3 agents
-- **Post-game:** QR code + n8n form voor leadgeneratieijfer + Enter)
-- **Scenario Generatie:** Webhook naar Supabase Edge Function bij START
-- **Straftijd:** +15 seconden per foute combinatie (zichtbaar op scherm)
-- **Volgorde:** WIE → WAARMEE → WAAR (strict enforced)
-**Fase:** Planning & Architectuur  
+- **Post-game:** QR code + n8n form voor leadgeneratie
+- **Agent Systeem:** n8n chat workflow met AI voor scenario-specifieke hints
+- **Hint Kwaliteit:** CONCRETE alibi's met tijd/locatie/persoon info voor eliminatie
+- **Cluedo Mechaniek:** Focus op deductie en uitsluiten, niet gokken
+
+## Design Notes
+
+### Cluedo vs Huidig Spel
+**Verschil met Cluedo:**
+- Cluedo: systematisch uitsluiten via kaarten tonen
+- Ons spel: hints via agents die alibi's geven
+
+**Verbeterpunten voor Cluedo-gevoel:**
+1. Agents geven concrete uitsluit-informatie
+2. Tijdscomponent in scenarios en alibi's
+3. Logische deductie mogelijk maken
+4. Hints moeten personen/wapens/locaties elimineren
+
+**Voorbeeld goede hint:**
+- ✅ "Ik zag de Data Analist om 14:00 in de kantine, dus die kan niet om 14:30 in de Meeting Room zijn geweest"
+- ❌ "Er gebeurde iets verdachts"
+
+### Locaties Dilemma
+**Twee opties:**
+1. **Data-opslag locaties** (huidige): Lakehouse, Datawarehouse, Excel Hell, Power BI Service
+2. **Fysieke locaties**: Meeting Room, Server Room, Kantine, Werkplek
+
+**Te bespreken:** Welke geeft betere gameplay? Fysiek is herkenbaarder voor Cluedo-feel.
+
+**Laatste update:** 24 december 2025
 **Volgende actie:** Technische architectuur uitwerken  
 **Laatste update:** 23 december 2025

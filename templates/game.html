@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Murder Mystery Game</title>
     <style>
+        /* === COLOR PALETTE === */
+        :root {
+            --color-bg: #001C0F;           /* Dark green background */
+            --color-primary: #54FCBC;      /* Bright teal (text, accents) */
+            --color-secondary: #DCFFED;    /* Light mint (subtle text) */
+            --color-dark: #1E1E1E;         /* Dark gray (borders, shadows) */
+            --color-success: #00ff00;      /* Success green */
+            --color-error: #ff0000;        /* Error red */
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,11 +23,12 @@
         
         body {
             font-family: 'Courier New', Courier, monospace;
-            background-color: #050505;
+            background-color: var(--color-bg);
             min-height: 100vh;
-            color: #e0e0e0;
-            padding: 20px;
+            color: var(--color-primary);
+            padding: 30px;
             cursor: none;
+            line-height: 1.6;
         }
         
         .game-container {
@@ -27,41 +38,42 @@
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 50px;
         }
         
         h1 {
             font-size: 2.5rem;
-            color: #e0e0e0;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        .timer-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 5px;
-            padding: 20px;
-            font-size: 3rem;
-            font-weight: bold;
-            color: #e0e0e0;
-            margin-bottom: 30px;
-            text-align: center;
+            color: var(--color-primary);
+            margin-bottom: 20px;
             letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }   font-weight: bold;
-            color: #f5576c;
-            margin-bottom: 30px;
-            text-align: center;
-        .scenario-box {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-shadow: 0 0 20px rgba(84, 252, 188, 0.5);
+            text-transform: uppercase;
+        }
+        
+        .timer-box {
+            background: rgba(84, 252, 188, 0.05);
+            border: 2px solid var(--color-primary);
             border-radius: 5px;
             padding: 30px;
-            margin-bottom: 30px;
-            line-height: 1.8;
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-bottom: 50px;
+            text-align: center;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px rgba(84, 252, 188, 0.5);
+        }
+        
+        .scenario-box {
+            background: rgba(84, 252, 188, 0.02);
+            border: 1px solid var(--color-primary);
+            border-radius: 5px;
+            padding: 40px;
+            margin-bottom: 50px;
+            line-height: 2;
             font-size: 1.2rem;
-            display: none; /* HIDE IN PRODUCTION - TODO: Remove before launch */
-        }   font-size: 1.2rem;
-            display: none; /* HIDE IN PRODUCTION - TODO: Remove before launch */
+            color: var(--color-secondary);
+            display: none;
         }
         
         .scenario-box.dev-mode {
@@ -71,83 +83,91 @@
         .answer-section {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
         .answer-box {
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(84, 252, 188, 0.03);
+            border: 2px solid rgba(84, 252, 188, 0.3);
             border-radius: 5px;
-            padding: 30px;
+            padding: 40px;
             text-align: center;
+            transition: all 0.3s ease;
         }
         
         .answer-box.filled {
-            border-color: rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--color-primary);
+            background: rgba(84, 252, 188, 0.08);
         }
         
         .answer-box.correct {
-            border-color: #00ff00;
+            border-color: var(--color-success);
             background: rgba(0, 255, 0, 0.1);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
         }
         
         .answer-box.wrong {
-            border-color: #ff0000;
+            border-color: var(--color-error);
             background: rgba(255, 0, 0, 0.1);
             animation: shake 0.5s;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-        }   border-color: #f5576c;
-            background: rgba(245, 87, 108, 0.2);
-            animation: shake 0.5s;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
         }
         
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
         .answer-label {
             font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 15px;
-            color: #888;
+            margin-bottom: 20px;
+            color: var(--color-secondary);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
         
         .answer-value {
             font-size: 1.8rem;
             font-weight: bold;
-            min-height: 60px;
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
+            letter-spacing: 2px;
+            color: var(--color-primary);
+        }
+        
         .test-buttons {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(84, 252, 188, 0.02);
+            border: 1px solid rgba(84, 252, 188, 0.2);
             border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
         }
         
         .test-buttons h3 {
-            margin-bottom: 15px;
-            color: #888;
+            margin-bottom: 20px;
+            color: var(--color-secondary);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             font-size: 1rem;
         }
         
         .button-group {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .test-button {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e0e0e0;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
+            background: rgba(84, 252, 188, 0.1);
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+            padding: 12px 24px;
             border-radius: 3px;
             cursor: pointer;
             font-size: 1rem;
@@ -156,27 +176,27 @@
         }
         
         .test-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            background: rgba(84, 252, 188, 0.2);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 15px rgba(84, 252, 188, 0.3);
         }
         
         .test-button.agent {
             background: rgba(0, 255, 0, 0.15);
-            border-color: #00ff00;
+            border-color: var(--color-success);
         }
         
         .test-button.special {
             background: rgba(255, 0, 0, 0.15);
-            border-color: #ff0000;
+            border-color: var(--color-error);
         }
         
         .agent-section {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(84, 252, 188, 0.02);
+            border: 1px solid rgba(84, 252, 188, 0.2);
             border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
             display: none;
         }
         
@@ -187,14 +207,15 @@
         .chat-messages {
             max-height: 300px;
             overflow-y: auto;
-            margin: 20px 0;
+            margin: 25px 0;
         }
         
         .message {
-            background: rgba(255, 255, 255, 0.02);
-            padding: 15px;
+            background: rgba(84, 252, 188, 0.02);
+            padding: 20px;
             border-radius: 3px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            line-height: 1.8;
         }
         
         .feedback-box {
@@ -202,15 +223,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 0, 0, 0.9);
-            border: 2px solid #ff0000;
-            padding: 50px;
+            background: rgba(30, 30, 30, 0.98);
+            border: 3px solid var(--color-error);
+            padding: 60px;
             border-radius: 5px;
             font-size: 2rem;
             font-weight: bold;
             z-index: 1000;
             display: none;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.6);
+            color: var(--color-error);
         }
         
         .feedback-box.show {
@@ -225,13 +247,18 @@
         }
         
         .complete-box {
-            background: rgba(0, 255, 0, 0.9);
-            border: 2px solid #00ff00;
-            padding: 50px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.98);
+            border: 3px solid var(--color-success);
+            padding: 60px;
             border-radius: 5px;
             text-align: center;
             display: none;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.6);
+            z-index: 1000;
         }
         
         .complete-box.show {
@@ -240,20 +267,22 @@
         
         .complete-box h2 {
             font-size: 3rem;
-            margin-bottom: 20px;
-            color: #000;
+            margin-bottom: 30px;
+            color: var(--color-success);
+            letter-spacing: 3px;
         }
         
         .complete-box p {
             font-size: 1.5rem;
-            margin-bottom: 30px;
-            color: #000;
+            margin-bottom: 20px;
+            color: var(--color-primary);
+            line-height: 1.8;
         }
         
         .big-button {
-            background: #000;
-            color: #00ff00;
-            border: 2px solid #00ff00;
+            background: var(--color-bg);
+            color: var(--color-success);
+            border: 2px solid var(--color-success);
             padding: 20px 50px;
             border-radius: 3px;
             font-size: 1.5rem;
@@ -261,76 +290,84 @@
             font-family: 'Courier New', Courier, monospace;
             cursor: pointer;
             transition: all 0.2s;
+            margin-top: 20px;
         }
         
         .big-button:hover {
-            background: #00ff00;
-            color: #000;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            background: var(--color-success);
+            color: var(--color-bg);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
         }
         
         /* Notification bar styling */
         .notification-bar {
             position: fixed;
-            bottom: -200px;
+            bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.95);
-            border-top: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 30px;
+            background: rgba(30, 30, 30, 0.98);
+            border-top: 3px solid var(--color-primary);
+            padding: 40px;
             text-align: center;
             z-index: 2000;
-            transition: bottom 0.3s ease;
             font-family: 'Courier New', Courier, monospace;
+            display: none;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
         }
         
         .notification-bar.show {
-            bottom: 0;
+            display: block;
+            transform: translateY(0);
         }
         
         .notification-bar.error {
-            border-top-color: #ff0000;
+            border-top-color: var(--color-error);
         }
         
         .notification-bar.success {
-            border-top-color: #00ff00;
+            border-top-color: var(--color-success);
         }
         
         .notification-message {
             font-size: 1.5rem;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            color: var(--color-primary);
+            line-height: 1.8;
         }
         
         .notification-buttons {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             justify-content: center;
         }
         
         .notification-btn {
-            padding: 15px 40px;
+            padding: 18px 45px;
             font-size: 1.2rem;
             font-family: 'Courier New', Courier, monospace;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: #e0e0e0;
+            border: 2px solid var(--color-primary);
+            background: rgba(84, 252, 188, 0.1);
+            color: var(--color-primary);
             border-radius: 3px;
             cursor: pointer;
             transition: all 0.2s;
         }
         
         .notification-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            background: rgba(84, 252, 188, 0.2);
+            box-shadow: 0 0 15px rgba(84, 252, 188, 0.4);
         }
         
         .notification-btn.yes {
-            border-color: #00ff00;
+            border-color: var(--color-success);
+            color: var(--color-success);
         }
         
         .notification-btn.no {
-            border-color: #ff0000;
+            border-color: var(--color-error);
+            color: var(--color-error);
         }
     </style>
 </head>
