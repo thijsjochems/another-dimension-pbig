@@ -15,15 +15,29 @@
 **📋 VOLLEDIGE CRITERIA**: Zie **[SCENARIO_CRITERIA.md](SCENARIO_CRITERIA.md)** voor alle kwaliteitseisen, testcriteria, anti-patronen en templates.
 
 **ACTIES:**
-- [ ] **Audit bestaande 20 scenarios**: Welke kloppen WEL? Welke zijn onlogisch?
-  - Score elk scenario op Realisme, Technische Accuratesse, Speelbaarheid (1-5 sterren)
-  - Gebruik testcriteria uit SCENARIO_CRITERIA.md
+- [x] **Audit bestaande scenarios uitgevoerd** - Zie **[SCENARIO_AUDIT_REPORT.md](SCENARIO_AUDIT_REPORT.md)**
+  - 21 scenarios gescored op 5 criteria (Realisme, Logica, Techniek, Speelbaarheid, Storytelling)
+  - 4 scenarios zijn goed (≥4.0 sterren), 17 moeten herschreven worden
+- [ ] **🔥 PRIORITEIT: Fixes doorvoeren uit SCENARIO_AUDIT_REPORT.md**
+  - Doorloop rapport en implementeer alle aanbevolen wijzigingen
+  - Focus op Quick Wins (8 scenarios op 3.6-3.8): alleen storytelling toevoegen
+  - Major Rewrites (2 scenarios): persoon/wapen logica fixen
+  - Voeg menselijk gedrag toe: vergat, haast, miscommunicatie, deadline
+- [ ] **🔥 PRIORITEIT: Scenario Storytelling voor Beursbezoeker**
+  - **Situatiebeschrijving toevoegen per scenario**: WAT is de fout/error?
+  - Bezoeker moet begrijpen: "Dit dashboard is stuk. Welke error zien we?"
+  - Voorbeelden:
+    - "Alle verkoopcijfers zijn verdubbeld - dashboard toont €2M i.p.v. €1M"
+    - "Error: Kan bestand niet vinden - refresh faalt"
+    - "Data lijkt te kloppen maar is van vorige week - niet gerefreshed"
+    - "Rapport toont alleen Q2 data, rest ontbreekt zonder melding"
+  - Voeg toe aan scenario beschrijving in database: `situatie_beschrijving` kolom
+  - Dit helpt agents + beursbezoeker te begrijpen WAT er mis is
 - [ ] **Goede scenarios markeren** (4-5 sterren): Behouden als benchmark
-- [ ] **Zwakke scenarios** (<4 sterren): Herschrijven of verwijderen
-- [ ] **Nieuwe scenarios schrijven** volgens template in SCENARIO_CRITERIA.md
+- [ ] **Nieuwe scenarios schrijven** volgens template indien nodig
 - [ ] **Validatie**: Elk scenario testen met "Zou een Power BI pro dit herkennen?"
 
-**OUTPUT**: 12-15 solide, geloofwaardige, speelbare scenarios (minimaal 4/5 sterren) voordat we verder gaan met agent hints.
+**OUTPUT**: 12-15 solide, geloofwaardige, speelbare scenarios (minimaal 4/5 sterren) met duidelijke situatiebeschrijving voordat we verder gaan met agent hints.
 
 ---
 
