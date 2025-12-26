@@ -45,13 +45,30 @@
   - Verkeerde combinatie = +15 sec straftijd + reset alle 3 boxen
 - [x] Timer start: Bij START pasje scan
 - [x] Timer stop: Bij correcte combinatie (eindtijd = speeltijd + straftijd)
-- [ ] Hint-systeem logica uitwerken (scenario-specifiek via n8n chatbot)
-- [ ] Alibi/uitsluit mechanisme ontwerpen
+- [ ] Hint-systeem logica uitwerken (scenario-specifiek via chatbot)
+- [ ] Alibi/uitsluit mechanisme ontwerpen                                                        
 - [ ] **PRODUCTIE: Scenario text verbergen (toont nu antwoord!) - Add ?dev=true URL param voor development**
 
 ---
 
 ## Fase 2: Content Creatie
+
+### 2.0 Agent Karakterisering & System Prompt Refactoring 🔥 **PRIORITEIT**
+- [ ] **ALTER TABLE agents**: Voeg `system_prompt` en `gedrag_regels` kolommen toe
+- [ ] **Agent karakters uitwerken met persoonlijkheid:**
+  - **Schoonmaker**: Dienstbaar, bescheiden, niemand tot last willen zijn, vriendelijk, observeert 's avonds gesprekken, geen technische kennis
+  - **Receptionist**: Professioneel, administratief sterk, weet wie waar was en wanneer, planning-georiënteerd, formeel maar behulpzaam
+  - **Stagiair**: Bijdehand, vol zelfvertrouwen, technisch bewust, soms iets té enthousiast om kennis te delen, jonge energie
+- [ ] **System prompts schrijven per agent met:**
+  - Volledige karakterbeschrijving (persoonlijkheid, rol, achtergrond)
+  - Gedragsregels (GEEN off-topic, blijf in karakter, GEEN directe antwoorden)
+  - Tone of voice (formeel/informeel, woordkeuze, spreekstijl)
+  - Kennisdomein (wat weet deze agent WEL/NIET)
+  - Response stijl (observaties delen, doorverwijzen, alibi's geven)
+- [ ] **Bestaande hints refactoren**: Strip gedragsinstructies uit scenario_hints (die gaan naar agents tabel)
+- [ ] **Edge Function aanpassen**: Combineer `agents.system_prompt` + `scenario_hints.hint_context`
+- [ ] **Testen**: Valideer dat agents consistent gedrag tonen over alle scenarios
+
 ### 2.1 Personen Brainstorm ✅
 - [x] 3 verdachten bedenken (Power BI persona's)
 - [x] Karakterbeschrijvingen schrijven
@@ -237,6 +254,8 @@
 
 ### 7.3 Deelnemer Ervaring 🔄
 - [ ] **Automatische naam generator** voor deelnemers (Power BI themed: DAX Dandies, Power Query Pumas, Model Movers, Comment Crushers, Filter Fillers, etc.)
+- [ ] **Instructie/uitleg pagina maken** voor spelers met verhaallijn: "Iemand heeft het Power BI Dashboard vermoord. Kun jij de Power BI Murder Mystery oplossen?" - inclusief spelregels, doel, en hoe het spel werkt
+- [ ] **Hint reminder na x seconden**: Pop-up/melding in beeld: "Er zitten hints verstopt in de stand van Another Dimension. Gebruik je telefoon om de verborgen NFC tags te scannen"
 
 ---
 
@@ -247,6 +266,7 @@
 - [ ] RFID reader aansluiten en testen
 - [ ] Internetverbinding/hotspot testen
 - [ ] Backup plan bij tech issues
+- [ ] **Uitzoeken: hoe deze app steady en standalone laten draaien** (production WSGI server, auto-restart, systemd/Windows service, of containerization)
 
 ### 6.2 Standmateriaal ⬜
 - [ ] Houten attributen met NFC tags voorbereid
