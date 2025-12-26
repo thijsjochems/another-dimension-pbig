@@ -9,6 +9,11 @@
 -- NIEUWE VERSIE (Verbeterd):
 -- Financial Controller + Budgetten Niet Geüpdatet + OneDrive
 
+-- Eerst de kolom toevoegen aan de scenarios tabel
+ALTER TABLE scenarios 
+ADD COLUMN IF NOT EXISTS situatie_beschrijving TEXT;
+
+-- Nu de update uitvoeren
 UPDATE scenarios 
 SET 
     persoon_id = 2, -- Financial Controller (correct)
