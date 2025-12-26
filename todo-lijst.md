@@ -12,28 +12,18 @@
 ### 0.1 Scenario Kwaliteitscontrole & Herschrijven ⚠️ **BLOCKER**
 **PROBLEEM**: Huidige scenarios zijn niet logisch genoeg. Combinaties kloppen niet altijd qua realisme.
 
-**VEREISTEN voor goede scenarios:**
-- ✅ **Herkenbare echte situaties** uit Power BI praktijk
-- ✅ **Logische causale keten**: Persoon → actie → Wapen (consequentie) → Locatie (waar het fout ging)
-- ✅ **Menselijk gedrag**: Medewerkers wijzen naar elkaar, zijn onbewust onbekwaam, maken defensieve keuzes
-- ✅ **Technische accuratesse**: Wapen moet echt kunnen ontstaan door die actie op die locatie
-- ✅ **Storytelling**: Elk scenario moet een geloofwaardig verhaal vertellen
+**📋 VOLLEDIGE CRITERIA**: Zie **[SCENARIO_CRITERIA.md](SCENARIO_CRITERIA.md)** voor alle kwaliteitseisen, testcriteria, anti-patronen en templates.
 
 **ACTIES:**
 - [ ] **Audit bestaande 20 scenarios**: Welke kloppen WEL? Welke zijn onlogisch?
-- [ ] **Goede scenarios markeren**: Behouden en als benchmark gebruiken
-- [ ] **Slechte scenarios herschrijven of verwijderen**: Liever 12 sterke scenarios dan 20 zwakke
-- [ ] **Nieuwe richtlijnen opstellen**: Sjabloon voor logische scenario's
-  - Persoon heeft een REDEN om die actie te doen (tijdsdruk, gebrek aan kennis, miscommunicatie)
-  - Actie leidt DIRECT tot het wapen (technische fout)
-  - Locatie is waar de actie PLAATSVOND of waar de fout ZICHTBAAR werd
-  - Andere medewerkers kunnen subtiel naar elkaar wijzen (alibi's, "ik zag X bij Y")
-- [ ] **Scenario testcriteria**:
-  - Zou een Power BI professional zeggen: "Ja, dat kan echt gebeuren"?
-  - Zijn er meerdere aanknopingspunten voor deductie?
-  - Kunnen agents logische hints geven zonder het antwoord weg te geven?
+  - Score elk scenario op Realisme, Technische Accuratesse, Speelbaarheid (1-5 sterren)
+  - Gebruik testcriteria uit SCENARIO_CRITERIA.md
+- [ ] **Goede scenarios markeren** (4-5 sterren): Behouden als benchmark
+- [ ] **Zwakke scenarios** (<4 sterren): Herschrijven of verwijderen
+- [ ] **Nieuwe scenarios schrijven** volgens template in SCENARIO_CRITERIA.md
+- [ ] **Validatie**: Elk scenario testen met "Zou een Power BI pro dit herkennen?"
 
-**OUTPUT**: 12-15 solide, geloofwaardige, speelbare scenarios voordat we verder gaan met agent hints.
+**OUTPUT**: 12-15 solide, geloofwaardige, speelbare scenarios (minimaal 4/5 sterren) voordat we verder gaan met agent hints.
 
 ---
 
