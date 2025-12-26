@@ -7,6 +7,36 @@
 
 ---
 
+## 🔥🔥🔥 KRITIEKE PRIORITEIT: Scenario Herziening
+
+### 0.1 Scenario Kwaliteitscontrole & Herschrijven ⚠️ **BLOCKER**
+**PROBLEEM**: Huidige scenarios zijn niet logisch genoeg. Combinaties kloppen niet altijd qua realisme.
+
+**VEREISTEN voor goede scenarios:**
+- ✅ **Herkenbare echte situaties** uit Power BI praktijk
+- ✅ **Logische causale keten**: Persoon → actie → Wapen (consequentie) → Locatie (waar het fout ging)
+- ✅ **Menselijk gedrag**: Medewerkers wijzen naar elkaar, zijn onbewust onbekwaam, maken defensieve keuzes
+- ✅ **Technische accuratesse**: Wapen moet echt kunnen ontstaan door die actie op die locatie
+- ✅ **Storytelling**: Elk scenario moet een geloofwaardig verhaal vertellen
+
+**ACTIES:**
+- [ ] **Audit bestaande 20 scenarios**: Welke kloppen WEL? Welke zijn onlogisch?
+- [ ] **Goede scenarios markeren**: Behouden en als benchmark gebruiken
+- [ ] **Slechte scenarios herschrijven of verwijderen**: Liever 12 sterke scenarios dan 20 zwakke
+- [ ] **Nieuwe richtlijnen opstellen**: Sjabloon voor logische scenario's
+  - Persoon heeft een REDEN om die actie te doen (tijdsdruk, gebrek aan kennis, miscommunicatie)
+  - Actie leidt DIRECT tot het wapen (technische fout)
+  - Locatie is waar de actie PLAATSVOND of waar de fout ZICHTBAAR werd
+  - Andere medewerkers kunnen subtiel naar elkaar wijzen (alibi's, "ik zag X bij Y")
+- [ ] **Scenario testcriteria**:
+  - Zou een Power BI professional zeggen: "Ja, dat kan echt gebeuren"?
+  - Zijn er meerdere aanknopingspunten voor deductie?
+  - Kunnen agents logische hints geven zonder het antwoord weg te geven?
+
+**OUTPUT**: 12-15 solide, geloofwaardige, speelbare scenarios voordat we verder gaan met agent hints.
+
+---
+
 ## Fase 1: Planning & Architectuur
 
 ### 1.1 Technische Architectuur ✅
