@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Chat - Power BI Mystery</title>
     <style>
+        @font-face {
+            font-family: 'Wosker';
+            src: url('https://thijsjochems.github.io/another-dimension-pbig/static/fonts/Wosker.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Blender';
+            src: url('https://thijsjochems.github.io/another-dimension-pbig/static/fonts/Blender-Book.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Blender';
+            src: url('https://thijsjochems.github.io/another-dimension-pbig/static/fonts/Blender-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --font-heading: 'Wosker', sans-serif;
+            --font-body: 'Blender', sans-serif;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,7 +41,7 @@
         }
 
         body {
-            font-family: 'Courier New', monospace;
+            font-family: var(--font-body);
             background: linear-gradient(135deg, #001C0F 0%, #003820 100%);
             color: #DCFFED;
             min-height: 100vh;

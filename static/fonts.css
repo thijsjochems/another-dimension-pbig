@@ -1,0 +1,54 @@
+/* Another Dimension Brand Fonts */
+
+@font-face {
+    font-family: 'Wosker';
+    src: url('/static/fonts/Wosker.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Blender';
+    src: url('/static/fonts/Blender-Book.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Blender';
+    src: url('/static/fonts/Blender-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Blender';
+    src: url('/static/fonts/Blender-Medium.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Apply fonts globally */
+:root {
+    --font-heading: 'Wosker', sans-serif;
+    --font-body: 'Blender', sans-serif;
+}
+
+body {
+    font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6,
+.heading {
+    font-family: var(--font-heading);
+}
+
+strong, b,
+.bold {
+    font-family: var(--font-body);
+    font-weight: 500;
+}
