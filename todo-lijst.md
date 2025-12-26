@@ -36,6 +36,7 @@
 - [x] NFC-ID mapping tabel ontwerpen
 - [x] Relaties tussen entities definiëren
 - [x] SQL scripts gemaakt (supabase_setup.sql)
+- [ ] Naam van deelnemer moet worden gegenereerd? Moet uniek zijn en iets met Power BI te maken hebben. DAX Dandies, Power Query Pumas, Model Movers, Comment Crushers, Filter Fillers, of zoiets. Daar moeten we ook een mooie AI oplossing voor maken
 
 ### 1.3 Game Logic Specificatie 🔄
 - [x] Win-conditie: Correcte combinatie WIE + WAARMEE + WAAR
@@ -217,6 +218,25 @@
 - [ ] Feedback verzamelen
 - [ ] Moeilijkheidsgraad aanpassen
 - [ ] UI/UX verbeteringen
+
+---
+
+## Fase 7: UI/UX Verbeteringen & Polish
+
+### 7.1 Agent Chat Interface 🔄
+- [ ] **Agent emoji's toevoegen** die passen bij hun rol (Schoonmaker 🧹, IT Specialist 💻, Receptionist 📞)
+- [ ] **Verstuur knop fix** - valt nu buiten beeld, moet altijd zichtbaar blijven
+- [ ] **"Agent denkt na..." tekst aanpassen** naar "Even nadenken..." of iets natuurlijkers
+- [ ] **Prompts aanpassen**: Agents zijn nu te letterlijk/direct. Ze moeten subtiele observaties delen en zich op de achtergrond houden (tenzij ze de dader zijn!)
+
+### 7.2 Flask App Interface 🔄
+- [ ] **Landingspagina opmaak** verbeteren
+- [ ] **Another Dimension huisstijl** toevoegen (logo, kleuren, fonts)
+- [ ] **Error message bij straftijd** stylen - moet stijlvoller en duidelijker
+- [ ] **Scenario info verwijderen uit Leaderboard** (toont nu antwoord!)
+
+### 7.3 Deelnemer Ervaring 🔄
+- [ ] **Automatische naam generator** voor deelnemers (Power BI themed: DAX Dandies, Power Query Pumas, Model Movers, Comment Crushers, Filter Fillers, etc.)
 
 ---
 
