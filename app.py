@@ -523,4 +523,5 @@ def get_leaderboard():
 if __name__ == '__main__':
     print("🚀 Power BI Murder Mystery starting...")
     print(f"📊 Supabase URL: {supabase_url}")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Disable debug mode and reloader to avoid import issues with pyiceberg on Python 3.13
+    app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False)

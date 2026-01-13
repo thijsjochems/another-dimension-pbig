@@ -33,6 +33,12 @@
     - "Rapport toont alleen Q2 data, rest ontbreekt zonder melding"
   - Voeg toe aan scenario beschrijving in database: `situatie_beschrijving` kolom
   - Dit helpt agents + beursbezoeker te begrijpen WAT er mis is
+- [ ] **🔥 PRIORITEIT: Eenvoudige 'murder' omschrijving voor spelscherm**
+  - **Korte probleembeschrijving toevoegen aan elk scenario**
+  - Moet op spelscherm getoond worden zodat speler weet wat het probleem is
+  - Bijvoorbeeld: "Dashboard toont dubbele verkoopcijfers" of "Rapport toont verouderde data"
+  - Speler moet direct zien WELK probleem ze moeten oplossen
+  - Implementeren in UI: toon probleem bij scenario start
 - [ ] **Goede scenarios markeren** (4-5 sterren): Behouden als benchmark
 - [ ] **Nieuwe scenarios schrijven** volgens template indien nodig
 - [ ] **Validatie**: Elk scenario testen met "Zou een Power BI pro dit herkennen?"
@@ -48,6 +54,10 @@
 - [x] Beslissen: Supabase met lokale fallback
 - [x] Input methode: USB RFID Reader (keyboard emulation)
 - [x] NFC-ID mapping systeem ontwerpen
+- [ ] **NFC tags koppelen aan special_nfc_codes tabel in Supabase**
+  - Fysieke NFC tag nummers scannen en documenteren
+  - Tag nummers invoeren in special_nfc_codes tabel met correcte persoon/locatie/wapen mapping
+  - Testen of tags correct worden herkend in game
 - [x] Scenario generatie: Webhook naar Supabase Edge Function bij START
 - [x] State management bepalen:
   - Actief scenario-ID
@@ -133,6 +143,7 @@
 - [ ] Hints met tijdsinformatie (wanneer gebeurde wat?) - ✅ voor scenario 10
 - [ ] Test of hints voldoende aanknopingspunten geven voor eliminatie
 - [ ] Kwaliteitscheck: hints moeten logische deductie mogelijk maken
+- [ ] Agents mogen GEEN feiten bedenken. Als ze iets niet weten, moetne ze daar gewoon duidleijk over zijn: ik weet het niet...)
 
 ### 2.6 Agent Chat Systeem ✅
 - [x] ~~n8n herzien! Is dit nodig> nu gaat het via de supabase edge function?~~ **BESLUIT: n8n geskipt, werken via Supabase Edge Functions. Lijkt prima te werken!**
