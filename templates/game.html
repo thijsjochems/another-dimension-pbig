@@ -28,7 +28,6 @@
             min-height: 100vh;
             color: var(--color-primary);
             padding: 30px;
-            cursor: none;
             line-height: 1.6;
         }
         
@@ -40,12 +39,27 @@
         .header {
             text-align: center;
             margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .robot-logo {
+            width: 50px;
+            height: 50px;
+            opacity: 0.6;
+            filter: drop-shadow(0 0 10px rgba(84, 252, 188, 0.3));
+        }
+        
+        .robot-logo.flipped {
+            transform: scaleX(-1);
         }
         
         h1 {
             font-size: 3rem;
             color: var(--color-primary);
-            margin-bottom: 20px;
+            margin: 0;
             letter-spacing: 8px;
             text-transform: uppercase;
         }
@@ -58,10 +72,22 @@
             font-size: 3rem;
             font-weight: bold;
             color: var(--color-primary);
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             text-align: center;
             letter-spacing: 5px;
             text-shadow: 0 0 20px rgba(84, 252, 188, 0.5);
+        }
+        
+        .situatie-box {
+            background: rgba(84, 252, 188, 0.05);
+            border: 2px solid var(--color-primary);
+            border-radius: 5px;
+            padding: 30px;
+            margin-bottom: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--color-secondary);
+            line-height: 1.8;
         }
         
         .scenario-box {
@@ -374,11 +400,17 @@
 <body>
     <div class="game-container">
         <div class="header">
-            <h1>🚨 WHO KILLED THE POWER BI DASHBOARD? 🚨</h1>
+            <img src="/static/robot-mascot.png" alt="Robot Detective" class="robot-logo">
+            <h1>POWER BI INVESTIGATION GAME</h1>
+            <img src="/static/robot-mascot.png" alt="Robot Detective" class="robot-logo flipped">
         </div>
         
         <div class="timer-box" id="timer">
             00:00
+        </div>
+        
+        <div class="situatie-box" id="situatie">
+            Loading...
         </div>
         
         <div class="scenario-box" id="scenario">
@@ -387,7 +419,7 @@
         
         <div class="answer-section">
             <div class="answer-box" id="box-who">
-                <div class="answer-label">WHO? (Persoon)</div>
+                <div class="answer-label">WIE? (Persoon)</div>
                 <div class="answer-value" id="answer-who">???</div>
             </div>
             <div class="answer-box" id="box-waarmee">
@@ -418,6 +450,7 @@
                 <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_3')">Dubbele Records</button>
                 <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_4')">Hardcoded Pad</button>
                 <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_5')">Budget Niet Updated</button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_6')">Kolomnaam Gewijzigd</button>
             </div>
             
             <div class="button-group">
@@ -437,14 +470,15 @@
             
             <div class="button-group">
                 <strong>Special:</strong>
-                <button class="test-button special" onclick="testScan('TEMP_NFC_EXIT')">🚪 Exit Game (Standhouder)</button>
-                <button class="test-button special" onclick="testScan('TEMP_NFC_RESET')">🔄 Reset App</button>
+                <button class="test-button special" onclick="handleExitGame()">🚪 Exit Game (Standhouder)</button>
+                <button class="test-button special" onclick="handleResetApp()">🔄 Reset App</button>
             </div>
             
             <div class="button-group">
                 <strong>Standbeheerder:</strong>
-                <button class="test-button special" onclick="testScan('TEMP_NFC_YES')">✅ YES</button>
-                <button class="test-button special" onclick="testScan('TEMP_NFC_NO')">❌ NO</button>
+                <button class="test-button special" onclick="handleNotificationYes()">✅ YES</button>
+                <button class="test-button special" onclick="handleNotificationNo()">❌ NO</button>
+            </div>
             </div>
             
             <div class="button-group">
@@ -534,6 +568,7 @@
                 if (data.success) {
                     gameId = data.game_id;
                     document.getElementById('scenario').innerHTML = data.scenario;
+                    document.getElementById('situatie').innerHTML = data.situatie_beschrijving || 'Er is een probleem met het Power BI Dashboard...';
                     startTimer();
                 } else {
                     showNotification('❌ Fout', data.message || 'Kon spel niet starten', 'error');
@@ -578,7 +613,19 @@
         }
         
         function testScan(code) {
-            handleNFCScan(code);
+            // Special codes kunnen direct afgehandeld worden of via API
+            if (code === 'TEMP_NFC_EXIT') {
+                handleExitGame();
+            } else if (code === 'TEMP_NFC_RESET') {
+                handleResetApp();
+            } else if (code === 'TEMP_NFC_YES') {
+                handleNotificationYes();
+            } else if (code === 'TEMP_NFC_NO') {
+                handleNotificationNo();
+            } else {
+                // Normale NFC codes gaan via API
+                handleNFCScan(code);
+            }
         }
         
         async function processScannedItem(data) {
@@ -743,6 +790,23 @@
                 return;
             }
             hideNotification();
+        }
+        
+        // Direct handlers for EXIT and RESET buttons
+        function handleExitGame() {
+            showNotification('⚠️ Spel Beëindigen?', 'Weet je zeker dat je het spel wilt stoppen?', 'exit');
+        }
+        
+        async function handleResetApp() {
+            // Abort current game before going to homepage
+            if (gameId) {
+                await fetch('/api/game/exit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ game_id: gameId })
+                });
+            }
+            window.location.href = '/';
         }
         
         async function forceReset() {

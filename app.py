@@ -150,8 +150,8 @@ def start_game():
             'message': 'Er is al een spel bezig. Vraag de standhouder om het spel te stoppen.'
         }), 409
     
-    # Get all inactive scenarios
-    scenarios = supabase.table('scenarios').select('*').eq('active', False).execute()
+    # Get all inactive scenarios that are not archived
+    scenarios = supabase.table('scenarios').select('*').eq('active', False).eq('archive_flag', 0).execute()
     
     if not scenarios.data:
         return jsonify({'error': 'No scenarios available'}), 500
@@ -182,6 +182,7 @@ def start_game():
         'session_code': session_code,
         'scenario_id': scenario['id'],
         'scenario': scenario['beschrijving'],
+        'situatie_beschrijving': scenario.get('situatie_beschrijving', ''),
         'message': 'Spel gestart! Los de moord op het Power BI Dashboard op.'
     })
 

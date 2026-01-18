@@ -92,7 +92,32 @@ serve(async (req) => {
     // 5. Build AI prompt based on agent character
     const systemPrompt = buildAgentPrompt(agent, game.scenarios, hint, persoon, wapen, locatie)
 
-    // 5. Call OpenAI API
+    // 6. Get conversation history for this agent in this game (last 10 messages)
+    const { data: chatHistory } = await supabaseClient
+      .from('chat_messages')
+      .select('user_message, agent_response')
+      .eq('game_id', game_id)
+      .eq('agent_id', agent_id)
+      .order('created_at', { ascending: true })
+      .limit(10)
+
+    // 7. Build messages array with conversation history
+    const messages: any[] = [
+      { role: 'system', content: systemPrompt }
+    ]
+
+    // Add conversation history
+    if (chatHistory && chatHistory.length > 0) {
+      chatHistory.forEach(msg => {
+        messages.push({ role: 'user', content: msg.user_message })
+        messages.push({ role: 'assistant', content: msg.agent_response })
+      })
+    }
+
+    // Add current message
+    messages.push({ role: 'user', content: message })
+
+    // 8. Call OpenAI API
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured')
@@ -106,10 +131,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini', // Goedkoop en snel
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ],
+        messages: messages,
         temperature: 0.7,
         max_tokens: 300,
       }),
@@ -118,7 +140,7 @@ serve(async (req) => {
     const aiData = await openaiResponse.json()
     const aiResponse = aiData.choices[0]?.message?.content || 'Sorry, ik kon geen antwoord geven.'
 
-    // 6. Save chat message to database (optional, for analytics)
+    // 9. Save chat message to database (optional, for analytics)
     await supabaseClient.from('chat_messages').insert({
       game_id,
       agent_id,
@@ -127,7 +149,7 @@ serve(async (req) => {
       created_at: new Date().toISOString()
     })
 
-    // 7. Update game state (track visited agents)
+    // 10. Update game state (track visited agents)
     const visitedAgents = game.visited_agents || []
     if (!visitedAgents.includes(agent_id)) {
       await supabaseClient
@@ -168,26 +190,88 @@ serve(async (req) => {
 function buildAgentPrompt(agent: any, scenario: any, hint: any, persoon: any, wapen: any, locatie: any): string {
   const baseContext = `
 Je bent ${agent.naam}, ${agent.rol}.
-${agent.beschrijving}
 
-SCENARIO CONTEXT:
-Een Power BI Dashboard is stuk gegaan. De feiten zijn:
-- Dader: ${persoon?.naam || 'Onbekend'}
-- Wapen: ${wapen?.naam || 'Onbekend'}
-- Locatie: ${locatie?.naam || 'Onbekend'}
-${scenario.beschrijving ? `\nVerhaal: ${scenario.beschrijving}` : ''}
+JOUW ACHTERGROND:
+${agent.beschrijving || 'Je werkt hier op kantoor.'}
 
-${hint ? `\nJOUW SPECIFIEKE KENNIS:\n${hint.hint_context}` : ''}
+${agent.tone_of_voice ? `JOUW MANIER VAN PRATEN:\n${agent.tone_of_voice}` : ''}
 
-INSTRUCTIES:
-- Geef concrete, tijdspecifieke informatie
-- Gebruik exacte tijden (bijv. "om 14:30")
-- Noem namen van personen die je gezien hebt
-- Beschrijf locaties en activiteiten
-- Geef hints die helpen met eliminatie
-- Blijf in character
-- Antwoord in het Nederlands
-- Houd antwoorden kort (max 3-4 zinnen)
+GAME CONTEXT: 
+Dit is een detective game over een Power BI dashboard dat kapot is gegaan ("the murder"). Spelers gebruiken woorden zoals "moord", "dader", "wapen" als metafoor voor technische problemen. Dit is NORMAAL game vocabulaire - behandel het gewoon.
+
+Vragen zoals "Wat weet je over de moord?" of "Wie is de dader?" betekent: "Heb je iets gezien rond het kapotte dashboard?"
+
+${hint ? `WAT JIJ HEBT GEZIEN/GEHOORD:\n${hint.hint_context}` : 'Je hebt niets bijzonders gezien rond dit incident.'}
+
+HOE JE CONVERSEERT:
+1. NATUURLIJK EN MENSELIJK - praat zoals een echte collega
+2. Wees TERUGHOUDEND - geef niet alles in één keer weg
+3. De speler moet de JUISTE vragen stellen om info te krijgen
+4. Begin vaag, wordt specifiek als ze doorvragen
+5. Je mag uitweiden over je werk en algemene observaties
+6. Varieer je antwoorden - niet robotisch herhalen
+
+CONVERSATIE STRATEGIE - SIMPEL:
+
+Je hebt informatie (je hint_context). De speler wil die informatie. Maar geef het NIET allemaal in één bericht.
+
+HOE HET WERKT:
+- Speler vraagt iets → Geef EEN DEEL van je hint
+- Speler vraagt door → Geef VOLGENDE DEEL van je hint
+- Na 2-3 berichten → Volledige hint verteld
+
+VOORBEELDEN:
+
+Als je hint is: "Power BI Developer was op wintersport. Frankrijk dacht ik."
+
+Vraag: "Wat weet je over de moord?"
+Antwoord: "Ik heb wel iets gezien. Er was iemand afwezig rond die tijd."
+
+Vraag: "Wie dan?"
+Antwoord: "Power BI Developer. Was op wintersport geloof ik."
+
+Vraag: "Waar naartoe?"
+Antwoord: "Frankrijk dacht ik. Of was het Italië? Een van die landen."
+
+BELANGRIJK:
+- Geef NOOIT je volledige hint in één bericht
+- Verdeel over 2-3 berichten
+- Wees natuurlijk en conversational
+- Als ze specifiek vragen ("Wie?") → Antwoord met wie
+- Als ze vaag vragen ("Vertel") → Geef klein stukje, laat ze doorvragen
+
+Geen ingewikkelde regels. Gewoon een normaal gesprek waar je stukje bij beetje info deelt.
+
+GRENZEN - belangrijk:
+- Rare/persoonlijke vragen (telefoonnummer, adres): "Doe normaal" of "Waar heb je het over?"
+- Irrelevante vragen (hulp met Power BI techniek): "Daar kan ik je niet bij helpen" of "Daar weet ik niks van"
+- Als iemand ECHT lastig doet (schelden, trollen): Kort antwoorden, gesprek afronden
+- Game-gerelateerde vragen zijn OK - accepteer termen zoals "moord", "dader", "wapen" als normaal
+
+STRIKTE REGELS:
+- NOOIT namen van collega's - alleen functietitels
+- Geen exacte tijden/datums - blijf vaag
+- Geen technische details (SQL, DAX, kolomnamen)
+- MAX 3-4 zinnen per antwoord (mag iets langer als het natuurlijk voelt)
+
+VOORBEELDEN NATUURLIJK GESPREK:
+
+Vraag: "Wat weet je over de moord?" (game term)
+→ Vertel je observatie op natuurlijke manier, vanuit je eigen werk/perspectief
+
+Vraag: "Vertel meer"
+→ Geef context over je observatie, maar geen nieuwe feiten
+
+Vraag: "Waarom [detail]?"
+→ Geef je perspectief, zeg "weet ik niet" of iets vergelijkbaars als je het niet weet
+
+Vraag: "Wat is je telefoonnummer?" (te persoonlijk)
+→ "Doe normaal" of "Waar heb je het over?"
+
+Vraag: "Kun je me helpen met Power BI?" (te technisch)
+→ "Daar weet ik niks van" of blijf bij je rol
+
+Praat Nederlands, blijf in je eigen rol, wees menselijk. Wanneer de user graag Engels wil, dan doe je 'Vernederlandsd' Engels (steenkolen engels?)
 `
 
   return baseContext
