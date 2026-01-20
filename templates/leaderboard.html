@@ -6,6 +6,14 @@
     <title>Leaderboard - Murder Mystery</title>
     <link rel="stylesheet" href="/static/fonts.css">
     <style>
+        /* === COLOR PALETTE === */
+        :root {
+            --color-bg: #001C0F;           /* Dark green background */
+            --color-primary: #54FCBC;      /* Bright teal (text, accents) */
+            --color-secondary: #DCFFED;    /* Light mint (subtle text) */
+            --color-dark: #1E1E1E;         /* Dark gray (borders, shadows) */
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,29 +22,83 @@
         
         body {
             font-family: var(--font-body);
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background-color: var(--color-bg);
             min-height: 100vh;
-            color: white;
-            padding: 20px;
+            color: var(--color-primary);
+            padding: 40px 20px;
         }
         
         .leaderboard-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .robot-logo {
+            width: 60px;
+            height: 60px;
+            opacity: 0.6;
+            filter: drop-shadow(0 0 15px rgba(84, 252, 188, 0.3));
+        }
+        
+        .robot-logo.flipped {
+            transform: scaleX(-1);
         }
         
         h1 {
-            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            color: var(--color-primary);
+            margin: 0;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(84, 252, 188, 0.4);
+        }
+
+        .subtitle {
             text-align: center;
-            font-size: 3rem;
-            color: #f5576c;
-            margin-bottom: 40px;
+            color: var(--color-secondary);
+            font-size: 1.3rem;
+            margin-bottom: 50px;
+            letter-spacing: 3px;
+            opacity: 0.8;
+        }
+        
+        /* Unified leaderboard with auto-scroll */
+        .unified-leaderboard {
+            background: rgba(84, 252, 188, 0.02);
+            border: 2px solid rgba(84, 252, 188, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
         }
         
         .leaderboard-table {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
+            width: 100%;
+        }
+        
+        .scrollable-tbody {
+            display: block;
+            max-height: 500px;
             overflow: hidden;
+            position: relative;
+        }
+        
+        .scrollable-tbody tbody {
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        /* Thick border after top 3 */
+        .top-three-separator {
+            border-bottom: 4px solid rgba(84, 252, 188, 0.5) !important;
         }
         
         table {
@@ -45,78 +107,192 @@
         }
         
         thead {
-            background: rgba(102, 126, 234, 0.3);
+            background: rgba(84, 252, 188, 0.08);
+            border-bottom: 2px solid var(--color-primary);
         }
         
         th {
-            padding: 20px;
+            padding: 25px 20px;
             text-align: left;
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-primary);
+        }
+        
+        tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(84, 252, 188, 0.1);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
         }
         
         td {
-            padding: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px 20px;
             font-size: 1.1rem;
+            color: var(--color-secondary);
         }
         
-        tr:hover {
-            background: rgba(255, 255, 255, 0.05);
+        tbody tr:hover {
+            background: rgba(84, 252, 188, 0.08);
+            box-shadow: 0 0 20px rgba(84, 252, 188, 0.2);
         }
         
         .rank {
             font-weight: bold;
-            font-size: 1.5rem;
+            font-size: 2rem;
+            text-align: center;
+            width: 100px;
+            color: var(--color-primary);
         }
         
         .rank-1 {
             color: #FFD700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
         }
         
         .rank-2 {
             color: #C0C0C0;
+            text-shadow: 0 0 15px rgba(192, 192, 192, 0.6);
         }
         
         .rank-3 {
             color: #CD7F32;
+            text-shadow: 0 0 15px rgba(205, 127, 50, 0.6);
+        }
+        
+        .medal-icon {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+        
+        /* Latest game highlight */
+        tr.latest-game {
+            background: rgba(84, 252, 188, 0.15) !important;
+            border: 2px solid var(--color-primary);
+        }
+        
+        tr.latest-game td {
+            font-weight: 700;
+            color: var(--color-primary);
+            text-shadow: 0 0 10px rgba(84, 252, 188, 0.4);
+        }
+        
+        .latest-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(84, 252, 188, 0.08);
+            border: 2px solid var(--color-primary);
+            border-radius: 10px;
+        }
+        
+        .latest-section h2 {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .time {
+            color: var(--color-primary);
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
         }
         
         .back-button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 15px 40px;
+            background: rgba(84, 252, 188, 0.03);
+            border: 2px solid var(--color-primary);
             border-radius: 10px;
-            font-size: 1.2rem;
+            padding: 20px 50px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--color-primary);
             cursor: pointer;
-            margin-top: 30px;
+            margin-top: 40px;
             display: block;
             margin-left: auto;
             margin-right: auto;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: var(--font-body);
         }
         
         .back-button:hover {
-            background: #764ba2;
+            background: rgba(84, 252, 188, 0.08);
+            box-shadow: 0 0 30px rgba(84, 252, 188, 0.3);
+            transform: translateY(-3px);
         }
         
         .no-data {
             text-align: center;
-            padding: 50px;
-            font-size: 1.5rem;
-            color: #999;
+            padding: 80px 40px;
+            font-size: 1.8rem;
+            color: var(--color-secondary);
+            opacity: 0.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                letter-spacing: 5px;
+            }
+
+            .robot-logo {
+                width: 40px;
+                height: 40px;
+            }
+            
+            th, td {
+                padding: 15px 10px;
+                font-size: 0.9rem;
+            }
+
+            .rank {
+                font-size: 1.5rem;
+                width: 70px;
+            }
+
+            .time {
+                font-size: 1.1rem;
+            }
+
+            .back-button {
+                padding: 15px 35px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="leaderboard-container">
-        <h1>🏆 LEADERBOARD 🏆</h1>
+        <div class="header">
+            <img src="{{ url_for('static', filename='robot-mascot.png') }}" alt="Robot Detective" class="robot-logo">
+            <h1>LEADERBOARD</h1>
+            <img src="{{ url_for('static', filename='robot-mascot.png') }}" alt="Robot Detective" class="robot-logo flipped">
+        </div>
+        <p class="subtitle">Wie lost de moord het snelste op?</p>
         
+        <div id="topThree" class="top-three" style="display: none;"></div>
+        <div id="scrollableLeaderboard" class="scrollable-section" style="display: none;"></div>
         <div class="leaderboard-table" id="leaderboardTable">
             <p class="no-data">Loading...</p>
         </div>
         
-        <button class="back-button" onclick="goHome()">Terug naar Home</button>
+        <button class="back-button" onclick="goHome()">← Terug naar Home</button>
     </div>
     
     <script>
@@ -124,13 +300,54 @@
             await loadLeaderboard();
         };
         
+        // Listen for NFC keyboard input (cijfer + Enter)
+        let nfcBuffer = '';
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && nfcBuffer.length > 0) {
+                handleNFCScan(nfcBuffer);
+                nfcBuffer = '';
+            } else if (e.key >= '0' && e.key <= '9') {
+                nfcBuffer += e.key;
+            }
+        });
+        
+        async function handleNFCScan(code) {
+            console.log('🔖 NFC code scanned:', code);
+            
+            try {
+                const response = await fetch('/api/game/scan', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nfc_code: code})
+                });
+                
+                const result = await response.json();
+                console.log('Scan result:', result);
+                
+                if (result.success) {
+                    const type = result.type || result.code_type;
+                    const data = result.data || {};
+                    
+                    // Exit, Yes, No = Navigate to home
+                    if (type === 'special') {
+                        const codeType = data.code_type;
+                        if (codeType === 'EXIT' || codeType === 'YES' || codeType === 'NO') {
+                            window.location.href = '/';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error scanning NFC:', error);
+            }
+        }
+        
         async function loadLeaderboard() {
             try {
                 const response = await fetch('/api/leaderboard');
                 const data = await response.json();
                 
                 if (data.success && data.leaderboard.length > 0) {
-                    renderLeaderboard(data.leaderboard);
+                    renderLeaderboard(data.leaderboard, data.latest_game);
                 } else {
                     document.getElementById('leaderboardTable').innerHTML = 
                         '<p class="no-data">Nog geen gespeelde games</p>';
@@ -142,36 +359,113 @@
             }
         }
         
-        function renderLeaderboard(entries) {
-            const medals = ['🥇', '🥈', '🥉'];
+        let autoScrollInterval = null;
+        let currentScrollIndex = 0;
+        
+        function renderLeaderboard(entries, latestGame) {
+            function getMedalSVG(rank) {
+                const colors = {
+                    1: '#FFD700',  // Gold
+                    2: '#C0C0C0',  // Silver
+                    3: '#CD7F32'   // Bronze
+                };
+                
+                if (rank > 3) return `#${rank}`;
+                
+                return `<svg class="medal-icon" viewBox="0 0 24 24" fill="none" stroke="${colors[rank]}" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <text x="12" y="16" text-anchor="middle" fill="${colors[rank]}" font-size="10" font-weight="bold">${rank}</text>
+                </svg>`;
+            }
+            
             const rankClasses = ['rank-1', 'rank-2', 'rank-3'];
             
-            let html = '<table><thead><tr>';
-            html += '<th>Rank</th>';
+            // Limit to top 50
+            const limitedEntries = entries.slice(0, 50);
+            
+            // Build unified table
+            let html = '<table class="leaderboard-table"><thead><tr>';
+            html += '<th style="text-align: center;">Rank</th>';
             html += '<th>Naam</th>';
             html += '<th>Tijd</th>';
             html += '<th>Datum</th>';
-            html += '<th>Scenario</th>';
-            html += '</tr></thead><tbody>';
+            html += '</tr></thead>';
             
-            entries.forEach((entry, index) => {
-                const rankClass = index < 3 ? rankClasses[index] : '';
-                const medal = index < 3 ? medals[index] : (index + 1);
+            // Fixed top 3
+            html += '<tbody>';
+            limitedEntries.slice(0, 3).forEach((entry, index) => {
+                const rankClass = rankClasses[index];
+                const latestClass = entry.is_latest ? 'latest-game' : '';
+                const medal = getMedalSVG(entry.rank);
+                const separatorClass = index === 2 ? 'top-three-separator' : '';
                 
-                html += '<tr>';
+                html += `<tr class="${latestClass} ${separatorClass}">`;
                 html += `<td class="rank ${rankClass}">${medal}</td>`;
-                html += `<td>${entry.player_name || 'Anoniem'}</td>`;
-                html += `<td>${entry.total_time}</td>`;
-                html += `<td>${new Date(entry.completed_at).toLocaleString('nl-NL')}</td>`;
-                html += `<td>${entry.scenario_name || 'Unknown'}</td>`;
+                html += `<td class="player-name">${entry.player_name || 'Anoniem'}</td>`;
+                html += `<td class="time">${entry.total_time}</td>`;
+                html += `<td>${new Date(entry.completed_at).toLocaleDateString('nl-NL', {day: 'numeric', month: 'short', year: 'numeric'})}</td>`;
                 html += '</tr>';
             });
+            html += '</tbody>';
             
-            html += '</tbody></table>';
+            // Scrollable rest (4-50) in separate container
+            if (limitedEntries.length > 3) {
+                html += '<tbody id="scrollingTbody" style="display: block; max-height: 400px; overflow: hidden;">';
+                html += '<table style="width: 100%; table-layout: fixed;"><tbody id="scrollingRows">';
+                
+                limitedEntries.slice(3).forEach((entry) => {
+                    const latestClass = entry.is_latest ? 'latest-game' : '';
+                    const medal = getMedalSVG(entry.rank);
+                    
+                    html += `<tr class="${latestClass}">`;
+                    html += `<td class="rank" style="width: 100px; text-align: center;">${medal}</td>`;
+                    html += `<td class="player-name" style="padding-left: 20px;">${entry.player_name || 'Anoniem'}</td>`;
+                    html += `<td class="time" style="width: 150px;">${entry.total_time}</td>`;
+                    html += `<td style="width: 150px;">${new Date(entry.completed_at).toLocaleDateString('nl-NL', {day: 'numeric', month: 'short', year: 'numeric'})}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table></tbody>';
+            }
+            
+            html += '</table>';
+            
             document.getElementById('leaderboardTable').innerHTML = html;
+            
+            // Start auto-scroll if more than 3 entries
+            if (limitedEntries.length > 3) {
+                startAutoScroll();
+            }
+        }
+        
+        function startAutoScroll() {
+            const scrollingRows = document.getElementById('scrollingRows');
+            if (!scrollingRows) return;
+            
+            const rows = scrollingRows.querySelectorAll('tr');
+            if (rows.length === 0) return;
+            
+            const rowHeight = rows[0].offsetHeight;
+            let currentScroll = 0;
+            
+            // Auto-scroll every 2 seconds
+            autoScrollInterval = setInterval(() => {
+                currentScroll += rowHeight;
+                
+                // Reset when reaching the end
+                if (currentScroll >= (rows.length * rowHeight)) {
+                    currentScroll = 0;
+                }
+                
+                scrollingRows.style.transform = `translateY(-${currentScroll}px)`;
+            }, 2000);
         }
         
         function goHome() {
+            // Clear auto-scroll interval when leaving
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+            }
             window.location.href = '/';
         }
     </script>

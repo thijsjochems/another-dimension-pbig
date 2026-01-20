@@ -27,7 +27,7 @@
             background-color: var(--color-bg);
             min-height: 100vh;
             color: var(--color-primary);
-            padding: 30px;
+            padding: 50px 30px 30px 30px;
             line-height: 1.6;
         }
         
@@ -38,10 +38,17 @@
         
         .header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 20px;
+            flex-direction: column;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
             gap: 20px;
         }
         
@@ -56,38 +63,127 @@
             transform: scaleX(-1);
         }
         
+        .footer-logo {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 400px;
+            width: 80%;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 20px rgba(84, 252, 188, 0.3));
+            z-index: 5;
+            cursor: pointer;
+        }
+        
         h1 {
             font-size: 3rem;
             color: var(--color-primary);
             margin: 0;
             letter-spacing: 8px;
             text-transform: uppercase;
+            line-height: 1.3;
+        }
+        
+        .title-line-1 {
+            display: block;
+        }
+        
+        .title-line-2 {
+            display: block;
+        }
+        
+        .split-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .split-top {
+            display: block;
+            background: var(--color-bg);
+            clip-path: polygon(0 0, 100% 0, 100% 51%, 0 51%);
+            transform: translateX(-3px);
+            line-height: 1.3;
+        }
+        
+        .split-bottom {
+            display: block;
+            background: var(--color-bg);
+            clip-path: polygon(0 51%, 100% 51%, 100% 100%, 0 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            line-height: 1.3;
         }
         
         .timer-box {
             background: rgba(84, 252, 188, 0.05);
             border: 2px solid var(--color-primary);
             border-radius: 5px;
-            padding: 30px;
-            font-size: 3rem;
+            padding: 50px;
+            font-size: 7.5rem;
             font-weight: bold;
             color: var(--color-primary);
             margin-bottom: 30px;
             text-align: center;
-            letter-spacing: 5px;
-            text-shadow: 0 0 20px rgba(84, 252, 188, 0.5);
+            letter-spacing: 10px;
+            text-shadow: 0 0 15px rgba(84, 252, 188, 0.6);
+            position: relative;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .penalty-counter {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2rem;
+            color: #54FCBC;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(84, 252, 188, 0.8);
         }
         
         .situatie-box {
             background: rgba(84, 252, 188, 0.05);
             border: 2px solid var(--color-primary);
             border-radius: 5px;
-            padding: 30px;
-            margin-bottom: 50px;
+            padding: 25px;
+            margin-bottom: 30px;
             text-align: center;
             font-size: 1.5rem;
             color: var(--color-secondary);
             line-height: 1.8;
+            min-height: 100px;
+        }
+        
+        .team-name-box {
+            background: rgba(84, 252, 188, 0.03);
+            border: 2px solid rgba(84, 252, 188, 0.3);
+            border-radius: 5px;
+            padding: 15px 25px;
+            text-align: center;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+        
+        .team-name-label {
+            font-size: 1rem;
+            color: var(--color-secondary);
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .team-name-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-primary);
+            letter-spacing: 3px;
+            text-transform: uppercase;
         }
         
         .scenario-box {
@@ -140,6 +236,10 @@
             box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
         }
         
+        .answer-box:not(.wrong) {
+            animation: none;
+        }
+        
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
@@ -147,22 +247,41 @@
         }
         
         .answer-label {
-            font-size: 1.2rem;
+            font-size: 2.4rem;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             color: var(--color-secondary);
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
+        }
+        
+        .answer-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+            stroke: var(--color-primary);
+            fill: none;
+            stroke-width: 2;
+            opacity: 0.7;
+        }
+        
+        .answer-subtitle {
+            font-size: 1.2rem;
+            color: var(--color-secondary);
+            opacity: 0.7;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         
         .answer-value {
-            font-size: 1.8rem;
+            font-size: 2.43rem;
             font-weight: bold;
-            min-height: 80px;
+            min-height: 144px;
             display: flex;
             align-items: center;
             justify-content: center;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             color: var(--color-primary);
         }
         
@@ -170,41 +289,77 @@
             background: rgba(84, 252, 188, 0.02);
             border: 1px solid rgba(84, 252, 188, 0.2);
             border-radius: 5px;
-            padding: 30px;
+            padding: 15px;
             margin-bottom: 30px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 90%;
+            width: auto;
+            z-index: 9999;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .test-buttons.dev-visible {
+            opacity: 1;
+            pointer-events: all;
         }
         
         .test-buttons h3 {
-            margin-bottom: 20px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
             color: var(--color-secondary);
             text-transform: uppercase;
-            letter-spacing: 3px;
-            font-size: 1rem;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
         }
         
         .button-group {
             display: flex;
-            gap: 15px;
+            gap: 8px;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .button-group strong {
+            font-size: 0.85rem;
+            margin-right: 5px;
+            color: var(--color-secondary);
         }
         
         .test-button {
             background: rgba(84, 252, 188, 0.1);
             color: var(--color-primary);
             border: 1px solid var(--color-primary);
-            padding: 12px 24px;
+            padding: 6px 12px;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.75rem;
             font-family: 'Courier New', Courier, monospace;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .test-button svg {
+            width: 12px;
+            height: 12px;
         }
         
         .test-button:hover {
             background: rgba(84, 252, 188, 0.2);
             border-color: var(--color-primary);
-            box-shadow: 0 0 15px rgba(84, 252, 188, 0.3);
+            box-shadow: 0 0 8px rgba(84, 252, 188, 0.3);
         }
         
         .test-button.agent {
@@ -267,9 +422,26 @@
         }
         
         @keyframes shake {
-            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-            25% { transform: translate(-50%, -50%) rotate(-5deg); }
-            75% { transform: translate(-50%, -50%) rotate(5deg); }
+            0%, 100% { margin-left: 0; margin-top: 0; }
+            10%, 90% { margin-left: -10px; }
+            20%, 80% { margin-left: 10px; }
+            30%, 50%, 70% { margin-left: -10px; }
+            40%, 60% { margin-left: 10px; }
+        }
+        
+        .complete-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 28, 15, 0.85);
+            z-index: 999;
+            display: none;
+        }
+        
+        .complete-overlay.show {
+            display: block;
         }
         
         .complete-box {
@@ -278,12 +450,12 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(30, 30, 30, 0.98);
-            border: 3px solid var(--color-success);
+            border: 3px solid var(--color-primary);
             padding: 60px;
             border-radius: 5px;
             text-align: center;
             display: none;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.6);
+            box-shadow: 0 0 50px rgba(84, 252, 188, 0.6);
             z-index: 1000;
         }
         
@@ -294,7 +466,7 @@
         .complete-box h2 {
             font-size: 3rem;
             margin-bottom: 30px;
-            color: var(--color-success);
+            color: var(--color-primary);
             letter-spacing: 3px;
         }
         
@@ -307,8 +479,8 @@
         
         .big-button {
             background: var(--color-bg);
-            color: var(--color-success);
-            border: 2px solid var(--color-success);
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
             padding: 20px 50px;
             border-radius: 3px;
             font-size: 1.5rem;
@@ -395,18 +567,210 @@
             border-color: var(--color-error);
             color: var(--color-error);
         }
+        
+        /* === WEATHER EFFECTS === */
+        .lightning-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .lightning-container.behind { z-index: 0; }
+        .lightning-container.front { z-index: 9999; }
+
+        .lightning-flash.soft {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, 
+                rgba(255, 255, 255, 0.3) 0%, 
+                rgba(84, 252, 188, 0.2) 20%, 
+                rgba(84, 252, 188, 0.1) 40%, 
+                transparent 60%);
+            opacity: 0;
+            animation: lightning-strike-soft 0.4s ease-out;
+        }
+
+        .lightning-flash.medium {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, 
+                rgba(255, 255, 255, 0.6) 0%, 
+                rgba(84, 252, 188, 0.4) 25%, 
+                rgba(84, 252, 188, 0.2) 50%, 
+                transparent 75%);
+            opacity: 0;
+            animation: lightning-strike 0.4s ease-out;
+        }
+
+        .lightning-flash.intense {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(255, 255, 255, 0.8) 30%, 
+                rgba(84, 252, 188, 0.6) 50%, 
+                rgba(84, 252, 188, 0.3) 70%, 
+                transparent 90%);
+            opacity: 0;
+            animation: lightning-strike-intense 0.3s ease-out;
+        }
+
+        @keyframes lightning-strike-soft {
+            0% { opacity: 0; }
+            15% { opacity: 1; }
+            30% { opacity: 0; }
+            45% { opacity: 0.6; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes lightning-strike {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            20% { opacity: 0; }
+            30% { opacity: 0.8; }
+            40% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes lightning-strike-intense {
+            0% { opacity: 0; }
+            5% { opacity: 1; }
+            10% { opacity: 0.3; }
+            15% { opacity: 1; }
+            25% { opacity: 0; }
+            30% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+
+        .lightning-bolt-svg {
+            position: absolute;
+            top: 0;
+            opacity: 0;
+            animation: bolt-strike 0.3s ease-out;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) 
+                    drop-shadow(0 0 20px rgba(84, 252, 188, 0.6));
+        }
+
+        @keyframes bolt-strike {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            40% { opacity: 0; }
+            60% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .rain-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            overflow: hidden;
+        }
+
+        .raindrop {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(84, 252, 188, 0.4) 50%, 
+                rgba(84, 252, 188, 0.8) 100%);
+            opacity: 0.7;
+            animation: rain-fall linear infinite;
+        }
+
+        @keyframes rain-fall {
+            0% { transform: translateY(-100px); }
+            100% { transform: translateY(calc(100vh + 100px)); }
+        }
+
+        .raindrop-stuck {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, 
+                rgba(84, 252, 188, 0.6) 0%, 
+                rgba(84, 252, 188, 0.3) 60%, 
+                transparent 100%);
+            border-radius: 50% 50% 40% 40%;
+            opacity: 0;
+            animation: drop-stick 0.3s ease-out forwards, drop-flow 2s ease-in 0.3s forwards;
+        }
+
+        @keyframes drop-stick {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 0.8; transform: scale(1); }
+        }
+
+        @keyframes drop-flow {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            100% { transform: translateY(100px) scale(0.3); opacity: 0; }
+        }
+
+        .raindrop-streak {
+            position: absolute;
+            width: 3px;
+            height: 0px;
+            background: linear-gradient(to bottom, 
+                rgba(84, 252, 188, 0.6) 0%, 
+                rgba(84, 252, 188, 0.2) 100%);
+            opacity: 0;
+            animation: streak-flow 1.5s ease-in forwards;
+        }
+
+        @keyframes streak-flow {
+            0% { height: 0px; opacity: 0.6; }
+            50% { height: 80px; opacity: 0.8; }
+            100% { height: 150px; opacity: 0; transform: translateY(50px); }
+        }
     </style>
 </head>
 <body>
+    <!-- Weather Effect Containers -->
+    <div class="lightning-container" id="lightningContainer"></div>
+    <div class="rain-container" id="rainContainer"></div>
+    
     <div class="game-container">
         <div class="header">
-            <img src="/static/robot-mascot.png" alt="Robot Detective" class="robot-logo">
-            <h1>POWER BI INVESTIGATION GAME</h1>
-            <img src="/static/robot-mascot.png" alt="Robot Detective" class="robot-logo flipped">
+            <div class="header-content">
+                <img src="/static/robot-mascot.png" alt="Robot Detective" class="robot-logo">
+                <h1>
+                    <span class="title-line-1">WHO 
+                        <span class="split-container">
+                            <span class="split-top">KILLED</span>
+                            <span class="split-bottom" aria-hidden="true">KILLED</span>
+                        </span> THE
+                    </span>
+                    <span class="title-line-2">POWER BI DASHBOARD?</span>
+                </h1>
+                <img src="/static/robot-mascot.png" alt="Robot Detective" class="robot-logo flipped">
+            </div>
         </div>
         
         <div class="timer-box" id="timer">
-            00:00
+            <span id="timeDisplay">00:00</span>
+            <div class="penalty-counter" id="penaltyCounter" style="display: none;"></div>
+        </div>
+        
+        <div class="team-name-box" id="teamNameBox" style="display: none;">
+            <div class="team-name-label">Team</div>
+            <div class="team-name-value" id="teamName">Team Alpha</div>
         </div>
         
         <div class="situatie-box" id="situatie">
@@ -419,72 +783,234 @@
         
         <div class="answer-section">
             <div class="answer-box" id="box-who">
-                <div class="answer-label">WIE? (Persoon)</div>
+                <svg class="answer-icon" viewBox="0 0 512 512">
+                    <path fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32" d="M256 304c-87 0-175.3 48-191.64 138.6C62.39 453.52 68.57 464 80 464h352c11.44 0 17.62-10.48 15.65-21.4C431.3 352 343 304 256 304z"/>
+                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M344 144c-3.92 52.87-44 96-88 96s-84.15-43.12-88-96c-4-55 35-96 88-96s92 42 88 96z"/>
+                </svg>
+                <div class="answer-label">WIE?</div>
+                <div class="answer-subtitle">(PERSOON)</div>
                 <div class="answer-value" id="answer-who">???</div>
             </div>
             <div class="answer-box" id="box-waarmee">
-                <div class="answer-label">WAARMEE? (Wapen)</div>
+                <svg class="answer-icon" viewBox="0 0 256 256">
+                    <path fill="currentColor" d="M231.87,32.13a27.84,27.84,0,0,0-39.32,0L18.34,206.4a8,8,0,0,0,3.86,13.45A160.67,160.67,0,0,0,58.4,224c32.95,0,65.92-10.2,96.95-30.23,31.76-20.5,50.19-43.82,51-44.81a8,8,0,0,0-.64-10.59L185.32,118l46.55-46.56A27.85,27.85,0,0,0,231.87,32.13ZM189.1,144.44a220.41,220.41,0,0,1-42.86,36.16c-34.43,22.1-69.94,30.92-105.77,26.3L146,101.33Zm31.46-84.3L174,106.7,157.32,90l46.55-46.56a11.8,11.8,0,0,1,16.69,16.69Z"/>
+                </svg>
+                <div class="answer-label">WAARMEE?</div>
+                <div class="answer-subtitle">(WAPEN)</div>
                 <div class="answer-value" id="answer-waarmee">???</div>
             </div>
             <div class="answer-box" id="box-waar">
-                <div class="answer-label">WAAR? (Locatie)</div>
+                <svg class="answer-icon" viewBox="0 0 512 512">
+                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 48c-79.5 0-144 61.39-144 137 0 87 96 224.87 131.25 272.49a15.77 15.77 0 0 0 25.5 0C304 409.89 400 272.07 400 185c0-75.61-64.5-137-144-137z"/>
+                    <circle cx="256" cy="192" r="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/>
+                </svg>
+                <div class="answer-label">WAAR?</div>
+                <div class="answer-subtitle">(LOCATIE)</div>
                 <div class="answer-value" id="answer-waar">???</div>
             </div>
         </div>
         
         <!-- TEST MODE BUTTONS -->
         <div class="test-buttons" id="testButtons">
-            <h3>🧪 TEST MODE (Development Only)</h3>
+            <h3>🧪 DEV CONTROLS</h3>
             
             <div class="button-group">
                 <strong>Personen:</strong>
-                <button class="test-button" onclick="testScan('TEMP_NFC_PERSON_1')">Power BI Developer</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_PERSON_2')">Financial Controller</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_PERSON_3')">Database Beheerder</button>
+                <button class="test-button" onclick="testScan('3032948996')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Power BI Developer
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_PERSON_04')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Financial Controller
+                </button>
+                <button class="test-button" onclick="testScan('0458378500')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Database Beheerder
+                </button>
             </div>
             
             <div class="button-group">
                 <strong>Wapens:</strong>
-                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_1')">Inactieve Relatie</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_2')">Hidden Slicer</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_3')">Dubbele Records</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_4')">Hardcoded Pad</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_5')">Budget Niet Updated</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_6')">Kolomnaam Gewijzigd</button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_1')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Inactieve Relatie
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_2')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Hidden Slicer
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_3')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Dubbele Records
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_4')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Hardcoded Pad
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_5')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Budget Niet Updated
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_6')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Kolomnaam Gewijzigd
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_WEAPON_7')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Refresh Uitgeschakeld
+                </button>
             </div>
             
             <div class="button-group">
                 <strong>Locaties:</strong>
-                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_1')">OneDrive</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_2')">Power Query Editor</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_3')">Semantisch Model</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_4')">Report View - Selection Pane</button>
-                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_DATABASE')">Database</button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_1')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    OneDrive
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_2')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Power Query Editor
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_3')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Semantisch Model
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_4')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Report View - Selection Pane
+                </button>
+                <button class="test-button" onclick="testScan('TEMP_NFC_LOCATION_DATABASE')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Database
+                </button>
             </div>
             
             <div class="button-group">
                 <strong>Agents:</strong>
-                <button class="test-button agent" onclick="testScan('TEMP_NFC_AGENT_1')">🕵️ De Schoonmaker</button>
-                <button class="test-button agent" onclick="testScan('TEMP_NFC_AGENT_2')">🕵️ De Receptionist</button>
-                <button class="test-button agent" onclick="testScan('TEMP_NFC_AGENT_3')">🕵️ De Stagiair</button>
+                <button class="test-button agent" onclick="testScan('0526206468')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                    </svg>
+                    De Schoonmaker
+                </button>
+                <button class="test-button agent" onclick="testScan('0480142596')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                    </svg>
+                    De Receptionist
+                </button>
+                <button class="test-button agent" onclick="testScan('0416094468')">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                    </svg>
+                    De Stagiair
+                </button>
             </div>
             
             <div class="button-group">
                 <strong>Special:</strong>
-                <button class="test-button special" onclick="handleExitGame()">🚪 Exit Game (Standhouder)</button>
-                <button class="test-button special" onclick="handleResetApp()">🔄 Reset App</button>
+                <button class="test-button special" onclick="handleExitGame()">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    EXIT
+                </button>
+                <button class="test-button special" onclick="handleResetApp()">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                    RESET
+                </button>
             </div>
             
             <div class="button-group">
                 <strong>Standbeheerder:</strong>
-                <button class="test-button special" onclick="handleNotificationYes()">✅ YES</button>
-                <button class="test-button special" onclick="handleNotificationNo()">❌ NO</button>
-            </div>
+                <button class="test-button special" onclick="handleNotificationYes()">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    YES
+                </button>
+                <button class="test-button special" onclick="handleNotificationNo()">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                    NO
+                </button>
             </div>
             
             <div class="button-group">
                 <strong>⚠️ DEV ONLY:</strong>
-                <button class="test-button special" onclick="forceReset()" style="background: #f5576c;">🔧 FORCE RESET DATABASE</button>
+                <button class="test-button special" onclick="forceReset()" style="background: rgba(245, 87, 108, 0.3);">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                    FORCE RESET
+                </button>
             </div>
         </div>
         
@@ -498,11 +1024,13 @@
         </div>
         
         <div class="feedback-box" id="feedbackBox">
-            ❌ FOUT! +15 SECONDEN
+            FOUT! +15 SECONDEN
         </div>
         
+        <div class="complete-overlay" id="completeOverlay"></div>
+        
         <div class="complete-box" id="completeBox">
-            <h2>🎉 GEFELICITEERD!</h2>
+            <h2>GEFELICITEERD!</h2>
             <p id="finalTime"></p>
             <p id="penaltyInfo"></p>
             <button class="big-button" onclick="showLeaderboard()">Bekijk Leaderboard</button>
@@ -550,32 +1078,59 @@
         });
         
         async function startNewGame() {
+            console.log('🎮 Starting new game...');
             try {
                 // Clear any leftover notifications from previous game
                 hideNotification();
+                
+                // Reset penalties for new game
+                penalties = 0;
+                updatePenaltyDisplay();
                 
                 const response = await fetch('/api/game/start', {
                     method: 'POST'
                 });
                 
+                console.log('Start game response status:', response.status);
+                
                 if (response.status === 409) {
                     // Conflict - active scenario exists
-                    showNotification('⚠️ Actief Spel', 'Er is al een actief spel. Scan EXIT om te stoppen.', 'error');
+                    console.warn('⚠️ Active game already exists');
+                    const errorData = await response.json();
+                    console.log('Conflict data:', errorData);
+                    
+                    // Check if we got a game_id anyway
+                    if (errorData.game_id) {
+                        console.log('✅ Using existing game_id:', errorData.game_id);
+                        gameId = errorData.game_id;
+                        // Try to load scenario info
+                        if (errorData.scenario) {
+                            document.getElementById('scenario').innerHTML = errorData.scenario;
+                        }
+                    } else {
+                        showNotification('⚠️ Actief Spel', 'Er is al een actief spel. Scan EXIT om te stoppen, of gebruik Force Reset knop.', 'error');
+                    }
                     return;
                 }
                 
                 const data = await response.json();
+                console.log('Start game data:', data);
                 
                 if (data.success) {
                     gameId = data.game_id;
+                    console.log('✅ New game started with ID:', gameId);
                     document.getElementById('scenario').innerHTML = data.scenario;
                     document.getElementById('situatie').innerHTML = data.situatie_beschrijving || 'Er is een probleem met het Power BI Dashboard...';
                     startTimer();
+                    
+                    // Start random weather effects
+                    startRandomWeather();
                 } else {
+                    console.error('❌ Game start failed:', data.message);
                     showNotification('❌ Fout', data.message || 'Kon spel niet starten', 'error');
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ Error starting game:', error);
                 showNotification('❌ Fout', 'Kon geen verbinding maken met server', 'error');
             }
         }
@@ -586,13 +1141,23 @@
                 const elapsed = Math.floor((Date.now() - startTime) / 1000);
                 const minutes = Math.floor(elapsed / 60);
                 const seconds = elapsed % 60;
-                document.getElementById('timer').textContent = 
+                document.getElementById('timeDisplay').textContent = 
                     `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             }, 1000);
         }
         
         async function handleNFCScan(code) {
+            console.log('📡 handleNFCScan called with:', code);
+            console.log('   gameId:', gameId);
+            
+            if (!gameId) {
+                console.error('❌ Cannot scan - no active game');
+                showNotification('⚠️ Geen Actief Spel', 'Game ID is niet geïnitialiseerd', 'error');
+                return;
+            }
+            
             try {
+                console.log('→ Sending POST to /api/game/scan');
                 const response = await fetch('/api/game/scan', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -602,6 +1167,7 @@
                     })
                 });
                 const data = await response.json();
+                console.log('← Response:', data);
                 
                 if (data.success) {
                     processScannedItem(data);
@@ -609,13 +1175,27 @@
                     showNotification('❌ Ongeldige Scan', data.message || 'Code niet herkend', 'error');
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ Error in handleNFCScan:', error);
+                showNotification('❌ Scan Error', error.message, 'error');
             }
         }
         
         function testScan(code) {
+            console.log('🧪 Test scan:', code);
+            console.log('   Current gameId:', gameId);
+            
+            // Check if we have a game running
+            if (!gameId && !code.startsWith('TEMP_NFC_START') && !code.startsWith('TEMP_NFC_RESET')) {
+                console.error('❌ Geen actief spel! Start eerst een nieuw spel.');
+                showNotification('⚠️ Geen Actief Spel', 'Scan START om een nieuw spel te beginnen', 'error');
+                return;
+            }
+            
             // Special codes kunnen direct afgehandeld worden of via API
-            if (code === 'TEMP_NFC_EXIT') {
+            if (code === 'TEMP_NFC_START') {
+                // Start nieuw spel - reload page to trigger startNewGame()
+                window.location.reload();
+            } else if (code === 'TEMP_NFC_EXIT') {
                 handleExitGame();
             } else if (code === 'TEMP_NFC_RESET') {
                 handleResetApp();
@@ -625,6 +1205,7 @@
                 handleNotificationNo();
             } else {
                 // Normale NFC codes gaan via API
+                console.log('→ Calling handleNFCScan with code:', code);
                 handleNFCScan(code);
             }
         }
@@ -666,11 +1247,26 @@
                         document.getElementById('box-waar').classList.add('correct');
                         
                         clearInterval(timerInterval);
+                        stopRandomWeather(); // Stop weather effects bij win
                         document.getElementById('finalTime').textContent = 
                             `Totale tijd: ${result.total_time}`;
                         document.getElementById('penaltyInfo').textContent = 
                             `Penalties: ${penalties} x 15 sec`;
-                        document.getElementById('completeBox').classList.add('show');
+                        
+                        // Verwijder groene borders en toon overlay + popup
+                        setTimeout(() => {
+                            document.getElementById('box-who').classList.remove('correct');
+                            document.getElementById('box-waarmee').classList.remove('correct');
+                            document.getElementById('box-waar').classList.remove('correct');
+                            document.getElementById('completeOverlay').classList.add('show');
+                            document.getElementById('completeBox').classList.add('show');
+                        }, 500);
+                        
+                        // Auto-navigatie naar leaderboard na 5 seconden
+                        setTimeout(() => {
+                            console.log('Navigating to leaderboard...');
+                            window.location.href = '/leaderboard';
+                        }, 5000);
                     } else {
                         // ALL FILLED BUT WRONG - Show red and reset
                         document.getElementById('box-who').classList.add('wrong');
@@ -678,9 +1274,10 @@
                         document.getElementById('box-waar').classList.add('wrong');
                         
                         penalties++;
+                        updatePenaltyDisplay();
                         showFeedback();
                         
-                        // Clear all boxes after 2 seconds
+                        // Clear boxes after 2 seconds - remove wrong class to make fillable again
                         setTimeout(() => {
                             document.getElementById('box-who').classList.remove('filled', 'wrong');
                             document.getElementById('box-waarmee').classList.remove('filled', 'wrong');
@@ -704,8 +1301,28 @@
             } else if (type === 'special') {
                 const codeType = data.code_type;
                 if (codeType === 'EXIT') {
-                    showNotification('⚠️ Spel Beëindigen?', 'Weet je zeker dat je het spel wilt stoppen?', 'exit');
+                    // EXIT OVERRULET ALLES - altijd force reset
+                    hideNotification(); // Verberg alle notificaties
+                    
+                    // Force reset om oude games te clearen
+                    await fetch('/api/game/force-reset', {
+                        method: 'POST'
+                    });
+                    
+                    // Als er een gameId is, probeer ook exit
+                    if (gameId) {
+                        await fetch('/api/game/exit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ game_id: gameId })
+                        });
+                    }
+                    
+                    // Ga naar home
+                    window.location.href = '/';
                 } else if (codeType === 'RESET') {
+                    // RESET OVERRULET ALLES - altijd force reset + naar home
+                    hideNotification(); // Verberg alle notificaties
                     // Abort current game before going to homepage
                     if (gameId) {
                         await fetch('/api/game/exit', {
@@ -727,6 +1344,18 @@
             const box = document.getElementById('feedbackBox');
             box.classList.add('show');
             setTimeout(() => box.classList.remove('show'), 2000);
+        }
+        
+        function updatePenaltyDisplay() {
+            const penaltyCounter = document.getElementById('penaltyCounter');
+            const totalPenaltySeconds = penalties * 15;
+            
+            if (penalties > 0) {
+                penaltyCounter.textContent = `+${totalPenaltySeconds}`;
+                penaltyCounter.style.display = 'block';
+            } else {
+                penaltyCounter.style.display = 'none';
+            }
         }
         
         function showLeaderboard() {
@@ -828,6 +1457,249 @@
                 }
             }
         }
+        
+        // === WEATHER EFFECTS ===
+        let rainInterval = null;
+        let stormInterval = null;
+        let randomWeatherInterval = null;
+        let rainActive = false;
+        let stormActive = false;
+        let randomWeatherActive = false;
+
+        function triggerLightning() {
+            const container = document.getElementById('lightningContainer');
+            const intensities = ['soft', 'medium', 'medium', 'intense'];
+            const intensity = intensities[Math.floor(Math.random() * intensities.length)];
+            const zPosition = Math.random() > 0.5 ? 'front' : 'behind';
+            
+            container.className = 'lightning-container ' + zPosition;
+            const flash = document.createElement('div');
+            flash.className = 'lightning-flash ' + intensity;
+            container.appendChild(flash);
+            
+            if (Math.random() > 0.6) {
+                const xPos = Math.random() * 80 + 10;
+                createZigzagBolt(container, xPos);
+            }
+            
+            setTimeout(() => {
+                flash.remove();
+                container.querySelectorAll('.lightning-bolt-svg').forEach(bolt => bolt.remove());
+            }, 600);
+        }
+
+        function createZigzagBolt(container, xPosition) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'lightning-bolt-svg');
+            svg.setAttribute('width', '200');
+            svg.setAttribute('height', '100vh');
+            svg.style.left = xPosition + '%';
+            svg.style.transform = 'translateX(-50%)';
+            
+            let path = 'M 100 0 ';
+            let currentX = 100;
+            let currentY = 0;
+            const segments = Math.floor(Math.random() * 8) + 6;
+            const screenHeight = window.innerHeight;
+            
+            for (let i = 0; i < segments; i++) {
+                const offsetX = (Math.random() - 0.5) * 100;
+                currentX = Math.max(20, Math.min(180, currentX + offsetX));
+                currentY += screenHeight / segments;
+                path += `L ${currentX} ${currentY} `;
+                
+                if (Math.random() > 0.7) {
+                    const sharpX = currentX + (Math.random() - 0.5) * 60;
+                    const sharpY = currentY + (screenHeight / segments) * 0.3;
+                    path += `L ${sharpX} ${sharpY} `;
+                    currentX = sharpX;
+                    currentY = sharpY;
+                }
+            }
+            
+            const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathElement.setAttribute('d', path);
+            pathElement.setAttribute('stroke', 'rgba(255, 255, 255, 0.9)');
+            pathElement.setAttribute('stroke-width', '3');
+            pathElement.setAttribute('fill', 'none');
+            pathElement.setAttribute('stroke-linecap', 'round');
+            
+            svg.appendChild(pathElement);
+            container.appendChild(svg);
+        }
+
+        function startRain() {
+            if (rainActive) return;
+            rainActive = true;
+            const container = document.getElementById('rainContainer');
+            rainInterval = setInterval(() => createRaindrop(container), 30);
+        }
+
+        function stopRain() {
+            rainActive = false;
+            if (rainInterval) {
+                clearInterval(rainInterval);
+                rainInterval = null;
+            }
+            setTimeout(() => {
+                document.querySelectorAll('.raindrop, .raindrop-stuck, .raindrop-streak').forEach(d => d.remove());
+            }, 2000);
+        }
+
+        function createRaindrop(container) {
+            const rand = Math.random();
+            
+            if (rand > 0.85) {
+                createStuckDrop(container);
+            } else if (rand > 0.80) {
+                createStreakDrop(container);
+            } else {
+                const drop = document.createElement('div');
+                drop.className = 'raindrop';
+                drop.style.left = (Math.random() * 100) + '%';
+                const duration = Math.random() * 0.5 + 0.5;
+                drop.style.animationDuration = duration + 's';
+                drop.style.animationDelay = (Math.random() * 0.2) + 's';
+                container.appendChild(drop);
+                setTimeout(() => drop.remove(), (duration + 0.2) * 1000);
+            }
+        }
+
+        function createStuckDrop(container) {
+            const drop = document.createElement('div');
+            drop.className = 'raindrop-stuck';
+            drop.style.left = (Math.random() * 100) + '%';
+            drop.style.top = (Math.random() * 50) + '%';
+            container.appendChild(drop);
+            setTimeout(() => drop.remove(), 2500);
+        }
+
+        function createStreakDrop(container) {
+            const drop = document.createElement('div');
+            drop.className = 'raindrop-streak';
+            drop.style.left = (Math.random() * 100) + '%';
+            drop.style.top = (Math.random() * 40) + '%';
+            container.appendChild(drop);
+            setTimeout(() => drop.remove(), 1600);
+        }
+
+        function triggerStorm() {
+            if (stormActive) return;
+            stormActive = true;
+            
+            if (!rainActive) startRain();
+            
+            stormInterval = setInterval(() => {
+                triggerLightning();
+                if (Math.random() > 0.7) {
+                    setTimeout(() => triggerLightning(), 300);
+                }
+            }, Math.random() * 7000 + 5000);
+        }
+
+        function stopStorm() {
+            stormActive = false;
+            if (stormInterval) {
+                clearInterval(stormInterval);
+                stormInterval = null;
+            }
+        }
+
+        function startRandomWeather() {
+            if (randomWeatherActive) return;
+            randomWeatherActive = true;
+            console.log('🎲 Random weer gestart');
+            triggerStorm();
+            scheduleNextWeatherChange();
+        }
+
+        function scheduleNextWeatherChange() {
+            if (!randomWeatherActive) return;
+            const nextChangeIn = Math.random() * 20000 + 10000;
+            
+            randomWeatherInterval = setTimeout(() => {
+                if (!randomWeatherActive) return;
+                
+                if (Math.random() > 0.4) {
+                    if (!stormActive) {
+                        console.log('🌧️ Storm begint...');
+                        triggerStorm();
+                    }
+                } else {
+                    if (stormActive || rainActive) {
+                        console.log('🌤️ Storm stopt...');
+                        stopStorm();
+                        stopRain();
+                    }
+                }
+                scheduleNextWeatherChange();
+            }, nextChangeIn);
+        }
+
+        function stopRandomWeather() {
+            randomWeatherActive = false;
+            if (randomWeatherInterval) {
+                clearTimeout(randomWeatherInterval);
+                randomWeatherInterval = null;
+            }
+            stopStorm();
+            stopRain();
+        }
+
+        // Dev Controls Visibility System
+        let devControlsTimeout = null;
+        let devControlsHideTimeout = null;
+        let mouseMovements = [];
+        let lastMouseTime = 0;
+
+        function checkMouseMovement(e) {
+            const now = Date.now();
+            mouseMovements.push(now);
+            
+            // Keep only last 2 seconds of movements
+            mouseMovements = mouseMovements.filter(t => now - t < 2000);
+            
+            // Check if mouse moved back and forth (at least 5 movements in 2 seconds)
+            if (mouseMovements.length >= 5 && now - lastMouseTime > 100) {
+                showDevControls();
+            }
+            
+            lastMouseTime = now;
+        }
+
+        function showDevControls() {
+            const testButtons = document.getElementById('testButtons');
+            testButtons.classList.add('dev-visible');
+            
+            // Clear existing hide timeout
+            if (devControlsHideTimeout) {
+                clearTimeout(devControlsHideTimeout);
+            }
+            
+            // Auto-hide after 5 seconds
+            devControlsHideTimeout = setTimeout(() => {
+                hideDevControls();
+            }, 5000);
+        }
+
+        function hideDevControls() {
+            const testButtons = document.getElementById('testButtons');
+            testButtons.classList.remove('dev-visible');
+            mouseMovements = [];
+        }
+
+        // Logo hover to show dev controls
+        document.addEventListener('DOMContentLoaded', () => {
+            const footerLogo = document.querySelector('.footer-logo');
+            if (footerLogo) {
+                footerLogo.addEventListener('mouseenter', showDevControls);
+            }
+            
+            // Track mouse movement
+            document.addEventListener('mousemove', checkMouseMovement);
+        });
     </script>
+    
+    <img src="{{ url_for('static', filename='AD-Sticker-Shape.png') }}" alt="Another Dimension" class="footer-logo">
 </body>
 </html>

@@ -152,16 +152,19 @@
         }
 
         .input-area button {
-            padding: 12px 24px;
+            padding: 12px 20px;
             background: #54FCBC;
             color: #001C0F;
             border: none;
             border-radius: 5px;
             font-family: 'Courier New', monospace;
-            font-size: 1rem;
+            font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .input-area button:hover {
@@ -222,7 +225,11 @@
                 placeholder="Stel je vraag aan de agent..."
                 disabled
             >
-            <button id="sendButton" disabled>Verstuur</button>
+            <button id="sendButton" disabled>
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
         </div>
     </div>
 
