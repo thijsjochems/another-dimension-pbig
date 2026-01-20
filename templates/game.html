@@ -492,9 +492,10 @@
         }
         
         .big-button:hover {
-            background: var(--color-success);
-            color: var(--color-bg);
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+            background: rgba(84, 252, 188, 0.1);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 30px rgba(84, 252, 188, 0.4);
+            transform: translateY(-2px);
         }
         
         /* Notification bar styling */
@@ -1150,12 +1151,6 @@
             console.log('📡 handleNFCScan called with:', code);
             console.log('   gameId:', gameId);
             
-            if (!gameId) {
-                console.error('❌ Cannot scan - no active game');
-                showNotification('⚠️ Geen Actief Spel', 'Game ID is niet geïnitialiseerd', 'error');
-                return;
-            }
-            
             try {
                 console.log('→ Sending POST to /api/game/scan');
                 const response = await fetch('/api/game/scan', {
@@ -1170,6 +1165,34 @@
                 console.log('← Response:', data);
                 
                 if (data.success) {
+                    // Check for special codes first (these work without game_id)
+                    if (data.type === 'special' && data.data && data.data.code_type) {
+                        const codeType = data.data.code_type;
+                        console.log('Special code detected:', codeType);
+                        
+                        switch(codeType) {
+                            case 'EXIT':
+                                handleExitGame();
+                                return;
+                            case 'RESET':
+                                handleResetApp();
+                                return;
+                            case 'YES':
+                                handleNotificationYes();
+                                return;
+                            case 'NO':
+                                handleNotificationNo();
+                                return;
+                        }
+                    }
+                    
+                    // For non-special codes, require game_id
+                    if (!gameId) {
+                        console.error('❌ Cannot scan - no active game');
+                        showNotification('⚠️ Geen Actief Spel', 'Game ID is niet geïnitialiseerd', 'error');
+                        return;
+                    }
+                    
                     processScannedItem(data);
                 } else {
                     showNotification('❌ Ongeldige Scan', data.message || 'Code niet herkend', 'error');

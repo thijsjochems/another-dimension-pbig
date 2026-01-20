@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KILLED Effect Tests</title>
+    <link rel="stylesheet" href="/static/fonts.css">
+    <style>
+        :root {
+            --color-bg: #001C0F;
+            --color-primary: #54FCBC;
+        }
+        
+        body {
+            background: var(--color-bg);
+            color: var(--color-primary);
+            font-family: 'Blender', sans-serif;
+            padding: 50px;
+            line-height: 2;
+        }
+        
+        .test-section {
+            margin: 60px 0;
+            padding: 30px;
+            border: 2px solid rgba(84, 252, 188, 0.3);
+            border-radius: 10px;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #54FCBC;
+        }
+        
+        .description {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #DCFFED;
+        }
+        
+        /* TEST 1: Huidige clip-path met background */
+        .test1-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .test1-top {
+            display: block;
+            background: var(--color-bg);
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+            transform: translateX(-5px);
+        }
+        
+        .test1-bottom {
+            display: block;
+            background: var(--color-bg);
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        /* TEST 2: Clip-path ZONDER background */
+        .test2-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .test2-top {
+            display: block;
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+            transform: translateX(-8px);
+        }
+        
+        .test2-bottom {
+            display: block;
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        /* TEST 3: Met padding ipv transform */
+        .test3-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .test3-top {
+            display: block;
+            background: var(--color-bg);
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+            padding-right: 10px;
+            margin-left: -5px;
+        }
+        
+        .test3-bottom {
+            display: block;
+            background: var(--color-bg);
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        /* TEST 4: Twee aparte spans naast elkaar */
+        .test4-container {
+            display: inline-flex;
+            gap: 8px;
+        }
+        
+        .test4-left {
+            display: block;
+        }
+        
+        .test4-gap {
+            width: 3px;
+            background: var(--color-primary);
+            align-self: stretch;
+        }
+        
+        .test4-right {
+            display: block;
+        }
+        
+        /* TEST 5: Box-shadow masking */
+        .test5-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .test5-top {
+            display: block;
+            clip-path: polygon(0 0, 100% 0, 100% 47%, 0 50%);
+            transform: translateX(-6px);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .test5-bottom {
+            display: block;
+            clip-path: polygon(0 50%, 100% 47%, 100% 100%, 0 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        /* TEST 6: Inline-block met overflow */
+        .test6-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .test6-wrapper {
+            position: relative;
+        }
+        
+        .test6-top {
+            display: inline-block;
+            overflow: hidden;
+            height: 50%;
+            transform: translateX(-7px);
+            background: var(--color-bg);
+            padding-bottom: 100%;
+        }
+        
+        .test6-bottom {
+            display: inline-block;
+            overflow: hidden;
+            height: 50%;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            background: var(--color-bg);
+        }
+    </style>
+</head>
+<body>
+    <h1>KILLED Effect Test Pagina</h1>
+    
+    <div class="test-section">
+        <h2>TEST 1: Huidige - Clip-path + Background + TranslateX</h2>
+        <div class="description">Clip-path voor horizontale split, background #001C0F, bovenkant 5px links</div>
+        <h1>WHO 
+            <span class="test1-container">
+                <span class="test1-top">KILLED</span>
+                <span class="test1-bottom" aria-hidden="true">KILLED</span>
+            </span> THE
+        </h1>
+    </div>
+    
+    <div class="test-section">
+        <h2>TEST 2: Clip-path ZONDER Background</h2>
+        <div class="description">Zelfde clip-path maar zonder background masking, 8px offset</div>
+        <h1>WHO 
+            <span class="test2-container">
+                <span class="test2-top">KILLED</span>
+                <span class="test2-bottom" aria-hidden="true">KILLED</span>
+            </span> THE
+        </h1>
+    </div>
+    
+    <div class="test-section">
+        <h2>TEST 3: Padding + Margin ipv Transform</h2>
+        <div class="description">Gebruikt padding/margin voor offset ipv translateX</div>
+        <h1>WHO 
+            <span class="test3-container">
+                <span class="test3-top">KILLED</span>
+                <span class="test3-bottom" aria-hidden="true">KILLED</span>
+            </span> THE
+        </h1>
+    </div>
+    
+    <div class="test-section">
+        <h2>TEST 4: Twee Aparte Spans (KIL + LED)</h2>
+        <div class="description">Letterlijk het woord splitsen met gap ertussen</div>
+        <h1>WHO 
+            <span class="test4-container">
+                <span class="test4-left">KIL</span>
+                <span class="test4-gap"></span>
+                <span class="test4-right">LED</span>
+            </span> THE
+        </h1>
+    </div>
+    
+    <div class="test-section">
+        <h2>TEST 5: Asymmetrische Clip-path (47% / 50%)</h2>
+        <div class="description">Clip-paths overlappen niet exact op 50%, z-index voor layering</div>
+        <h1>WHO 
+            <span class="test5-container">
+                <span class="test5-top">KILLED</span>
+                <span class="test5-bottom" aria-hidden="true">KILLED</span>
+            </span> THE
+        </h1>
+    </div>
+    
+    <div class="test-section">
+        <h2>TEST 6: GEWOON KILLED (geen effect)</h2>
+        <div class="description">Fallback: gewoon het woord zonder fancy effecten</div>
+        <h1>WHO KILLED THE</h1>
+    </div>
+    
+    <div style="margin-top: 80px; padding: 30px; border: 2px solid #54FCBC; border-radius: 10px;">
+        <h2>Instructies:</h2>
+        <ul style="font-size: 1.3rem; line-height: 2;">
+            <li>Bekijk welke test het beste werkt</li>
+            <li>Let op: horizontale split (boven/onder verschoven)</li>
+            <li>Background moet niet zichtbaar zijn als het goed is</li>
+            <li>Geef nummer door van de beste versie!</li>
+        </ul>
+    </div>
+    
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="/" style="color: #54FCBC; font-size: 1.5rem; text-decoration: underline;">← Terug naar Home</a>
+    </div>
+</body>
+</html>

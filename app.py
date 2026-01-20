@@ -40,30 +40,31 @@ def generate_session_code():
 def get_nfc_mapping(nfc_code):
     """
     Map NFC code to database entity
-    Returns: dict with 'type' and 'id' or None
+    Supports both nfc_code (legacy) and nfc_codes (array) columns
+    Returns: dict with 'type' and 'data' or None
     """
-    # Check personen
-    result = supabase.table('personen').select('*').eq('nfc_code', nfc_code).execute()
+    # Check personen - support both single code and array
+    result = supabase.table('personen').select('*').or_(f'nfc_code.eq.{nfc_code},nfc_codes.cs.["{nfc_code}"]').execute()
     if result.data:
         return {'type': 'persoon', 'data': result.data[0]}
     
     # Check wapens
-    result = supabase.table('wapens').select('*').eq('nfc_code', nfc_code).execute()
+    result = supabase.table('wapens').select('*').or_(f'nfc_code.eq.{nfc_code},nfc_codes.cs.["{nfc_code}"]').execute()
     if result.data:
         return {'type': 'wapen', 'data': result.data[0]}
     
     # Check locaties
-    result = supabase.table('locaties').select('*').eq('nfc_code', nfc_code).execute()
+    result = supabase.table('locaties').select('*').or_(f'nfc_code.eq.{nfc_code},nfc_codes.cs.["{nfc_code}"]').execute()
     if result.data:
         return {'type': 'locatie', 'data': result.data[0]}
     
     # Check agents
-    result = supabase.table('agents').select('*').eq('nfc_code', nfc_code).execute()
+    result = supabase.table('agents').select('*').or_(f'nfc_code.eq.{nfc_code},nfc_codes.cs.["{nfc_code}"]').execute()
     if result.data:
         return {'type': 'agent', 'data': result.data[0]}
     
     # Check special codes
-    result = supabase.table('special_nfc_codes').select('*').eq('nfc_code', nfc_code).execute()
+    result = supabase.table('special_nfc_codes').select('*').or_(f'nfc_code.eq.{nfc_code},nfc_codes.cs.["{nfc_code}"]').execute()
     if result.data:
         return {'type': 'special', 'data': result.data[0]}
     
@@ -77,6 +78,32 @@ def get_nfc_mapping(nfc_code):
 def index():
     """Homepage with 4 main buttons"""
     return render_template('index.html')
+
+@app.route('/killed-test')
+def killed_test():
+    """Test page for KILLED effect variations"""
+    return render_template('killed-test.html')
+
+@app.route('/team-reveal')
+def team_reveal():
+    """Team name reveal page with slot machine animation"""
+    # TODO: Replace with LLM-generated team name
+    # For now, use hardcoded alliterative names
+    import random
+    team_names = [
+        "THE DAX DANDIES",
+        "THE DAX DOLLS", 
+        "THE QUERY QUEENS",
+        "THE STARSCHEMA STARS",
+        "THE MEASURE MAKERS",
+        "THE TABLE TWISTERS",
+        "THE FILTER FANATICS",
+        "THE PIVOT PIONEERS",
+        "THE SLICER SLEUTHS",
+        "THE DASHBOARD DETECTIVES"
+    ]
+    team_name = random.choice(team_names)
+    return render_template('team-reveal.html', team_name=team_name)
 
 @app.route('/game')
 def game():
@@ -117,6 +144,7 @@ def handle_scan():
     response = {
         'success': True,
         'type': entity_type,
+        'data': entity_data,  # Include full data object
         'name': entity_data.get('naam') or entity_data.get('name', ''),
         'nfc_code': nfc_code,
         'bio': entity_data.get('bio', ''),
@@ -503,19 +531,48 @@ def get_agent_hint():
 
 @app.route('/api/leaderboard', methods=['GET'])
 def get_leaderboard():
-    """Get top 10 fastest times"""
-    leaderboard = supabase.table('games').select('*, scenarios(naam)').eq('completed', True).order('total_time_seconds', desc=False).limit(10).execute()
+    """Get top 10 fastest times + laatste sessie"""
+    # Get top 10
+    leaderboard = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).order('total_time_seconds', desc=False).limit(15).execute()
+    
+    # Get laatste sessie (most recent)
+    latest = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).order('end_time', desc=True).limit(1).execute()
     
     formatted = []
-    for game in leaderboard.data:
+    latest_game_id = latest.data[0]['id'] if latest.data else None
+    
+    for idx, game in enumerate(leaderboard.data, 1):
         formatted.append({
+            'rank': idx,
+            'game_id': game['id'],
             'player_name': game.get('player_name', 'Anoniem'),
             'total_time': f"{game['total_time_seconds'] // 60:02d}:{game['total_time_seconds'] % 60:02d}",
+            'total_time_seconds': game['total_time_seconds'],
             'completed_at': game['end_time'],
-            'scenario_name': game['scenarios']['naam'] if game.get('scenarios') else 'Unknown'
+            'is_latest': game['id'] == latest_game_id
         })
     
-    return jsonify({'success': True, 'leaderboard': formatted})
+    # Check if latest game is in top 10
+    latest_in_top10 = any(g['is_latest'] for g in formatted)
+    
+    response = {
+        'success': True, 
+        'leaderboard': formatted,
+        'latest_game': None
+    }
+    
+    # If latest game is NOT in top 10, add it separately
+    if not latest_in_top10 and latest.data:
+        lg = latest.data[0]
+        response['latest_game'] = {
+            'game_id': lg['id'],
+            'player_name': lg.get('player_name', 'Anoniem'),
+            'total_time': f"{lg['total_time_seconds'] // 60:02d}:{lg['total_time_seconds'] % 60:02d}",
+            'total_time_seconds': lg['total_time_seconds'],
+            'completed_at': lg['end_time']
+        }
+    
+    return jsonify(response)
 
 # ==========================================
 # RUN APP
@@ -524,5 +581,5 @@ def get_leaderboard():
 if __name__ == '__main__':
     print("🚀 Power BI Murder Mystery starting...")
     print(f"📊 Supabase URL: {supabase_url}")
-    # Disable debug mode and reloader to avoid import issues with pyiceberg on Python 3.13
-    app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False)
+    # Enable debug mode and auto-reload for development
+    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=True)

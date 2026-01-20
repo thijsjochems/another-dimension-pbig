@@ -53,6 +53,30 @@
 - archive_flag: 0
 - Hints: 3 (Schoonmaker, Receptionist, Stagiair)
 
+### Scenario 30: De Budget Backup Blunder ✨ NIEUW
+- persoon_id: 4 (Financial Controller - man)
+- wapen_id: 3 (Dubbele Records)
+- locatie_id: 1 (OneDrive)
+- situatie_beschrijving: "Het Q1 budget dashboard toont plotseling het dubbele van de verwachte cijfers. Alle budget totalen zijn 2x zo hoog. De CFO is in paniek: 'Hebben we echt zoveel budget?' Gisteren klopte alles nog."
+- archive_flag: 0
+- Hints: 3 (Schoonmaker, Receptionist, Stagiair)
+
+### Scenario 31: De Hoofdletter Catastrofe ✨ NIEUW
+- persoon_id: 4 (Financial Controller - man)
+- wapen_id: 6 (Kolomnaam Gewijzigd)
+- locatie_id: 3 (Semantisch Model)
+- situatie_beschrijving: "Het dashboard toont alleen foutmeldingen. Alle measures zijn rood. Error: 'Can't find column Revenue_Amount'. Gisteren werkte alles nog perfect. Wat is er gebeurd?"
+- archive_flag: 0
+- Hints: 3 (Schoonmaker, Receptionist, Stagiair)
+
+### Scenario 32: De Stille Stop ✨ NIEUW
+- persoon_id: 1 (Power BI Developer - vrouw)
+- wapen_id: 7 (Refresh Uitgeschakeld)
+- locatie_id: 2 (Power Query Editor)
+- situatie_beschrijving: "Het sales dashboard draait perfect, maar de cijfers kloppen niet. Een manager merkt op: 'Dit zijn de cijfers van vorige week!' Andere tabellen zijn WEL up-to-date. Waarom refresht deze ene tabel niet mee?"
+- archive_flag: 0
+- Hints: 3 (Schoonmaker, Receptionist, Stagiair)
+
 ## PERSONEN (Daders)
 1. Power BI Developer - vrouw - NFC: 3032948996
 2. (BESTAAT NIET - ID 2 is leeg)
@@ -66,6 +90,7 @@
 4. Hardcoded Pad - NFC: TEMP_NFC_WEAPON_4 ✨ NIEUW
 5. Budget Niet Updated - NFC: TEMP_NFC_WEAPON_5 ✨ NIEUW
 6. Kolomnaam Gewijzigd - NFC: TEMP_NFC_WEAPON_6
+7. Refresh Uitgeschakeld - NFC: TEMP_NFC_WEAPON_7 ✨ NIEUW
 
 ## LOCATIES (Crime Scenes)
 1. OneDrive - NFC: TEMP_NFC_LOCATION_1 ✨ NIEUW
@@ -90,23 +115,24 @@
 3. ✅ Scenario 26 gefixed (locatie_id=7, vrouwelijke voornaamwoorden)
 4. ✅ Interface gefixed - Database locatie button toegevoegd
 5. ✅ Many-to-Many vervangen door Inactieve Relatie in interface + database
-6. ✅ 3 nieuwe wapens toegevoegd: Inactieve Relatie, Hardcoded Pad, Budget Niet Updated
+6. ✅ 4 nieuwe wapens toegevoegd: Inactieve Relatie, Hardcoded Pad, Budget Niet Updated, Refresh Uitgeschakeld
 7. ✅ 2 nieuwe locaties toegevoegd: OneDrive, Power Query Editor
-8. ✅ 3 nieuwe scenarios gemaakt: 27 (Budget Vergelijking), 28 (Refresh Failure), 29 (Filter Fail)
+8. ✅ 6 nieuwe scenarios gemaakt: 27, 28, 29, 30, 31, 32
+9. ✅ Alle scenarios hebben naam + situatie_beschrijving + beschrijving + hints
 9. ✅ Alle scenarios hebben naam + situatie_beschrijving + beschrijving + hints
 10. ❌ NFC pasjes bestellen:
    - Financial Controller (persoon 4) - TEMP_NFC_PERSON_04
    - Database locatie (locatie 7) - TEMP_NFC_LOCATION_DATABASE
    - Inactieve Relatie (wapen 1) - TEMP_NFC_WEAPON_1
    - Hardcoded Pad (wapen 4) - TEMP_NFC_WEAPON_4
-   - Budget Niet Updated (wapen 5) - TEMP_NFC_WEAPON_5
 ## INTERFACE STATUS
 ✅ **templates/game.html** - Test buttons compleet:
 - Personen: Power BI Developer, Financial Controller, Database Beheerder (3/3)
-- Wapens: Inactieve Relatie, Hidden Slicer, Dubbele Records, Hardcoded Pad, Budget Niet Updated, Kolomnaam Gewijzigd (6/6)
+- Wapens: Inactieve Relatie, Hidden Slicer, Dubbele Records, Hardcoded Pad, Budget Niet Updated, Kolomnaam Gewijzigd, Refresh Uitgeschakeld (7/7)
 - Locaties: OneDrive, Power Query Editor, Semantisch Model, Report View - Selection Pane, Database (5/5)
 - Agents: Schoonmaker, Receptionist, Stagiair (3/3)
 
+Alle 9 scenarios zijn nu volledig speelbaar via de interface!
 Alle 6 scenarios zijn nu volledig speelbaar via de interface!NFC codes
 6. ⏳ VOLGENDE: Scenarios testen en nieuwe scenarios bedenken
 

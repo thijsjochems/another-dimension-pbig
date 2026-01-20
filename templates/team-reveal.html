@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Reveal - Murder Mystery</title>
+    <link rel="stylesheet" href="/static/fonts.css">
+    <style>
+        :root {
+            --color-bg: #001C0F;
+            --color-primary: #54FCBC;
+            --color-secondary: #DCFFED;
+            --font-heading: 'Blender', sans-serif;
+            --font-body: 'Blender', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-secondary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .reveal-container {
+            text-align: center;
+            width: 90%;
+            max-width: 1200px;
+        }
+        
+        .header-text {
+            font-size: 2rem;
+            color: var(--color-primary);
+            opacity: 1;
+            margin-bottom: 40px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-family: var(--font-heading);
+        }
+        
+        .team-name-display {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 80px;
+            flex-wrap: wrap;
+        }
+        
+        .word-container {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .letter-slot {
+            width: 80px;
+            height: 120px;
+            background: rgba(84, 252, 188, 0.05);
+            border: 3px solid var(--color-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 30px rgba(84, 252, 188, 0.3),
+                        inset 0 0 20px rgba(84, 252, 188, 0.1);
+        }
+        
+        .letter-roller {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .letter {
+            width: 100%;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--color-primary);
+            text-shadow: 0 0 20px rgba(84, 252, 188, 0.6);
+            letter-spacing: 0;
+            font-family: var(--font-heading);
+        }
+        
+        .letter-slot.stopped {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 50px rgba(84, 252, 188, 0.8),
+                        inset 0 0 30px rgba(84, 252, 188, 0.2);
+            animation: slot-stop 0.3s ease-out;
+        }
+        
+        @keyframes slot-stop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .space-slot {
+            width: 40px;
+            opacity: 0;
+        }
+        
+        .countdown-container {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            text-align: center;
+        }
+        
+        .countdown-container.show {
+            opacity: 1;
+        }
+        
+        .countdown-number {
+            font-size: 15rem;
+            font-weight: bold;
+            color: var(--color-primary);
+            text-shadow: 0 0 60px rgba(84, 252, 188, 0.8);
+            animation: countdown-pulse 1s ease-out;
+            display: inline-block;
+            font-family: var(--font-heading);
+        }
+        
+        @keyframes countdown-pulse {
+            0% { 
+                transform: scale(0.5); 
+                opacity: 0;
+            }
+            50% { 
+                transform: scale(1.2); 
+            }
+            100% { 
+                transform: scale(1); 
+                opacity: 1;
+            }
+        }
+        
+        .start-text {
+            font-size: 15rem;
+            font-weight: bold;
+            color: var(--color-primary);
+            text-shadow: 0 0 60px rgba(84, 252, 188, 0.8);
+            animation: start-flash 0.5s ease-out;
+            font-family: var(--font-heading);
+        }
+        
+        @keyframes start-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .robot-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 20px;
+            vertical-align: middle;
+            filter: drop-shadow(0 0 15px rgba(84, 252, 188, 0.5));
+        }
+        
+        .footer-logo {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 400px;
+            width: 80%;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 20px rgba(84, 252, 188, 0.3));
+            z-index: 5;
+        }
+        
+        /* Loading animation before reveal */
+        .loading-text {
+            font-size: 2rem;
+            color: var(--color-primary);
+            letter-spacing: 3px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .letter-slot {
+                width: 50px;
+                height: 80px;
+            }
+            
+            .letter {
+                height: 80px;
+                font-size: 2.5rem;
+            }
+            
+            .countdown-number, .start-text {
+                font-size: 8rem;
+            }
+            
+            .header-text {
+                font-size: 1.5rem;
+            }
+            
+            .robot-logo {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal-container">
+        <div class="header-text">
+            <img src="{{ url_for('static', filename='robot-mascot.png') }}" alt="Robot" class="robot-logo">
+            JULLIE TEAMNAAM IS...
+            <img src="{{ url_for('static', filename='robot-mascot.png') }}" alt="Robot" class="robot-logo" style="transform: scaleX(-1);">
+        </div>
+        
+        <div class="team-name-display" id="teamNameDisplay">
+            <div class="loading-text">GENEREREN...</div>
+        </div>
+        
+        <div class="countdown-container" id="countdownContainer">
+            <div class="countdown-number" id="countdownNumber"></div>
+        </div>
+    </div>
+    
+    <img src="{{ url_for('static', filename='AD-Sticker-Shape.png') }}" alt="Another Dimension" class="footer-logo">
+    
+    <script>
+        const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const teamName = "{{ team_name }}"; // Will be passed from backend
+        
+        function createLetterSlot(targetLetter, delay, onComplete) {
+            const slot = document.createElement('div');
+            slot.className = 'letter-slot';
+            
+            const roller = document.createElement('div');
+            roller.className = 'letter-roller';
+            
+            // Create all letters for rolling effect
+            const letters = ALPHABET + targetLetter;
+            letters.split('').forEach(letter => {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'letter';
+                letterDiv.textContent = letter;
+                roller.appendChild(letterDiv);
+            });
+            
+            slot.appendChild(roller);
+            
+            // Start rolling animation
+            setTimeout(() => {
+                let currentPos = 0;
+                const targetPos = ALPHABET.indexOf(targetLetter);
+                const rollSpeed = 50; // ms per letter
+                const slowDownAt = Math.max(0, targetPos - 5);
+                
+                const rollInterval = setInterval(() => {
+                    if (currentPos < ALPHABET.length) {
+                        roller.style.transform = `translateY(-${currentPos * 120}px)`;
+                        
+                        // Slow down near target
+                        if (currentPos >= slowDownAt) {
+                            clearInterval(rollInterval);
+                            // Final positioning with slower speed
+                            const finalRoll = setInterval(() => {
+                                currentPos++;
+                                roller.style.transform = `translateY(-${currentPos * 120}px)`;
+                                
+                                if (currentPos >= ALPHABET.length) {
+                                    clearInterval(finalRoll);
+                                    slot.classList.add('stopped');
+                                    if (onComplete) onComplete();
+                                }
+                            }, 150);
+                        } else {
+                            currentPos++;
+                        }
+                    }
+                }, rollSpeed);
+            }, delay);
+            
+            return slot;
+        }
+        
+        function createSpaceSlot() {
+            const slot = document.createElement('div');
+            slot.className = 'letter-slot space-slot';
+            return slot;
+        }
+        
+        function revealTeamName() {
+            const display = document.getElementById('teamNameDisplay');
+            display.innerHTML = '';
+            
+            const words = teamName.split(' ');
+            let totalDelay = 0;
+            let completedLetters = 0;
+            const totalLetters = teamName.replace(/ /g, '').length;
+            
+            words.forEach((word, wordIndex) => {
+                const wordContainer = document.createElement('div');
+                wordContainer.className = 'word-container';
+                
+                word.split('').forEach((letter, letterIndex) => {
+                    const delay = totalDelay + (letterIndex * 100);
+                    const slot = createLetterSlot(letter.toUpperCase(), delay, () => {
+                        completedLetters++;
+                        // Start countdown when ALL letters are complete
+                        if (completedLetters === totalLetters) {
+                            setTimeout(() => {
+                                startCountdown();
+                            }, 1000); // Extra 1 second pause after all letters stop
+                        }
+                    });
+                    wordContainer.appendChild(slot);
+                });
+                
+                display.appendChild(wordContainer);
+                totalDelay += word.length * 100 + 200; // Extra delay between words
+                
+                // Add space between words
+                if (wordIndex < words.length - 1) {
+                    display.appendChild(createSpaceSlot());
+                }
+            });
+        }
+        
+        function startCountdown() {
+            const container = document.getElementById('countdownContainer');
+            const numberEl = document.getElementById('countdownNumber');
+            container.classList.add('show');
+            
+            let count = 5;
+            
+            function showNumber() {
+                if (count > 0) {
+                    numberEl.textContent = count;
+                    numberEl.style.animation = 'none';
+                    setTimeout(() => {
+                        numberEl.style.animation = 'countdown-pulse 1s ease-out';
+                    }, 10);
+                    count--;
+                    setTimeout(showNumber, 1000);
+                } else {
+                    showStart();
+                }
+            }
+            
+            showNumber();
+        }
+        
+        function showStart() {
+            const numberEl = document.getElementById('countdownNumber');
+            numberEl.textContent = 'START!';
+            numberEl.className = 'start-text';
+            
+            // Navigate to game after 1 second
+            setTimeout(() => {
+                window.location.href = '/game';
+            }, 1000);
+        }
+        
+        // Start reveal when page loads
+        window.onload = () => {
+            setTimeout(revealTeamName, 500);
+        };
+    </script>
+</body>
+</html>

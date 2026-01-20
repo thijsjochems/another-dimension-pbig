@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Effects Test - Murder Mystery</title>
+    <link rel="stylesheet" href="/static/fonts.css">
+    <style>
+        /* === COLOR PALETTE === */
+        :root {
+            --color-bg: #001C0F;
+            --color-primary: #54FCBC;
+            --color-secondary: #DCFFED;
+            --color-dark: #1E1E1E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-bg);
+            min-height: 100vh;
+            color: var(--color-primary);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* === LIGHTNING EFFECT === */
+        .lightning-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Flash achter content (z-index lager) */
+        .lightning-container.behind {
+            z-index: 0;
+        }
+
+        /* Flash voor content (z-index hoger) */
+        .lightning-container.front {
+            z-index: 9999;
+        }
+
+        /* Soft flash - verder weg */
+        .lightning-flash.soft {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, 
+                rgba(255, 255, 255, 0.3) 0%, 
+                rgba(84, 252, 188, 0.2) 20%, 
+                rgba(84, 252, 188, 0.1) 40%, 
+                transparent 60%);
+            opacity: 0;
+            animation: lightning-strike-soft 0.4s ease-out;
+        }
+
+        /* Medium flash - normale afstand */
+        .lightning-flash.medium {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, 
+                rgba(255, 255, 255, 0.6) 0%, 
+                rgba(84, 252, 188, 0.4) 25%, 
+                rgba(84, 252, 188, 0.2) 50%, 
+                transparent 75%);
+            opacity: 0;
+            animation: lightning-strike 0.4s ease-out;
+        }
+
+        /* Intense flash - héél dichtbij, vol scherm */
+        .lightning-flash.intense {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(255, 255, 255, 0.8) 30%, 
+                rgba(84, 252, 188, 0.6) 50%, 
+                rgba(84, 252, 188, 0.3) 70%, 
+                transparent 90%);
+            opacity: 0;
+            animation: lightning-strike-intense 0.3s ease-out;
+        }
+
+        @keyframes lightning-strike-soft {
+            0% { opacity: 0; }
+            15% { opacity: 1; }
+            30% { opacity: 0; }
+            45% { opacity: 0.6; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes lightning-strike {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            20% { opacity: 0; }
+            30% { opacity: 0.8; }
+            40% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes lightning-strike-intense {
+            0% { opacity: 0; }
+            5% { opacity: 1; }
+            10% { opacity: 0.3; }
+            15% { opacity: 1; }
+            25% { opacity: 0; }
+            30% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+
+        /* SVG zigzag lightning bolt */
+        .lightning-bolt-svg {
+            position: absolute;
+            top: 0;
+            opacity: 0;
+            animation: bolt-strike 0.3s ease-out;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) 
+                    drop-shadow(0 0 20px rgba(84, 252, 188, 0.6));
+        }
+
+        @keyframes bolt-strike {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            40% { opacity: 0; }
+            60% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* === RAIN EFFECT === */
+        .rain-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            overflow: hidden;
+        }
+
+        /* Normale vallende regen */
+        .raindrop {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(84, 252, 188, 0.4) 50%, 
+                rgba(84, 252, 188, 0.8) 100%);
+            opacity: 0.7;
+            animation: rain-fall linear infinite;
+        }
+
+        @keyframes rain-fall {
+            0% {
+                transform: translateY(-100px);
+            }
+            100% {
+                transform: translateY(calc(100vh + 100px));
+            }
+        }
+
+        /* Druppel die blijft plakken op scherm */
+        .raindrop-stuck {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, 
+                rgba(84, 252, 188, 0.6) 0%, 
+                rgba(84, 252, 188, 0.3) 60%, 
+                transparent 100%);
+            border-radius: 50% 50% 40% 40%;
+            opacity: 0;
+            animation: drop-stick 0.3s ease-out forwards, drop-flow 2s ease-in 0.3s forwards;
+        }
+
+        @keyframes drop-stick {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+        }
+
+        /* Druppel stroomt naar beneden over scherm */
+        @keyframes drop-flow {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100px) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        /* Streak effect - druppel trekt een lijn */
+        .raindrop-streak {
+            position: absolute;
+            width: 3px;
+            height: 0px;
+            background: linear-gradient(to bottom, 
+                rgba(84, 252, 188, 0.6) 0%, 
+                rgba(84, 252, 188, 0.2) 100%);
+            opacity: 0;
+            animation: streak-flow 1.5s ease-in forwards;
+        }
+
+        @keyframes streak-flow {
+            0% {
+                height: 0px;
+                opacity: 0.6;
+            }
+            50% {
+                height: 80px;
+                opacity: 0.8;
+            }
+            100% {
+                height: 150px;
+                opacity: 0;
+                transform: translateY(50px);
+            }
+        }
+
+        /* === TEST PAGE CONTENT === */
+        .test-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: var(--color-primary);
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(84, 252, 188, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            color: var(--color-secondary);
+            font-size: 1.3rem;
+            letter-spacing: 3px;
+            opacity: 0.8;
+        }
+
+        .controls {
+            background: rgba(84, 252, 188, 0.05);
+            border: 2px solid rgba(84, 252, 188, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: rgba(84, 252, 188, 0.08);
+            border: 2px solid var(--color-primary);
+            border-radius: 10px;
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: var(--font-body);
+        }
+
+        button:hover {
+            background: rgba(84, 252, 188, 0.15);
+            box-shadow: 0 0 30px rgba(84, 252, 188, 0.3);
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .info-box {
+            background: rgba(84, 252, 188, 0.02);
+            border-left: 4px solid var(--color-primary);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            color: var(--color-primary);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .info-box p {
+            color: var(--color-secondary);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .status {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--color-dark);
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.active {
+            background: var(--color-primary);
+            box-shadow: 0 0 15px var(--color-primary);
+        }
+
+        .sample-content {
+            background: rgba(84, 252, 188, 0.03);
+            border: 2px solid rgba(84, 252, 188, 0.2);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .sample-content h2 {
+            color: var(--color-primary);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+        }
+
+        .sample-content p {
+            color: var(--color-secondary);
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="lightning-container" id="lightningContainer"></div>
+    <div class="rain-container" id="rainContainer"></div>
+
+    <div class="test-container">
+        <div class="header">
+            <h1>WEATHER EFFECTS</h1>
+            <p class="subtitle">Bliksem & Regen Test</p>
+        </div>
+
+        <div class="controls">
+            <div class="button-group">
+                <button onclick="triggerLightning()">⚡ BLIKSEM</button>
+                <button onclick="toggleRain()">🌧️ REGEN</button>
+                <button onclick="triggerStorm()">⛈️ STORM (BEIDE)</button>
+                <button onclick="startRandomWeather()">🎲 RANDOM WEER</button>
+                <button onclick="clearEffects()">🌤️ STOP ALLES</button>
+            </div>
+
+            <div class="status">
+                <div class="status-item">
+                    <div class="status-indicator" id="lightningStatus"></div>
+                    <span style="color: var(--color-secondary);">Bliksem</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator" id="rainStatus"></div>
+                    <span style="color: var(--color-secondary);">Regen</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>Hoe werkt het?</h3>
+                <p>⚡ <strong>BLIKSEM:</strong> SVG zigzag pad, 3 intensiteiten (soft/medium/intense), soms voor/achter content</p>
+                <p>🌧️ <strong>REGEN:</strong> Normale druppels + blijven plakken & stromen + streak effects</p>
+                <p>⛈️ <strong>STORM:</strong> Regen met bliksem elke 5-12 seconden (minder frequent)</p>
+                <p>🎲 <strong>RANDOM WEER:</strong> Storm start/stopt automatisch elke 10-30 sec (60% storm, 40% droog)</p>
+            </div>
+        </div>
+
+        <div class="sample-content">
+            <h2>LEADERBOARD</h2>
+            <p>Dit is voorbeeldcontent om de effecten te testen.</p>
+            <p>De bliksem en regen worden over deze content heen weergegeven.</p>
+            <p>Alle effecten zijn CSS/JavaScript animaties zonder audio.</p>
+        </div>
+    </div>
+
+    <script>
+        let rainInterval = null;
+        let stndomWeatherInterval = null;
+        let rainActive = false;
+        let stormActive = false;
+        let randomWeatherctive = false;
+        let stormActive = false;
+
+        // === LIGHTNING EFFECT ===
+        function triggerLightning() {
+            const container = document.getElementById('lightningContainer');
+            const lightningStatus = document.getElementById('lightningStatus');
+            
+            // Random intensity: soft (ver weg), medium (normaal), intense (héél dichtbij)
+            const intensities = ['soft', 'medium', 'medium', 'intense']; // medium vaker
+            const intensity = intensities[Math.floor(Math.random() * intensities.length)];
+            
+            // Random z-index: voor of achter content
+            const inFront = Math.random() > 0.5;
+            container.className = 'lightning-container ' + (inFront ? 'front' : 'behind');
+            
+            // Flash effect met intensity
+            const flash = document.createElement('div');
+            flash.className = 'lightning-flash ' + intensity;
+            
+            // Voor intense flashes, verschuif de gradient positie
+            if (intensity === 'intense') {
+                const xPos = Math.random() * 100;
+                const yPos = Math.random() * 100;
+                flash.style.background = `radial-gradient(circle at ${xPos}% ${yPos}%, 
+                    rgba(255, 255, 255, 0.95) 0%, 
+                    rgba(255, 255, 255, 0.8) 30%, 
+                    rgba(84, 252, 188, 0.6) 50%, 
+                    rgba(84, 252, 188, 0.3) 70%, 
+                    transparent 90%)`;
+            }
+            
+            container.appendChild(flash);
+            
+            // Zigzag lightning bolt (SVG path)
+            const boltPosition = Math.random() * 80 + 10; // 10-90% van scherm
+            createZigzagBolt(container, boltPosition);
+            
+            // Status indicator
+            lightningStatus.classList.add('active');
+            
+            // Clean up after animation
+            setTimeout(() => {
+                flash.remove();
+                lightningStatus.classList.remove('active');
+                document.querySelectorAll('.lightning-bolt-svg').forEach(b => b.remove());
+            }, 500);
+        }
+
+        function createZigzagBolt(container, xPosition) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'lightning-bolt-svg');
+            svg.setAttribute('width', '200');
+            svg.setAttribute('height', '100vh');
+            svg.style.left = xPosition + '%';
+            svg.style.transform = 'translateX(-50%)';
+            
+            // Generate random zigzag path
+            let path = 'M 100 0 '; // Start at top center
+            let currentX = 100;
+            let currentY = 0;
+            const segments = Math.floor(Math.random() * 8) + 6; // 6-13 segments
+            const screenHeight = window.innerHeight;
+            
+            for (let i = 0; i < segments; i++) {
+                // Random horizontal offset (-50 to +50)
+                const offsetX = (Math.random() - 0.5) * 100;
+                currentX = Math.max(20, Math.min(180, currentX + offsetX));
+                
+                // Move down a segment
+                currentY += screenHeight / segments;
+                
+                // Add line segment
+                path += `L ${currentX} ${currentY} `;
+                
+                // Sometimes add a sharp turn
+                if (Math.random() > 0.7) {
+                    const sharpX = currentX + (Math.random() - 0.5) * 60;
+                    const sharpY = currentY + (screenHeight / segments) * 0.3;
+                    path += `L ${sharpX} ${sharpY} `;
+                    currentX = sharpX;
+                    currentY = sharpY;
+                }
+            }
+            
+            const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathElement.setAttribute('d', path);
+            pathElement.setAttribute('stroke', 'rgba(255, 255, 255, 0.9)');
+            pathElement.setAttribute('stroke-width', '3');
+            pathElement.setAttribute('fill', 'none');
+            pathElement.setAttribute('stroke-linecap', 'round');
+            
+            svg.appendChild(pathElement);
+            container.appendChild(svg);
+        }
+
+        // === RAIN EFFECT ===
+        function toggleRain() {
+            const rainStatus = document.getElementById('rainStatus');
+            
+            if (rainActive) {
+                stopRain();
+            } else {
+                startRain();
+                rainStatus.classList.add('active');
+            }
+        }
+
+        function startRain() {
+            if (rainActive) return;
+            rainActive = true;
+            
+            const container = document.getElementById('rainContainer');
+            
+            rainInterval = setInterval(() => {
+                createRaindrop(container);
+            }, 30); // Nieuwe druppel elke 30ms
+        }
+
+        function stopRain() {
+            rainActive = false;
+            const rainStatus = document.getElementById('rainStatus');
+            rainStatus.classList.remove('active');
+            
+            if (rainInterval) {
+                clearInterval(rainInterval);
+                rainInterval = null;
+            }
+            
+            // Remove all raindrops
+            setTimeout(() => {
+                document.querySelectorAll('.raindrop, .raindrop-stuck, .raindrop-streak').forEach(d => d.remove());
+            }, 2000);
+        }
+
+        function createRaindrop(container) {
+            // 80% normale regen, 15% blijft plakken, 5% streak
+            const rand = Math.random();
+            
+            if (rand > 0.85) {
+                // Druppel blijft plakken en stroomt naar beneden
+                createStuckDrop(container);
+            } else if (rand > 0.80) {
+                // Streak effect
+                createStreakDrop(container);
+            } else {
+                // Normale vallende regen
+                const drop = document.createElement('div');
+                drop.className = 'raindrop';
+                
+                // Random position
+                const xPosition = Math.random() * 100;
+                drop.style.left = xPosition + '%';
+                
+                // Random speed (duration)
+                const duration = Math.random() * 0.5 + 0.5; // 0.5-1 seconde
+                drop.style.animationDuration = duration + 's';
+                
+                // Random delay
+                const delay = Math.random() * 0.2;
+                drop.style.animationDelay = delay + 's';
+                
+                container.appendChild(drop);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    drop.remove();
+                }, (duration + delay) * 1000);
+            }
+        }
+
+        function createStuckDrop(container) {
+            const drop = document.createElement('div');
+            drop.className = 'raindrop-stuck';
+            
+            // Random position (vooral bovenste helft van scherm)
+            const xPosition = Math.random() * 100;
+            const yPosition = Math.random() * 50; // 0-50% van scherm hoogte
+            drop.style.left = xPosition + '%';
+            drop.style.top = yPosition + '%';
+            
+            container.appendChild(drop);
+            
+            // Remove after animation completes (stick + flow = 2.3s)
+            setTimeout(() => {
+                drop.remove();
+            }, 2500);
+        }
+
+        function createStreakDrop(container) {
+            const drop = document.createElement('div');
+            drop.className = 'raindrop-streak';
+            
+            // Random position
+            const xPosition = Math.random() * 100;
+            const yPosition = Math.random() * 40; // Bovenste deel van scherm
+            drop.style.left = xPosition + '%';
+            drop.style.top = yPosition + '%';
+            
+            container.appendChild(drop);
+            
+            // Remove after animation
+            setTimeout(() => {
+                drop.remove();
+            }, 1600);
+        }
+
+        // === STORM EFFECT (COMBINED) ===
+        function triggerStorm() {
+            if (stormActive) {
+                stopStorm();
+                return;
+            }
+            
+            stormActive = true;
+            
+            // Start rain
+            if (!rainActive) {
+                startRain();
+            }
+            
+            // Periodic lightning - MINDER VAAK (5-12 seconden)
+            stormInterval = setInterval(() => {
+                triggerLightning();
+                
+                // Sometimes double strike (30% kans ipv 70%)
+                if (Math.random() > 0.7) {
+                    setTimeout(() => {
+                        triggerLightning();
+                    }, 300);
+                }
+            }, Math.random() * 7000 + 5000); // Elke 5-12 seconden (was 3-8)
+        }
+
+        function stopStorm() {
+            stormActive = false;
+            
+            if (stormInterval) {
+                clearInterval(stormInterval);
+                stormInterval = null;
+            }
+        }
+
+        function clearEffects() {
+            stopRandomWeather();
+            
+            // Clear all lightning elements
+            document.getElementById('lightningContainer').innerHTML = '';
+            document.getElementById('rainContainer').innerHTML = '';
+            
+            // Reset status indicators
+            document.getElementById('lightningStatus').classList.remove('active');
+            document.getElementById('rainStatus').classList.remove('active');
+        }
+
+        // === RANDOM WEATHER (START/STOP CYCLES) ===
+        function startRandomWeather() {
+            if (randomWeatherActive) {
+                stopRandomWeather();
+                return;
+            }
+            
+            randomWeatherActive = true;
+            console.log('🎲 Random weer gestart');
+            
+            // Start met een storm
+            triggerStorm();
+            
+            // Plan random start/stop cycles
+            scheduleNextWeatherChange();
+        }
+
+        function scheduleNextWeatherChange() {
+            if (!randomWeatherActive) return;
+            
+            // Random tijd tot volgende wijziging (10-30 seconden)
+            const nextChangeIn = Math.random() * 20000 + 10000;
+            
+            randomWeatherInterval = setTimeout(() => {
+                if (!randomWeatherActive) return;
+                
+                // 60% kans op storm, 40% kans op droog weer
+                if (Math.random() > 0.4) {
+                    // Start storm (als het niet al regent)
+                    if (!stormActive) {
+                        console.log('🌧️ Storm begint...');
+                        triggerStorm();
+                    }
+                } else {
+                    // Stop storm (droge periode)
+                    if (stormActive || rainActive) {
+                        console.log('🌤️ Storm stopt... droge periode');
+                        stopStorm();
+                        stopRain();
+                    }
+                }
+                
+                // Plan volgende wijziging
+                scheduleNextWeatherChange();
+            }, nextChangeIn);
+        }
+
+        function stopRandomWeather() {
+            randomWeatherActive = false;
+            
+            if (randomWeatherInterval) {
+                clearTimeout(randomWeatherInterval);
+                randomWeatherInterval = null;
+            }
+            
+            console.log('🎲 Random weer gestopt
+            document.getElementById('lightningStatus').classList.remove('active');
+            document.getElementById('rainStatus').classList.remove('active');
+        }
+
+        // Test on page load
+        setTimeout(() => {
+            triggerLightning();
+        }, 1000);
+    </script>
+</body>
+</html>

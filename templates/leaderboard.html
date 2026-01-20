@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Leaderboard - Murder Mystery</title>
     <link rel="stylesheet" href="/static/fonts.css">
     <style>
@@ -40,6 +43,11 @@
             align-items: center;
             justify-content: center;
             gap: 20px;
+            position: relative;
+            z-index: 100;
+            background: var(--color-bg);
+            padding-bottom: 20px;
+            padding-top: 20px;
         }
         
         .robot-logo {
@@ -69,11 +77,15 @@
             margin-bottom: 50px;
             letter-spacing: 3px;
             opacity: 0.8;
+            position: relative;
+            z-index: 100;
+            background: var(--color-bg);
+            padding: 10px 0;
         }
         
         /* Unified leaderboard with auto-scroll */
         .unified-leaderboard {
-            background: rgba(84, 252, 188, 0.02);
+            background: var(--color-bg);
             border: 2px solid rgba(84, 252, 188, 0.3);
             border-radius: 10px;
             overflow: hidden;
@@ -82,23 +94,69 @@
         
         .leaderboard-table {
             width: 100%;
-        }
-        
-        .scrollable-tbody {
-            display: block;
-            max-height: 500px;
-            overflow: hidden;
             position: relative;
+            table-layout: fixed;
+            box-shadow: 0 2px 0 0 var(--color-primary);
+            z-index: 10;
         }
         
-        .scrollable-tbody tbody {
-            display: block;
-            transition: transform 0.5s ease;
+        .leaderboard-table thead th:nth-child(1),
+        .leaderboard-table tbody td:nth-child(1) {
+            width: 100px;
+            text-align: center;
         }
         
-        /* Thick border after top 3 */
+        .leaderboard-table thead th:nth-child(2),
+        .leaderboard-table tbody td:nth-child(2) {
+            width: auto;
+        }
+        
+        .leaderboard-table thead th:nth-child(3),
+        .leaderboard-table tbody td:nth-child(3) {
+            width: 150px;
+        }
+        
+        .leaderboard-table thead th:nth-child(4),
+        .leaderboard-table tbody td:nth-child(4) {
+            width: 170px;
+        }
+        
+        .leaderboard-table > tbody {
+            position: relative;
+            z-index: 20;
+            background: var(--color-bg);
+        }
+        
+        /* Thick border after top 3 - highest priority */
         .top-three-separator {
             border-bottom: 4px solid rgba(84, 252, 188, 0.5) !important;
+            position: relative;
+            z-index: 25;
+        }
+        
+        .top-three-separator td {
+            position: relative;
+            background: var(--color-bg);
+            z-index: 25;
+        }
+        
+        .scrollable-wrapper {
+            max-height: 400px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .scrollable-wrapper tbody {
+            transition: transform 1s ease-in-out;
+        }
+        
+        .scrollable-wrapper tr {
+            border-bottom: none !important;
+        }
+        
+        .scrollable-wrapper td {
+            border-bottom: none !important;
         }
         
         table {
@@ -107,8 +165,16 @@
         }
         
         thead {
-            background: rgba(84, 252, 188, 0.08);
+            background: var(--color-bg);
             border-bottom: 2px solid var(--color-primary);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+        
+        thead th {
+            background: var(--color-bg);
+            padding: 25px 20px;
         }
         
         th {
@@ -179,13 +245,19 @@
         /* Latest game highlight */
         tr.latest-game {
             background: rgba(84, 252, 188, 0.15) !important;
-            border: 2px solid var(--color-primary);
+            box-shadow: inset 0 0 0 2px var(--color-primary);
+            position: relative;
         }
         
         tr.latest-game td {
             font-weight: 700;
             color: var(--color-primary);
             text-shadow: 0 0 10px rgba(84, 252, 188, 0.4);
+        }
+        
+        /* Ensure table rows have solid backgrounds */
+        tbody tr {
+            background: var(--color-bg);
         }
         
         .latest-section {
@@ -384,56 +456,63 @@
             const limitedEntries = entries.slice(0, 50);
             
             // Build unified table
-            let html = '<table class="leaderboard-table"><thead><tr>';
+            let html = '<table class="leaderboard-table"><colgroup>';
+            html += '<col style="width: 100px;">';
+            html += '<col style="width: auto;">';
+            html += '<col style="width: 150px;">';
+            html += '<col style="width: 170px;">';
+            html += '</colgroup><thead><tr>';
             html += '<th style="text-align: center;">Rank</th>';
             html += '<th>Naam</th>';
             html += '<th>Tijd</th>';
             html += '<th>Datum</th>';
             html += '</tr></thead>';
             
-            // Fixed top 3
+            // Top 3 only
             html += '<tbody>';
             limitedEntries.slice(0, 3).forEach((entry, index) => {
                 const rankClass = rankClasses[index];
                 const latestClass = entry.is_latest ? 'latest-game' : '';
                 const medal = getMedalSVG(entry.rank);
-                const separatorClass = index === 2 ? 'top-three-separator' : '';
                 
-                html += `<tr class="${latestClass} ${separatorClass}">`;
+                html += `<tr class="${latestClass} ${rankClass}">`;
                 html += `<td class="rank ${rankClass}">${medal}</td>`;
                 html += `<td class="player-name">${entry.player_name || 'Anoniem'}</td>`;
                 html += `<td class="time">${entry.total_time}</td>`;
                 html += `<td>${new Date(entry.completed_at).toLocaleDateString('nl-NL', {day: 'numeric', month: 'short', year: 'numeric'})}</td>`;
                 html += '</tr>';
             });
-            html += '</tbody>';
+            html += '</tbody></table>';
             
-            // Scrollable rest (4-50) in separate container
+            // Second table for scrolling (4-50)
             if (limitedEntries.length > 3) {
-                html += '<tbody id="scrollingTbody" style="display: block; max-height: 400px; overflow: hidden;">';
-                html += '<table style="width: 100%; table-layout: fixed;"><tbody id="scrollingRows">';
+                html += '<div class="scrollable-wrapper">';
+                html += '<table class="leaderboard-table"><colgroup>';
+                html += '<col style="width: 100px;">';
+                html += '<col style="width: auto;">';
+                html += '<col style="width: 150px;">';
+                html += '<col style="width: 170px;">';
+                html += '</colgroup><tbody id="scrollingRows">';
                 
                 limitedEntries.slice(3).forEach((entry) => {
                     const latestClass = entry.is_latest ? 'latest-game' : '';
                     const medal = getMedalSVG(entry.rank);
                     
                     html += `<tr class="${latestClass}">`;
-                    html += `<td class="rank" style="width: 100px; text-align: center;">${medal}</td>`;
-                    html += `<td class="player-name" style="padding-left: 20px;">${entry.player_name || 'Anoniem'}</td>`;
-                    html += `<td class="time" style="width: 150px;">${entry.total_time}</td>`;
-                    html += `<td style="width: 150px;">${new Date(entry.completed_at).toLocaleDateString('nl-NL', {day: 'numeric', month: 'short', year: 'numeric'})}</td>`;
+                    html += `<td class="rank">${medal}</td>`;
+                    html += `<td class="player-name">${entry.player_name || 'Anoniem'}</td>`;
+                    html += `<td class="time">${entry.total_time}</td>`;
+                    html += `<td>${new Date(entry.completed_at).toLocaleDateString('nl-NL', {day: 'numeric', month: 'short', year: 'numeric'})}</td>`;
                     html += '</tr>';
                 });
                 
-                html += '</tbody></table></tbody>';
+                html += '</tbody></table></div>';
             }
-            
-            html += '</table>';
             
             document.getElementById('leaderboardTable').innerHTML = html;
             
-            // Start auto-scroll if more than 3 entries
-            if (limitedEntries.length > 3) {
+            // Start auto-scroll only if more than 10 entries
+            if (limitedEntries.length > 10) {
                 startAutoScroll();
             }
         }
@@ -445,27 +524,27 @@
             const rows = scrollingRows.querySelectorAll('tr');
             if (rows.length === 0) return;
             
-            const rowHeight = rows[0].offsetHeight;
-            let currentScroll = 0;
+            // Get exact row height
+            const firstRow = rows[0];
+            const rowHeight = firstRow.getBoundingClientRect().height;
+            
+            let currentIndex = 0;
             
             // Auto-scroll every 2 seconds
-            autoScrollInterval = setInterval(() => {
-                currentScroll += rowHeight;
+            setInterval(() => {
+                currentIndex++;
                 
                 // Reset when reaching the end
-                if (currentScroll >= (rows.length * rowHeight)) {
-                    currentScroll = 0;
+                if (currentIndex >= rows.length) {
+                    currentIndex = 0;
                 }
                 
-                scrollingRows.style.transform = `translateY(-${currentScroll}px)`;
+                const scrollAmount = currentIndex * rowHeight;
+                scrollingRows.style.transform = `translateY(-${scrollAmount}px)`;
             }, 2000);
         }
         
         function goHome() {
-            // Clear auto-scroll interval when leaving
-            if (autoScrollInterval) {
-                clearInterval(autoScrollInterval);
-            }
             window.location.href = '/';
         }
     </script>
