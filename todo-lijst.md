@@ -90,7 +90,8 @@
 - [x] Timer start: Bij START pasje scan
 - [x] Timer stop: Bij correcte combinatie (eindtijd = speeltijd + straftijd)
 - [ ] Hint-systeem logica uitwerken (scenario-specifiek via chatbot)
-- [ ] Alibi/uitsluit mechanisme ontwerpen                                                        
+- [ ] Alibi/uitsluit mechanisme ontwerpen
+- [ ] **Na 2 x fout antwoord: Hint: "Zoek op de stand naar getuigen om mee te 'praten'"**
 - [ ] **PRODUCTIE: Scenario text verbergen (toont nu antwoord!) - Add ?dev=true URL param voor development**
 
 ---
@@ -183,6 +184,7 @@
 - [ ] Routing/navigatie
 
 ### 3.3 Portfolio/Training/AI Secties ⬜
+- [ ] **Paginas voor AI Automation, AI Training, Power BI Portfolio en Power BI Training**
 - [ ] Portfolio video/content integratie
 - [ ] Training overzicht pagina
 - [ ] AI Automation pagina

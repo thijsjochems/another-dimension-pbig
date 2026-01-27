@@ -121,6 +121,8 @@
             border: 2px solid var(--color-primary);
             border-radius: 5px;
             padding: 50px;
+            padding-top: 40px;
+            padding-bottom: 60px;
             font-size: 7.5rem;
             font-weight: bold;
             color: var(--color-primary);
@@ -147,43 +149,39 @@
             background: rgba(84, 252, 188, 0.05);
             border: 2px solid var(--color-primary);
             border-radius: 5px;
-            padding: 25px;
-            margin-bottom: 30px;
+            padding: 35px;
+            margin-top: 40px;
+            margin-bottom: 35px;
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: var(--color-secondary);
-            line-height: 1.8;
-            min-height: 100px;
+            line-height: 1.9;
+            min-height: 140px;
         }
         
         .team-name-box {
-            background: rgba(84, 252, 188, 0.03);
-            border: 2px solid rgba(84, 252, 188, 0.3);
-            border-radius: 5px;
-            padding: 15px 25px;
-            text-align: center;
-            position: fixed;
-            bottom: 20px;
+            position: absolute;
+            bottom: 8px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 100;
+            text-align: center;
         }
         
         .team-name-label {
-            font-size: 1rem;
-            color: var(--color-secondary);
-            opacity: 0.7;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: rgba(84, 252, 188, 0.6);
+            font-family: 'Blender', sans-serif;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
         }
         
         .team-name-value {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 1.1rem;
             color: var(--color-primary);
-            letter-spacing: 3px;
+            font-family: 'Blender', sans-serif;
             text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 2px;
         }
         
         .scenario-box {
@@ -206,6 +204,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 30px;
+            margin-top: 45px;
             margin-bottom: 50px;
         }
         
@@ -477,6 +476,136 @@
             line-height: 1.8;
         }
         
+        /* Hint Popup Overlay */
+        .hint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 28, 15, 0.85);
+            z-index: 999;
+            display: none;
+        }
+        
+        .hint-overlay.show {
+            display: block;
+        }
+        
+        .hint-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.98);
+            border: 3px solid var(--color-primary);
+            padding: 60px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 0 50px rgba(84, 252, 188, 0.6);
+            z-index: 1000;
+            min-width: 500px;
+        }
+        
+        .hint-box.show {
+            display: block;
+            animation: hintPulse 0.5s ease-out;
+        }
+        
+        @keyframes hintPulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        
+        .hint-box h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: var(--color-primary);
+            letter-spacing: 3px;
+            font-family: var(--font-heading);
+        }
+        
+        .hint-box p {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--color-primary);
+            line-height: 1.8;
+            font-family: var(--font-body);
+        }
+        
+        .hint-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            display: block;
+            fill: var(--color-primary);
+            filter: drop-shadow(0 0 20px rgba(84, 252, 188, 0.6));
+        }
+        
+        /* Agent Scan Popup */
+        .agent-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 28, 15, 0.85);
+            z-index: 999;
+            display: none;
+        }
+        
+        .agent-overlay.show {
+            display: block;
+        }
+        
+        .agent-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.98);
+            border: 3px solid var(--color-primary);
+            padding: 60px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 0 50px rgba(84, 252, 188, 0.6);
+            z-index: 1000;
+            min-width: 500px;
+        }
+        
+        .agent-box.show {
+            display: block;
+            animation: hintPulse 0.5s ease-out;
+        }
+        
+        .agent-box h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: var(--color-primary);
+            letter-spacing: 3px;
+            font-family: var(--font-heading);
+        }
+        
+        .agent-box p {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--color-primary);
+            line-height: 1.8;
+            font-family: var(--font-body);
+        }
+        
+        .agent-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            display: block;
+            fill: var(--color-primary);
+            filter: drop-shadow(0 0 20px rgba(84, 252, 188, 0.6));
+        }
+        
         .big-button {
             background: var(--color-bg);
             color: var(--color-primary);
@@ -534,6 +663,7 @@
             letter-spacing: 2px;
             color: var(--color-primary);
             line-height: 1.8;
+            font-family: var(--font-body);
         }
         
         .notification-buttons {
@@ -767,11 +897,10 @@
         <div class="timer-box" id="timer">
             <span id="timeDisplay">00:00</span>
             <div class="penalty-counter" id="penaltyCounter" style="display: none;"></div>
-        </div>
-        
-        <div class="team-name-box" id="teamNameBox" style="display: none;">
-            <div class="team-name-label">Team</div>
-            <div class="team-name-value" id="teamName">Team Alpha</div>
+            <div class="team-name-box" id="teamNameBox" style="display: none;">
+                <div class="team-name-label">Team</div>
+                <div class="team-name-value" id="teamName">Team Alpha</div>
+            </div>
         </div>
         
         <div class="situatie-box" id="situatie">
@@ -1030,6 +1159,27 @@
         
         <div class="complete-overlay" id="completeOverlay"></div>
         
+        <div class="hint-overlay" id="hintOverlay"></div>
+        
+        <div class="agent-overlay" id="agentOverlay"></div>
+        
+        <div class="hint-box" id="hintBox">
+            <svg class="hint-icon" viewBox="0 0 352 512">
+                <path d="M176 80c-52.94 0-96 43.06-96 96 0 8.84 7.16 16 16 16s16-7.16 16-16c0-35.3 28.72-64 64-64 8.84 0 16-7.16 16-16s-7.16-16-16-16zM96.06 459.17c0 3.15.93 6.22 2.68 8.84l24.51 36.84c2.97 4.46 7.97 7.14 13.32 7.14h78.85c5.36 0 10.36-2.68 13.32-7.14l24.51-36.84c1.74-2.62 2.67-5.7 2.68-8.84l.05-43.18H96.02l.04 43.18zM176 0C73.72 0 0 82.97 0 176c0 44.37 16.45 84.85 43.56 115.78 16.64 18.99 42.74 58.8 52.42 92.16v.06h48v-.12c-.01-4.77-.72-9.51-2.15-14.07-5.59-17.81-22.82-64.77-62.17-109.67-20.54-23.43-31.52-53.15-31.61-84.14-.2-73.64 59.67-128 127.95-128 70.58 0 128 57.42 128 128 0 30.97-11.24 60.85-31.65 84.14-39.11 44.61-56.42 91.47-62.1 109.46a47.507 47.507 0 0 0-2.22 14.3v.1h48v-.05c9.68-33.37 35.78-73.18 52.42-92.16C335.55 260.85 352 220.37 352 176 352 78.8 273.2 0 176 0z"></path>
+            </svg>
+            <h2>HINT</h2>
+            <p>Zoek op de stand naar getuigen<br>om mee te 'praten'</p>
+            <p style="font-size: 1.2rem; opacity: 0.8; margin-top: 10px;">(Gebruik je telefoon om de NFC-tags te scannen)</p>
+        </div>
+        
+        <div class="agent-box" id="agentBox">
+            <svg class="agent-icon" viewBox="0 0 24 24">
+                <path d="M12.596 2.043c1.075.076 2.059.281 2.743.956.698.688.92 1.696.92 2.941 0 .432-.057.955-.117 1.438-.026.2-.051.392-.076.572l-.056.429h2.05c.752 0 1.446.108 2.036.404.612.306 1.062.787 1.355 1.431.551 1.214.542 3.008.223 5.394l-.051.39c-.134 1.01-.248 1.872-.396 2.58-.166.795-.394 1.496-.816 2.05-.89 1.168-2.395 1.372-4.583 1.372-2.331 0-4.08-.418-5.544-.824l-.602-.17c-1.023-.29-1.852-.526-2.69-.586A1.75 1.75 0 0 1 5.25 22h-1.5A1.75 1.75 0 0 1 2 20.25V9.75C2 8.784 2.784 8 3.75 8h1.5a1.75 1.75 0 0 1 1.746 1.633 1.85 1.85 0 0 0 .523-.131c.961-.415 2.774-1.534 2.774-4.2V4.249c0-1.22 1.002-2.298 2.303-2.206ZM7 18.918c1.059.064 2.079.355 3.118.652l.568.16c1.406.39 3.006.77 5.142.77 2.277 0 3.004-.274 3.39-.781.216-.283.388-.718.54-1.448.136-.65.242-1.45.379-2.477l.05-.384c.32-2.4.253-3.795-.102-4.575-.16-.352-.375-.568-.66-.711-.305-.153-.74-.245-1.365-.245h-2.37c-.681 0-1.293-.57-1.211-1.328.026-.243.065-.537.105-.834l.07-.527c.06-.482.105-.921.105-1.25 0-1.125-.213-1.617-.473-1.873-.275-.27-.774-.455-1.795-.528-.351-.024-.698.274-.698.71v1.053c0 3.55-2.488 5.063-3.68 5.577-.372.16-.754.232-1.113.26ZM3.75 20.5h1.5a.25.25 0 0 0 .25-.25V9.75a.25.25 0 0 0-.25-.25h-1.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25Z"></path>
+            </svg>
+            <h2>GETUIGE GEVONDEN</h2>
+            <p>Gebruik je telefoon om de tag<br>te scannen, en chat met de getuige</p>
+        </div>
+        
         <div class="complete-box" id="completeBox">
             <h2>GEFELICITEERD!</h2>
             <p id="finalTime"></p>
@@ -1088,6 +1238,38 @@
                 penalties = 0;
                 updatePenaltyDisplay();
                 
+                // Check if we already have a session from START scan
+                const existingSessionCode = localStorage.getItem('sessionCode');
+                
+                if (existingSessionCode) {
+                    console.log('✅ Using existing session from START scan:', existingSessionCode);
+                    
+                    // Get the game details from the existing session
+                    const sessionResponse = await fetch(`/api/game/session/${existingSessionCode}`);
+                    if (sessionResponse.ok) {
+                        const sessionData = await sessionResponse.json();
+                        console.log('Session data:', sessionData);
+                        
+                        gameId = sessionData.game_id;
+                        document.getElementById('scenario').innerHTML = sessionData.scenario;
+                        document.getElementById('situatie').innerHTML = sessionData.situatie_beschrijving || 'Er is een probleem met het Power BI Dashboard...';
+                        
+                        // Show team name
+                        if (sessionData.team_name) {
+                            document.getElementById('teamName').textContent = sessionData.team_name;
+                            document.getElementById('teamNameBox').style.display = 'block';
+                        }
+                        
+                        startTimer();
+                        startRandomWeather();
+                        return;
+                    } else {
+                        console.warn('Session not found, creating new game...');
+                        localStorage.removeItem('sessionCode');
+                    }
+                }
+                
+                // No existing session - create new game
                 const response = await fetch('/api/game/start', {
                     method: 'POST'
                 });
@@ -1120,8 +1302,16 @@
                 if (data.success) {
                     gameId = data.game_id;
                     console.log('✅ New game started with ID:', gameId);
+                    localStorage.setItem('sessionCode', data.session_code);
                     document.getElementById('scenario').innerHTML = data.scenario;
                     document.getElementById('situatie').innerHTML = data.situatie_beschrijving || 'Er is een probleem met het Power BI Dashboard...';
+                    
+                    // Show team name
+                    if (data.team_name) {
+                        document.getElementById('teamName').textContent = data.team_name;
+                        document.getElementById('teamNameBox').style.display = 'block';
+                    }
+                    
                     startTimer();
                     
                     // Start random weather effects
@@ -1300,6 +1490,11 @@
                         updatePenaltyDisplay();
                         showFeedback();
                         
+                        // Show hint after 2nd and 4th wrong attempt
+                        if (penalties === 2 || penalties === 4) {
+                            showHintNotification();
+                        }
+                        
                         // Clear boxes after 2 seconds - remove wrong class to make fillable again
                         setTimeout(() => {
                             document.getElementById('box-who').classList.remove('filled', 'wrong');
@@ -1312,12 +1507,10 @@
                     }
                 }
             } else if (type === 'agent') {
-                // Show agent info
-                document.getElementById('agentName').textContent = '🕵️ ' + data.name;
-                document.getElementById('agentBio').textContent = data.bio;
-                document.getElementById('agentSection').classList.add('active');
+                // Show agent popup - instrueert om telefoon te gebruiken
+                showAgentNotification();
                 
-                // Get hint context for n8n
+                // Get hint context for n8n (achtergrond)
                 const hintResponse = await fetch(`/api/agent/hint?game_id=${gameId}&agent_nfc=${data.nfc_code}`);
                 const hintData = await hintResponse.json();
                 console.log('Agent hint context:', hintData);
@@ -1392,18 +1585,65 @@
             document.getElementById('notificationTitle').textContent = title;
             document.getElementById('notificationMessage').textContent = message;
             
+            // Remove all type classes
+            const bar = document.getElementById('notificationBar');
+            bar.classList.remove('error', 'success');
+            
             // Hide YES/NO buttons for error notifications
             if (action === 'error') {
+                bar.classList.add('error');
                 document.querySelector('.notification-buttons').style.display = 'none';
-                document.getElementById('notificationBar').classList.add('show');
+                bar.classList.add('show');
                 // Auto-hide after 3 seconds
                 setTimeout(() => {
                     hideNotification();
                 }, 3000);
             } else {
                 document.querySelector('.notification-buttons').style.display = 'flex';
-                document.getElementById('notificationBar').classList.add('show');
+                bar.classList.add('show');
             }
+        }
+        
+        function showHintNotification() {
+            const overlay = document.getElementById('hintOverlay');
+            const box = document.getElementById('hintBox');
+            
+            overlay.classList.add('show');
+            box.classList.add('show');
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                hideHintNotification();
+            }, 10000);
+        }
+        
+        function hideHintNotification() {
+            const overlay = document.getElementById('hintOverlay');
+            const box = document.getElementById('hintBox');
+            
+            overlay.classList.remove('show');
+            box.classList.remove('show');
+        }
+        
+        function showAgentNotification() {
+            const overlay = document.getElementById('agentOverlay');
+            const box = document.getElementById('agentBox');
+            
+            overlay.classList.add('show');
+            box.classList.add('show');
+            
+            // Auto-hide after 8 seconds
+            setTimeout(() => {
+                hideAgentNotification();
+            }, 8000);
+        }
+        
+        function hideAgentNotification() {
+            const overlay = document.getElementById('agentOverlay');
+            const box = document.getElementById('agentBox');
+            
+            overlay.classList.remove('show');
+            box.classList.remove('show');
         }
         
         function hideNotification() {
@@ -1426,9 +1666,10 @@
                     body: JSON.stringify({ game_id: gameId })
                 });
                 
-                // Force reset to clear all active scenarios
-                await fetch('/api/game/force-reset', {
-                    method: 'POST'
+                // Cleanup active games
+                await fetch('/api/game/cleanup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
                 });
                 
                 window.location.href = '/';
@@ -1459,6 +1700,13 @@
                     body: JSON.stringify({ game_id: gameId })
                 });
             }
+            
+            // Cleanup active games before going home
+            await fetch('/api/game/cleanup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
             window.location.href = '/';
         }
         

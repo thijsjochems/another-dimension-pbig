@@ -276,6 +276,22 @@
     <img src="{{ url_for('static', filename='AD-Sticker-Shape.png') }}" alt="Another Dimension" class="footer-logo">
     
     <script>
+        // Auto-cleanup on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Clean up any active games when returning to homepage
+            fetch('/api/game/cleanup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Cleanup result:', data);
+            })
+            .catch(error => {
+                console.error('Cleanup error:', error);
+            });
+        });
+        
         // Custom cursor movement
         document.addEventListener('mousemove', (e) => {
             const cursor = document.querySelector('body::after');
@@ -353,8 +369,32 @@
         }
         
         function startGame() {
-            console.log('Starting game...');
-            window.location.href = '/team-reveal';
+            console.log('Starting new game...');
+            
+            // First create a new game session via API
+            fetch('/api/game/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Game started successfully:', data);
+                    // Save session code to localStorage
+                    localStorage.setItem('sessionCode', data.session_code);
+                    // Navigate to team reveal with session code
+                    window.location.href = `/team-reveal/${data.session_code}`;
+                } else {
+                    console.error('Failed to start game:', data);
+                    alert('Fout bij starten van het spel. Probeer opnieuw.');
+                }
+            })
+            .catch(error => {
+                console.error('Error starting game:', error);
+                alert('Fout bij starten van het spel. Probeer opnieuw.');
+            });
         }
         
         function goToScoreboard() {

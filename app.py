@@ -30,6 +30,98 @@ if not supabase_url or not supabase_key:
 supabase: Client = create_client(supabase_url, supabase_key)
 
 # ==========================================
+# TEAM NAME GENERATION
+# ==========================================
+
+POWERBI_TERMS = {
+    'A': ['Analytics', 'Aggregation', 'Append', 'API', 'Azure'],
+    'B': ['BI', 'Bookmark', 'Button', 'Budget', 'Batch', 'Binary', 'Barchart'],
+    'C': ['Column', 'Calculated', 'Card', 'Cluster', 'Composite', 'Cache', 'Chart', 'Code'],
+    'D': ['DAX', 'Dashboard', 'Dataflow', 'Drill', 'Dimension', 'Data', 'Database', 'Download', 'Datamodel'],
+    'E': ['ETL', 'Extract', 'Excel', 'Export', 'Expression'],
+    'F': ['Filter', 'Fact', 'Field', 'Forecast', 'Format', 'Formula', 'Function'],
+    'G': ['Gateway', 'Gauge', 'Grain', 'Graph', 'Grid'],
+    'I': ['Insight', 'Import', 'Index', 'Integration'],
+    'J': ['Join', 'JSON'],
+    'K': ['KPI', 'Kernel'],
+    'L': ['Lakehouse', 'Load', 'Layer', 'Legend', 'Link'],
+    'M': ['Measure', 'Model', 'Matrix', 'M-code', 'Merge', 'Metric', 'Migration'],
+    'P': ['Power Query', 'Parameter', 'Partition', 'Publish', 'Pipeline', 'Pivot', 'Python'],
+    'Q': ['Query', 'Q&A', 'Queue'],
+    'R': ['Report', 'Row', 'Relationship', 'Refresh', 'RLS', 'Ribbon', 'Range'],
+    'S': ['Slicer', 'Star Schema', 'Snapshot', 'Sync', 'Schema', 'Script', 'SQL', 'Storage', 'Stream'],
+    'T': ['Table', 'Tooltip', 'Template', 'Trend', 'Transform', 'Transpose', 'Trigger'],
+    'V': ['Visual', 'Variable', 'View', 'Validate', 'Value'],
+    'W': ['Workspace', 'Waterfall', 'Warehouse', 'Workflow'],
+    'Y': ['YAML', 'Year'],
+    'Z': ['Zoom']
+}
+
+ALLITERATIVE_WORDS = {
+    'A': ['Aces', 'Admirals', 'Agents', 'Alligators', 'Alphas', 'Ambassadors', 'Anchors', 'Angels', 'Archers', 'Architects', 'Armada', 'Artists', 'Assassins', 'Astronauts', 'Athletes', 'Atoms', 'Avengers', 'Aviators'],
+    'B': ['Badgers', 'Bandits', 'Barracudas', 'Bears', 'Beavers', 'Bees', 'Berserkers', 'Bison', 'Blazers', 'Blizzards', 'Bombers', 'Boosters', 'Bosses', 'Brawlers', 'Breakers', 'Builders', 'Bulls', 'Bullets', 'Buffalos'],
+    'C': ['Captains', 'Cardinals', 'Centurions', 'Champions', 'Chargers', 'Cheetahs', 'Chiefs', 'Cobras', 'Collectors', 'Commanders', 'Comets', 'Conquerors', 'Corsairs', 'Cougars', 'Cowboys', 'Crackers', 'Creators', 'Crew', 'Crusaders', 'Crushers', 'Cyclones'],
+    'D': ['Daredevils', 'Dashers', 'Defenders', 'Demons', 'Designers', 'Destroyers', 'Detectives', 'Diamonds', 'Diggers', 'Dolphins', 'Dragons', 'Drillers', 'Drivers', 'Drones', 'Dynamos', 'Dynamite'],
+    'E': ['Eagles', 'Echoes', 'Editors', 'Elites', 'Emperors', 'Enforcers', 'Engineers', 'Enigmas', 'Explorers', 'Experts', 'Express'],
+    'F': ['Falcons', 'Fighters', 'Firebirds', 'Flames', 'Flyers', 'Forces', 'Foxes', 'Frenzy', 'Fusion'],
+    'G': ['Galaxies', 'Gamers', 'Generals', 'Geniuses', 'Ghosts', 'Giants', 'Gladiators', 'Goblins', 'Grizzlies', 'Guardians', 'Gurus', 'Gunslingers'],
+    'I': ['Icons', 'Infernos', 'Innovators', 'Inspectors', 'Invaders', 'Inventors', 'Investigators', 'Ironclads'],
+    'J': ['Jaguars', 'Jets', 'Jokers', 'Juggernauts', 'Jumpers'],
+    'K': ['Kamikazes', 'Keepers', 'Kings', 'Knights', 'Koalas', 'Komodos'],
+    'L': ['Lancers', 'Leaders', 'Legends', 'Leopards', 'Lions', 'Lobos', 'Locusts', 'Lords', 'Lynx'],
+    'M': ['Mages', 'Magnates', 'Mammoths', 'Mambas', 'Mavericks', 'Magicians', 'Masters', 'Meteors', 'Miners', 'Monarchs', 'Monsters', 'Movers', 'Mustangs'],
+    'P': ['Paladins', 'Pandas', 'Panthers', 'Patriots', 'Penguins', 'Phantoms', 'Phoenixes', 'Pilots', 'Pioneers', 'Pirates', 'Predators', 'Prowlers', 'Pumas', 'Pythons'],
+    'Q': ['Quakes', 'Queens', 'Questers', 'Quicksilvers'],
+    'R': ['Raiders', 'Rangers', 'Raptors', 'Ravens', 'Rebels', 'Reapers', 'Rhinos', 'Riders', 'Rivals', 'Rockets', 'Rogues', 'Rulers', 'Runners'],
+    'S': ['Sabres', 'Samurai', 'Savages', 'Scorpions', 'Scouts', 'Sentinels', 'Serpents', 'Shadows', 'Sharks', 'Shooters', 'Slayers', 'Snipers', 'Soldiers', 'Spartans', 'Speedsters', 'Spiders', 'Spirits', 'Stallions', 'Storms', 'Strikers', 'Summoners'],
+    'T': ['Tacticians', 'Talons', 'Templars', 'Terrors', 'Thunders', 'Tigers', 'Titans', 'Tornadoes', 'Trackers', 'Trailblazers', 'Tribes', 'Trojans', 'Troopers', 'Tycoons'],
+    'V': ['Valkyries', 'Vampires', 'Vanguards', 'Velociraptors', 'Venoms', 'Veterans', 'Victors', 'Vikings', 'Vipers', 'Virtuosos', 'Voyagers', 'Vultures'],
+    'W': ['Warriors', 'Wasps', 'Watchers', 'Waves', 'Whalers', 'Wildcats', 'Winds', 'Wingmen', 'Wizards', 'Wolves', 'Wranglers'],
+    'Y': ['Yankees', 'Yetis'],
+    'Z': ['Zealots', 'Zephyrs', 'Zombies', 'Zulus']
+}
+
+def generate_unique_team_name(max_attempts=10):
+    """
+    Generate a unique alliterative team name
+    Format: [PowerBI Term] [Alliterative Word]
+    Example: "DAX Dragons", "Query Quicksilvers"
+    
+    Checks database to ensure uniqueness WITHIN TODAY
+    Names reset daily - same name can be reused on different days
+    If duplicates after max_attempts, adds random number
+    """
+    # Get start of today (00:00:00) for date filtering
+    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    for attempt in range(max_attempts):
+        # Pick random letter that has both terms and words
+        available_letters = set(POWERBI_TERMS.keys()) & set(ALLITERATIVE_WORDS.keys())
+        letter = random.choice(list(available_letters))
+        
+        # Generate name
+        term = random.choice(POWERBI_TERMS[letter])
+        word = random.choice(ALLITERATIVE_WORDS[letter])
+        team_name = f"{term} {word}"
+        
+        # Check if name already exists in games created TODAY
+        # Filter by created_at >= today 00:00:00
+        existing = supabase.table('games').select('id').eq('player_name', team_name).gte('created_at', today_start.isoformat()).execute()
+        
+        if not existing.data:
+            # Name is unique for today!
+            return team_name
+    
+    # If we get here, we've tried max_attempts times without finding unique name
+    # Fallback: add random number
+    letter = random.choice(list(available_letters))
+    term = random.choice(POWERBI_TERMS[letter])
+    word = random.choice(ALLITERATIVE_WORDS[letter])
+    random_num = random.randint(10, 99)
+    
+    return f"{term} {word} #{random_num}"
+
+# ==========================================
 # HELPER FUNCTIONS
 # ==========================================
 
@@ -84,25 +176,18 @@ def killed_test():
     """Test page for KILLED effect variations"""
     return render_template('killed-test.html')
 
-@app.route('/team-reveal')
-def team_reveal():
+@app.route('/team-reveal/<session_code>')
+def team_reveal(session_code):
     """Team name reveal page with slot machine animation"""
-    # TODO: Replace with LLM-generated team name
-    # For now, use hardcoded alliterative names
-    import random
-    team_names = [
-        "THE DAX DANDIES",
-        "THE DAX DOLLS", 
-        "THE QUERY QUEENS",
-        "THE STARSCHEMA STARS",
-        "THE MEASURE MAKERS",
-        "THE TABLE TWISTERS",
-        "THE FILTER FANATICS",
-        "THE PIVOT PIONEERS",
-        "THE SLICER SLEUTHS",
-        "THE DASHBOARD DETECTIVES"
-    ]
-    team_name = random.choice(team_names)
+    # Get the actual team name from the game session
+    result = supabase.table('games').select('player_name').eq('session_code', session_code).execute()
+    
+    if result.data and result.data[0]['player_name']:
+        team_name = result.data[0]['player_name'].upper()
+    else:
+        # Fallback if session not found
+        team_name = "THE MYSTERY TEAM"
+    
     return render_template('team-reveal.html', team_name=team_name)
 
 @app.route('/game')
@@ -160,6 +245,70 @@ def handle_scan():
 # ROUTES - Game Start
 # ==========================================
 
+@app.route('/api/game/cleanup', methods=['POST'])
+def cleanup_active_games():
+    """
+    Cleanup all active scenarios and games
+    Called when returning to homepage to ensure clean state
+    """
+    try:
+        # Set all active scenarios to inactive
+        supabase.table('scenarios').update({
+            'active': False,
+            'started_at': None
+        }).eq('active', True).execute()
+        
+        # Optionally also mark incomplete games as abandoned
+        # (but keep completed games intact for leaderboard)
+        supabase.table('games').update({
+            'status': 'abandoned'
+        }).eq('status', 'active').execute()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Active games cleaned up'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/game/session/<session_code>', methods=['GET'])
+def get_game_session(session_code):
+    """
+    Get game details by session code
+    Used when continuing an existing game session
+    """
+    try:
+        # Get game by session code
+        game_result = supabase.table('games').select('*').eq('session_code', session_code).execute()
+        
+        if not game_result.data:
+            return jsonify({'error': 'Session not found'}), 404
+        
+        game = game_result.data[0]
+        
+        # Get scenario details
+        scenario_result = supabase.table('scenarios').select('*').eq('id', game['scenario_id']).execute()
+        
+        if not scenario_result.data:
+            return jsonify({'error': 'Scenario not found'}), 404
+        
+        scenario = scenario_result.data[0]
+        
+        return jsonify({
+            'success': True,
+            'game_id': game['id'],
+            'session_code': session_code,
+            'team_name': game.get('player_name', 'Team'),
+            'scenario_id': scenario['id'],
+            'scenario': scenario['beschrijving'],
+            'situatie_beschrijving': scenario.get('situatie_beschrijving', '')
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/game/start', methods=['POST'])
 def start_game():
     """
@@ -195,10 +344,12 @@ def start_game():
     
     # Create game record
     session_code = generate_session_code()
+    team_name = generate_unique_team_name()
     
     game = supabase.table('games').insert({
         'session_code': session_code,
         'scenario_id': scenario['id'],
+        'player_name': team_name,
         'start_time': datetime.utcnow().isoformat(),
         'status': 'active'  # Mark as active for Edge Function auto-detect
     }).execute()
@@ -208,6 +359,7 @@ def start_game():
         'success': True,
         'game_id': game.data[0]['id'],
         'session_code': session_code,
+        'team_name': team_name,
         'scenario_id': scenario['id'],
         'scenario': scenario['beschrijving'],
         'situatie_beschrijving': scenario.get('situatie_beschrijving', ''),
@@ -531,12 +683,15 @@ def get_agent_hint():
 
 @app.route('/api/leaderboard', methods=['GET'])
 def get_leaderboard():
-    """Get top 10 fastest times + laatste sessie"""
-    # Get top 10
-    leaderboard = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).order('total_time_seconds', desc=False).limit(15).execute()
+    """Get top 10 fastest times + laatste sessie (ONLY from today)"""
+    # Get start of today (00:00:00) for date filtering
+    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     
-    # Get laatste sessie (most recent)
-    latest = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).order('end_time', desc=True).limit(1).execute()
+    # Get top 10 from TODAY only
+    leaderboard = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).gte('created_at', today_start.isoformat()).order('total_time_seconds', desc=False).limit(15).execute()
+    
+    # Get laatste sessie (most recent from TODAY)
+    latest = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).gte('created_at', today_start.isoformat()).order('end_time', desc=True).limit(1).execute()
     
     formatted = []
     latest_game_id = latest.data[0]['id'] if latest.data else None
