@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAMES - Split Text</title>
+    <style>
+        @font-face {
+            font-family: 'Blender';
+            src: url("{{ url_for('static', filename='fonts/BlenderPro-Bold.ttf') }}") format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        
+        :root {
+            --color-bg: #001C0F;
+            --color-primary: #54FCBC;
+            --color-secondary: #DCFFED;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--color-bg);
+            color: var(--color-primary);
+            font-family: 'Blender', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+        }
+        
+        .split-word {
+            font-size: 15rem;
+            font-weight: bold;
+            letter-spacing: 20px;
+            text-transform: uppercase;
+            line-height: 1;
+            position: relative;
+            display: inline-block;
+            margin: 40px;
+        }
+        
+        .split-top {
+            display: block;
+            background: var(--color-bg);
+            clip-path: polygon(0 0, 100% 0, 100% 51%, 0 51%);
+            transform: translateX(-10px);
+        }
+        
+        .split-bottom {
+            display: block;
+            background: var(--color-bg);
+            clip-path: polygon(0 51%, 100% 51%, 100% 100%, 0 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="split-word">
+            <span class="split-top">THIJS</span>
+            <span class="split-bottom" aria-hidden="true">THIJS</span>
+        </div>
+        <div class="split-word">
+            <span class="split-top">JASPER</span>
+            <span class="split-bottom" aria-hidden="true">JASPER</span>
+        </div>
+    </div>
+</body>
+</html>

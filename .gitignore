@@ -31,3 +31,11 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Videos (local only, not in git)
+static/videos/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm

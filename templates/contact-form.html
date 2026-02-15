@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Another Dimension</title>
+    <style>
+        @font-face {
+            font-family: 'Blender';
+            src: url("{{ url_for('static', filename='fonts/Blender-Medium.ttf') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        :root {
+            --color-bg: #001C0F;
+            --color-primary: #54FCBC;
+            --color-secondary: #DCFFED;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--color-bg);
+            color: var(--color-secondary);
+            font-family: 'Blender', sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo img {
+            width: 80px;
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(84, 252, 188, 0.4));
+        }
+        
+        h1 {
+            font-size: 2rem;
+            color: var(--color-primary);
+            text-align: center;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 40px;
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(84, 252, 188, 0.05);
+            border: 2px solid rgba(84, 252, 188, 0.3);
+            border-radius: 8px;
+            color: var(--color-secondary);
+            font-family: 'Blender', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: rgba(84, 252, 188, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .interests-group {
+            margin-bottom: 25px;
+        }
+        
+        .interests-label {
+            display: block;
+            margin-bottom: 15px;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .checkbox-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: var(--color-primary);
+        }
+        
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: var(--color-secondary);
+            letter-spacing: 0.5px;
+        }
+        
+        .overig-field {
+            margin-top: 10px;
+            margin-left: 30px;
+            display: none;
+        }
+        
+        .overig-field.visible {
+            display: block;
+        }
+        
+        .gdpr {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(84, 252, 188, 0.05);
+            border: 1px solid rgba(84, 252, 188, 0.2);
+            border-radius: 8px;
+        }
+        
+        .gdpr label {
+            font-size: 0.85rem;
+            color: var(--color-secondary);
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            background: var(--color-primary);
+            border: none;
+            border-radius: 8px;
+            color: var(--color-bg);
+            font-family: 'Blender', sans-serif;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .submit-button:hover {
+            background: var(--color-secondary);
+            box-shadow: 0 0 20px rgba(84, 252, 188, 0.5);
+        }
+        
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .success-message.visible {
+            display: block;
+        }
+        
+        .success-icon {
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin-bottom: 20px;
+            font-family: 'Blender', sans-serif;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .success-message h2 {
+            color: var(--color-primary);
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .success-message p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .error-message {
+            display: none;
+            padding: 15px;
+            background: rgba(255, 100, 100, 0.1);
+            border: 2px solid rgba(255, 100, 100, 0.5);
+            border-radius: 8px;
+            color: #ff6464;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .error-message.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/robot-mascot.png') }}" alt="Another Dimension">
+        </div>
+        
+        <h1>Neem Contact Op</h1>
+        <p class="subtitle">We horen graag van je. Vul het formulier in en we nemen snel contact op.</p>
+        
+        <div class="error-message" id="errorMessage">
+            Er ging iets fout. Probeer het opnieuw of mail naar thijs@anotherdimension.nl
+        </div>
+        
+        <form id="contactForm">
+            <div class="form-group">
+                <label for="naam">Naam *</label>
+                <input type="text" id="naam" name="naam" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="bedrijf">Bedrijf *</label>
+                <input type="text" id="bedrijf" name="bedrijf" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="telefoon">Telefoon (optioneel)</label>
+                <input type="tel" id="telefoon" name="telefoon">
+            </div>
+            
+            <div class="interests-group">
+                <span class="interests-label">Waar ben je in geïnteresseerd? *</span>
+                
+                <div class="checkbox-item">
+                    <input type="checkbox" id="powerbi_training" name="interesse_powerbi_training">
+                    <label for="powerbi_training">Power BI Training</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <input type="checkbox" id="powerbi_rapportage" name="interesse_powerbi_rapportage">
+                    <label for="powerbi_rapportage">Power BI Rapportage Ontwikkelen</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <input type="checkbox" id="ai_training" name="interesse_ai_training">
+                    <label for="ai_training">AI Training</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <input type="checkbox" id="ai_automation" name="interesse_ai_automation">
+                    <label for="ai_automation">AI Automation Ontwikkelen</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <input type="checkbox" id="samenwerken" name="interesse_samenwerken">
+                    <label for="samenwerken">Samenwerken</label>
+                </div>
+                
+                <div class="checkbox-item">
+                    <input type="checkbox" id="overig_check" name="interesse_overig_check">
+                    <label for="overig_check">Overig</label>
+                </div>
+                
+                <div class="overig-field" id="overigField">
+                    <textarea id="interesse_overig" name="interesse_overig" placeholder="Vertel ons waar je in geïnteresseerd bent..."></textarea>
+                </div>
+            </div>
+            
+            <div class="gdpr checkbox-item">
+                <input type="checkbox" id="gdpr" name="gdpr" required>
+                <label for="gdpr">
+                    Ik ga akkoord dat mijn gegevens worden opgeslagen en gebruikt voor contact opname. 
+                    Zie onze privacy policy op anotherdimension.nl
+                </label>
+            </div>
+            
+            <button type="submit" class="submit-button" id="submitButton">
+                Verstuur
+            </button>
+        </form>
+        
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">✓ GELUKT</div>
+            <h2>BEDANKT!</h2>
+            <p>We hebben je gegevens ontvangen en nemen snel contact met je op.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Show/hide "overig" textarea
+        document.getElementById('overig_check').addEventListener('change', function() {
+            const overigField = document.getElementById('overigField');
+            if (this.checked) {
+                overigField.classList.add('visible');
+            } else {
+                overigField.classList.remove('visible');
+                document.getElementById('interesse_overig').value = '';
+            }
+        });
+        
+        // Form submission
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = document.getElementById('submitButton');
+            const errorMessage = document.getElementById('errorMessage');
+            const form = document.getElementById('contactForm');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Validate at least one interest selected
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:not(#gdpr)');
+            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+            
+            if (!anyChecked) {
+                errorMessage.textContent = 'Selecteer minimaal één interesse.';
+                errorMessage.classList.add('visible');
+                return;
+            }
+            
+            // Disable button and show loading
+            submitButton.disabled = true;
+            submitButton.textContent = 'Versturen...';
+            errorMessage.classList.remove('visible');
+            
+            // Collect form data
+            const formData = {
+                naam: document.getElementById('naam').value,
+                bedrijf: document.getElementById('bedrijf').value,
+                email: document.getElementById('email').value,
+                telefoon: document.getElementById('telefoon').value || null,
+                interesse_powerbi_training: document.getElementById('powerbi_training').checked,
+                interesse_powerbi_rapportage: document.getElementById('powerbi_rapportage').checked,
+                interesse_ai_training: document.getElementById('ai_training').checked,
+                interesse_ai_automation: document.getElementById('ai_automation').checked,
+                interesse_samenwerken: document.getElementById('samenwerken').checked,
+                interesse_overig: document.getElementById('overig_check').checked ? document.getElementById('interesse_overig').value : null
+            };
+            
+            try {
+                // POST to Flask API
+                const response = await fetch('/api/contact/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Network response was not ok');
+                }
+                
+                // Success - show thank you message
+                form.style.display = 'none';
+                successMessage.classList.add('visible');
+                
+                // Redirect to home after 5 seconds
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 5000);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.classList.add('visible');
+                submitButton.disabled = false;
+                submitButton.textContent = 'VERSTUUR';
+            }
+        });
+    </script>
+</body>
+</html>

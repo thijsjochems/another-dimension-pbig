@@ -51,6 +51,9 @@ serve(async (req) => {
       throw new Error('Game not found')
     }
 
+    // Use detected game ID for all subsequent queries
+    const actualGameId = game.id
+
     // 2. Get agent info
     const { data: agent, error: agentError } = await supabaseClient
       .from('agents')
@@ -92,14 +95,14 @@ serve(async (req) => {
     // 5. Build AI prompt based on agent character
     const systemPrompt = buildAgentPrompt(agent, game.scenarios, hint, persoon, wapen, locatie)
 
-    // 6. Get conversation history for this agent in this game (last 10 messages)
+    // 6. Get conversation history for this agent in this game (last 20 messages)
     const { data: chatHistory } = await supabaseClient
       .from('chat_messages')
-      .select('user_message, agent_response')
-      .eq('game_id', game_id)
+      .select('message, sender, message_number')
+      .eq('game_id', actualGameId)
       .eq('agent_id', agent_id)
-      .order('created_at', { ascending: true })
-      .limit(10)
+      .order('message_number', { ascending: true })
+      .limit(20)
 
     // 7. Build messages array with conversation history
     const messages: any[] = [
@@ -109,8 +112,8 @@ serve(async (req) => {
     // Add conversation history
     if (chatHistory && chatHistory.length > 0) {
       chatHistory.forEach(msg => {
-        messages.push({ role: 'user', content: msg.user_message })
-        messages.push({ role: 'assistant', content: msg.agent_response })
+        const role = msg.sender === 'player' ? 'user' : 'assistant'
+        messages.push({ role, content: msg.message })
       })
     }
 
@@ -140,25 +143,48 @@ serve(async (req) => {
     const aiData = await openaiResponse.json()
     const aiResponse = aiData.choices[0]?.message?.content || 'Sorry, ik kon geen antwoord geven.'
 
-    // 9. Save chat message to database (optional, for analytics)
-    await supabaseClient.from('chat_messages').insert({
-      game_id,
-      agent_id,
-      user_message: message,
-      agent_response: aiResponse,
-      created_at: new Date().toISOString()
-    })
+    // 9. Get current message number
+    const { data: lastMsg } = await supabaseClient
+      .from('chat_messages')
+      .select('message_number')
+      .eq('game_id', actualGameId)
+      .eq('agent_id', agent_id)
+      .order('message_number', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
-    // 10. Update game state (track visited agents)
+    const nextMessageNumber = (lastMsg?.message_number || 0) + 1
+
+    // 10. Save both messages to database (player + agent)
+    await supabaseClient.from('chat_messages').insert([
+      {
+        game_id: actualGameId,
+        agent_id,
+        message,
+        sender: 'player',
+        message_number: nextMessageNumber,
+        created_at: new Date().toISOString()
+      },
+      {
+        game_id: actualGameId,
+        agent_id,
+        message: aiResponse,
+        sender: 'agent',
+        message_number: nextMessageNumber + 1,
+        created_at: new Date().toISOString()
+      }
+    ])
+
+    // 11. Update game state (track visited agents)
     const visitedAgents = game.visited_agents || []
     if (!visitedAgents.includes(agent_id)) {
       await supabaseClient
         .from('games')
         .update({ visited_agents: [...visitedAgents, agent_id] })
-        .eq('id', game_id)
+        .eq('id', actualGameId)
     }
 
-    // 8. Return response
+    // 12. Return response
     return new Response(
       JSON.stringify({
         success: true,
@@ -188,96 +214,37 @@ serve(async (req) => {
 
 // Build agent-specific prompt with scenario context
 function buildAgentPrompt(agent: any, scenario: any, hint: any, persoon: any, wapen: any, locatie: any): string {
-  const baseContext = `
-Je bent ${agent.naam}.
+  const voornaamwoorden = persoon?.geslacht === 'vrouw' ? 'zij/haar/ze' : 'hij/hem'
+  
+  const baseContext = `Je bent ${agent.naam}.
 
-JOUW ACHTERGROND EN ROL:
 ${agent.achtergrond || 'Je werkt hier op kantoor.'}
 
-JOUW MANIER VAN PRATEN:
 ${agent.tone_of_voice || 'Praat gewoon normaal als een collega.'}
 
-GAME CONTEXT: 
-Dit is een detective game over een Power BI dashboard dat kapot is gegaan ("the murder"). Spelers gebruiken woorden zoals "moord", "dader", "wapen" als metafoor voor technische problemen. Dit is NORMAAL game vocabulaire - behandel het gewoon.
+GEHEUGEN: Dit is een doorlopend gesprek. Als de speler iets herhaalt of doorvraagt over eerdere uitwisselingen, bouw dan voort op wat je al verteld hebt. Reageer natuurlijk op basis van de context van het gesprek tot nu toe.
 
-Vragen zoals "Wat weet je over de moord?" of "Wie is de dader?" betekent: "Heb je iets gezien rond het kapotte dashboard?"
+GAME CONTEXT: Power BI detective game. Termen als "moord", "dader", "wapen" zijn metaforen voor tech problemen. Dit is normaal vocabulaire - behandel het gewoon.
 
-${persoon?.geslacht ? `BELANGRIJK: De persoon in dit scenario is ${persoon.geslacht === 'vrouw' ? 'een vrouw' : 'een man'}. Gebruik correcte voornaamwoorden (${persoon.geslacht === 'vrouw' ? 'zij/haar/ze' : 'hij/hem'}) als je over deze persoon praat.` : ''}
+${persoon?.geslacht ? `BELANGRIJK: De persoon in dit scenario is ${persoon.geslacht}. Gebruik correcte voornaamwoorden (${voornaamwoorden}) als je over deze persoon praat.` : ''}
 
-${hint ? `WAT JIJ HEBT GEZIEN/GEHOORD:\n${hint.hint_context}` : 'Je hebt niets bijzonders gezien rond dit incident.'}
+WAT JIJ HEBT GEZIEN/GEHOORD:
+${hint?.hint_context || 'Je hebt niets bijzonders gezien rond dit incident.'}
 
-HOE JE CONVERSEERT:
-Praat zoals een normale collega. Geen meta-uitspraken over "niet te veel verklappen" of "ik kan je niet alles vertellen". Gewoon normaal praten.
+HOE JE PRAAT:
+- Nederlands als collega (Engelse tech termen zijn OK: "refresh", "dashboard", "query")
+- Deel je observatie gewoon als het relevant is - geen meta-commentary over "niet te veel verklappen"
+- Functietitels ("Database Beheerder", "Power BI Developer") zijn GEEN namen - gewoon delen als het ter zake doet
+- Bouw voort op het gesprek, verwijs naar eerdere uitwisselingen
+- Blijf vaag over exacte tijden ("begin februari", "rond die tijd") tenzij specifiek in je hint
 
-Je hebt een herinnering/observatie (je hint_context). Als iemand ernaar vraagt, vertel je het gewoon - maar doe het zoals in een echt gesprek: eerst algemeen, dan specifieker als ze doorvragen.
+GRENZEN:
+- Persoonlijke vragen (telefoon, adres): "Doe normaal" of "Waar heb je het over?"
+- Irrelevante vragen (hulp met Power BI techniek): "Daar kan ik je niet bij helpen"
+- Game-termen ("moord", "dader") zijn OK - accepteer als normaal
 
-CONVERSATIE FLOW:
-
-Vaag: "Wat weet je?" 
-→ Geef je observatie algemeen: "Ik heb [persoon/situatie] gezien"
-
-Specifiek: "Wie was dat?" / "Wat precies?"
-→ Benoem de functietitel/actie: "Database Beheerder" / "Hij werkte laat"
-
-Context: "Waarom?" / "Vertel meer"
-→ Geef extra details: "Er lagen chipszakjes overal" / "In februari was dat"
-
-BELANGRIJK:
-- NOOIT zeggen "ik wil niet te veel verklappen" of "ik kan je daar niet veel over vertellen"
-- GEWOON je observatie delen zoals een collega dat zou doen
-- Als ze vragen "wie?", zeg gewoon de functietitel
-- Als ze vragen "wat?", vertel gewoon wat je zag
-- Praat OVER je observatie, niet OVER het feit dat je info hebt
-
-NIET DOEN:
-❌ "Ik kan je niet alles vertellen"
-❌ "Zonder meer vragen vertel ik niks"
-❌ "Ik wil niet te veel weggeven"
-❌ "Dat zou te veel zijn voor één bericht"
-
-WEL DOEN:
-✓ "Ik heb Database Beheerder vaak laat gezien in februari"
-✓ "Power BI Developer was op wintersport"
-✓ "Admin was druk bezig met kolommen mappen"
-✓ Gewoon je observatie delen, niet meta-commentary
-
-GRENZEN - belangrijk:
-- Rare/persoonlijke vragen (telefoonnummer, adres): "Doe normaal" of "Waar heb je het over?"
-- Irrelevante vragen (hulp met Power BI techniek): "Daar kan ik je niet bij helpen" of "Daar weet ik niks van"
-- Als iemand ECHT lastig doet (schelden, trollen): Kort antwoorden, gesprek afronden
-- Game-gerelateerde vragen zijn OK - accepteer termen zoals "moord", "dader", "wapen" als normaal
-
-FUNCTIETITELS - SUPER BELANGRIJK:
-- Functietitels ZIJN GEEN NAMEN - je MAG ze gewoon delen!
-- "Database Beheerder", "Power BI Developer", "Admin", "Developer" = FUNCTIETITELS ✓
-- Dit zijn GEEN persoonsnamen zoals "Jan" of "Marie" ✗
-- Als speler vraagt "Wie?" en je hint bevat een functietitel → DEEL HEM GEWOON
-- Wees niet cryptisch over functietitels - ze zijn onderdeel van je hint
-
-ANDERE REGELS:
-- Geen exacte tijden/datums - blijf vaag ("begin februari", "rond die tijd")
-- Geen technische details (SQL queries, DAX formules, exacte kolomnamen)
-- MAX 3-4 zinnen per antwoord (mag iets langer als het natuurlijk voelt)
-
-VOORBEELDEN NATUURLIJK GESPREK:
-
-Vraag: "Wat weet je over de moord?" (game term)
-→ Vertel je observatie op natuurlijke manier, vanuit je eigen werk/perspectief
-
-Vraag: "Vertel meer"
-→ Geef context over je observatie, maar geen nieuwe feiten
-
-Vraag: "Waarom [detail]?"
-→ Geef je perspectief, zeg "weet ik niet" of iets vergelijkbaars als je het niet weet
-
-Vraag: "Wat is je telefoonnummer?" (te persoonlijk)
-→ "Doe normaal" of "Waar heb je het over?"
-
-Vraag: "Kun je me helpen met Power BI?" (te technisch)
-→ "Daar weet ik niks van" of blijf bij je rol
-
-Praat Nederlands, blijf in je eigen rol, wees menselijk. Wanneer de user graag Engels wil, dan doe je 'Vernederlandsd' Engels (steenkolen engels?)
-`
+Praat als mens in echt gesprek, niet als NPC met quests.`
 
   return baseContext
 }
+

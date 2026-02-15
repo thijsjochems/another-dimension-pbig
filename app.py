@@ -200,6 +200,76 @@ def leaderboard_page():
     """Leaderboard page"""
     return render_template('leaderboard.html')
 
+@app.route('/powerbi-portfolio')
+def powerbi_portfolio():
+    """Power BI Portfolio page"""
+    return render_template('powerbi-portfolio.html')
+
+@app.route('/powerbi-training')
+def powerbi_training():
+    """Power BI Training page"""
+    return render_template('powerbi-training.html')
+
+@app.route('/ai-automation')
+def ai_automation():
+    """AI Automation page"""
+    return render_template('ai-automation.html')
+
+@app.route('/ai-training')
+def ai_training():
+    """AI Training page"""
+    return render_template('ai-training.html')
+
+@app.route('/names')
+def names():
+    """Names split text page"""
+    return render_template('names.html')
+
+@app.route('/contact')
+def contact_form():
+    """Contact form page"""
+    return render_template('contact-form.html')
+
+@app.route('/api/contact/submit', methods=['POST'])
+def submit_contact():
+    """Handle contact form submission and save to Supabase"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('naam') or not data.get('bedrijf') or not data.get('email'):
+            return jsonify({'success': False, 'message': 'Naam, bedrijf en email zijn verplicht'}), 400
+        
+        # Insert into Supabase contacts table
+        contact_data = {
+            'naam': data.get('naam'),
+            'bedrijf': data.get('bedrijf'),
+            'email': data.get('email'),
+            'telefoon': data.get('telefoon'),
+            'interesse_powerbi_training': data.get('interesse_powerbi_training', False),
+            'interesse_powerbi_rapportage': data.get('interesse_powerbi_rapportage', False),
+            'interesse_ai_training': data.get('interesse_ai_training', False),
+            'interesse_ai_automation': data.get('interesse_ai_automation', False),
+            'interesse_samenwerken': data.get('interesse_samenwerken', False),
+            'interesse_overig': data.get('interesse_overig'),
+            'bron': 'beurs_qr'
+        }
+        
+        # Insert into Supabase
+        result = supabase.table('contacts').insert(contact_data).execute()
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Bedankt! We nemen snel contact op.'
+        })
+        
+    except Exception as e:
+        print(f"Error submitting contact form: {e}")
+        return jsonify({
+            'success': False, 
+            'message': 'Er ging iets fout. Probeer het opnieuw.'
+        }), 500
+
 # ==========================================
 # ROUTES - NFC Scan Handler
 # ==========================================

@@ -9,7 +9,7 @@
 
 ## 🔥🔥🔥 KRITIEKE PRIORITEIT: Scenario Herziening
 
-### 0.1 Scenario Kwaliteitscontrole & Herschrijven ⚠️ **BLOCKER**
+### 0.1 Scenario Kwaliteitscontrole & Herschrijven ✅ **AFGEROND**
 **PROBLEEM**: Huidige scenarios zijn niet logisch genoeg. Combinaties kloppen niet altijd qua realisme.
 
 **📋 VOLLEDIGE CRITERIA**: Zie **[SCENARIO_CRITERIA.md](SCENARIO_CRITERIA.md)** voor alle kwaliteitseisen, testcriteria, anti-patronen en templates.
@@ -18,12 +18,12 @@
 - [x] **Audit bestaande scenarios uitgevoerd** - Zie **[SCENARIO_AUDIT_REPORT.md](SCENARIO_AUDIT_REPORT.md)**
   - 21 scenarios gescored op 5 criteria (Realisme, Logica, Techniek, Speelbaarheid, Storytelling)
   - 4 scenarios zijn goed (≥4.0 sterren), 17 moeten herschreven worden
-- [ ] **🔥 PRIORITEIT: Fixes doorvoeren uit SCENARIO_AUDIT_REPORT.md**
+- [x] **🔥 PRIORITEIT: Fixes doorvoeren uit SCENARIO_AUDIT_REPORT.md**
   - Doorloop rapport en implementeer alle aanbevolen wijzigingen
   - Focus op Quick Wins (8 scenarios op 3.6-3.8): alleen storytelling toevoegen
   - Major Rewrites (2 scenarios): persoon/wapen logica fixen
   - Voeg menselijk gedrag toe: vergat, haast, miscommunicatie, deadline
-- [ ] **🔥 PRIORITEIT: Scenario Storytelling voor Beursbezoeker**
+- [x] **🔥 PRIORITEIT: Scenario Storytelling voor Beursbezoeker**
   - **Situatiebeschrijving toevoegen per scenario**: WAT is de fout/error?
   - Bezoeker moet begrijpen: "Dit dashboard is stuk. Welke error zien we?"
   - Voorbeelden:
@@ -33,17 +33,40 @@
     - "Rapport toont alleen Q2 data, rest ontbreekt zonder melding"
   - Voeg toe aan scenario beschrijving in database: `situatie_beschrijving` kolom
   - Dit helpt agents + beursbezoeker te begrijpen WAT er mis is
-- [ ] **🔥 PRIORITEIT: Eenvoudige 'murder' omschrijving voor spelscherm**
+- [x] **🔥 PRIORITEIT: Eenvoudige 'murder' omschrijving voor spelscherm**
   - **Korte probleembeschrijving toevoegen aan elk scenario**
   - Moet op spelscherm getoond worden zodat speler weet wat het probleem is
   - Bijvoorbeeld: "Dashboard toont dubbele verkoopcijfers" of "Rapport toont verouderde data"
   - Speler moet direct zien WELK probleem ze moeten oplossen
   - Implementeren in UI: toon probleem bij scenario start
-- [ ] **Goede scenarios markeren** (4-5 sterren): Behouden als benchmark
-- [ ] **Nieuwe scenarios schrijven** volgens template indien nodig
-- [ ] **Validatie**: Elk scenario testen met "Zou een Power BI pro dit herkennen?"
+- [x] **Goede scenarios markeren** (4-5 sterren): Behouden als benchmark
+- [x] **Nieuwe scenarios schrijven** volgens template indien nodig
+- [x] **Validatie**: Elk scenario testen met "Zou een Power BI pro dit herkennen?"
 
 **OUTPUT**: 12-15 solide, geloofwaardige, speelbare scenarios (minimaal 4/5 sterren) met duidelijke situatiebeschrijving voordat we verder gaan met agent hints.
+
+---
+
+## 🔥 KRITIEKE PRIORITEIT: Scenario Hints Schrijven
+
+### 0.2 Scenario Hints voor Alle Scenarios 🔥 **PRIORITEIT**
+**DOEL**: Alle 20+ scenarios voorzien van 3 agent hints (Schoonmaker, Receptionist, Stagiair) met INDIRECTE observaties.
+
+**REGELS:**
+- Agents geven OBSERVATIES, geen conclusies ("Ik zag persoon X bij locatie Y om 10:15")
+- Agents mogen NIET rechtstreeks zeggen "persoon X is de dader" of "het wapen is Y"
+- Agents mogen doorverwijzen ("misschien moet je eens met persoon A of B praten")
+- Hints moeten logische deductie mogelijk maken
+- Speler moet zelf conclusies trekken
+
+**ACTIES:**
+- [ ] Alle 20+ scenarios doornemen
+- [ ] Per scenario: 3 hints schrijven (1 per agent)
+- [ ] Hints valideren: indirect genoeg? Speelbaar?
+- [ ] Hints in database invoeren (scenario_hints tabel)
+- [ ] Testen met echte gameplay: leidt het tot deductie?
+
+**STATUS:** Te checken komende week
 
 ---
 
@@ -54,7 +77,7 @@
 - [x] Beslissen: Supabase met lokale fallback
 - [x] Input methode: USB RFID Reader (keyboard emulation)
 - [x] NFC-ID mapping systeem ontwerpen
-- [ ] **NFC tags koppelen aan special_nfc_codes tabel in Supabase**
+- [ ] **NFC tags koppelen aan special_nfc_codes tabel in Supabase** ⏳ **KOMENDE WEEK**
   - Fysieke NFC tag nummers scannen en documenteren
   - Tag nummers invoeren in special_nfc_codes tabel met correcte persoon/locatie/wapen mapping
   - Testen of tags correct worden herkend in game
@@ -80,7 +103,7 @@
 - [x] NFC-ID mapping tabel ontwerpen
 - [x] Relaties tussen entities definiëren
 - [x] SQL scripts gemaakt (supabase_setup.sql)
-- [ ] Naam van deelnemer moet worden gegenereerd? Moet uniek zijn en iets met Power BI te maken hebben. DAX Dandies, Power Query Pumas, Model Movers, Comment Crushers, Filter Fillers, of zoiets. Daar moeten we ook een mooie AI oplossing voor maken
+- [x] Naam van deelnemer moet worden gegenereerd? Moet uniek zijn en iets met Power BI te maken hebben. DAX Dandies, Power Query Pumas, Model Movers, Comment Crushers, Filter Fillers, of zoiets. Daar moeten we ook een mooie AI oplossing voor maken
 
 ### 1.3 Game Logic Specificatie 🔄
 - [x] Win-conditie: Correcte combinatie WIE + WAARMEE + WAAR
@@ -92,27 +115,27 @@
 - [ ] Hint-systeem logica uitwerken (scenario-specifiek via chatbot)
 - [ ] Alibi/uitsluit mechanisme ontwerpen
 - [ ] **Na 2 x fout antwoord: Hint: "Zoek op de stand naar getuigen om mee te 'praten'"**
-- [ ] **PRODUCTIE: Scenario text verbergen (toont nu antwoord!) - Add ?dev=true URL param voor development**
+- [x] **PRODUCTIE: Scenario text verbergen (toont nu antwoord!) - Add ?dev=true URL param voor development**
 
 ---
 
 ## Fase 2: Content Creatie
 
-### 2.0 Agent Karakterisering & System Prompt Refactoring 🔥 **PRIORITEIT**
-- [ ] **ALTER TABLE agents**: Voeg `system_prompt` en `gedrag_regels` kolommen toe
-- [ ] **Agent karakters uitwerken met persoonlijkheid:**
+### 2.0 Agent Karakterisering & System Prompt Refactoring ✅ **AFGEROND**
+- [x] **ALTER TABLE agents**: Voeg `system_prompt` en `gedrag_regels` kolommen toe
+- [x] **Agent karakters uitwerken met persoonlijkheid:**
   - **Schoonmaker**: Dienstbaar, bescheiden, niemand tot last willen zijn, vriendelijk, observeert 's avonds gesprekken, geen technische kennis
   - **Receptionist**: Professioneel, administratief sterk, weet wie waar was en wanneer, planning-georiënteerd, formeel maar behulpzaam
   - **Stagiair**: Bijdehand, vol zelfvertrouwen, technisch bewust, soms iets té enthousiast om kennis te delen, jonge energie
-- [ ] **System prompts schrijven per agent met:**
+- [x] **System prompts schrijven per agent met:**
   - Volledige karakterbeschrijving (persoonlijkheid, rol, achtergrond)
   - Gedragsregels (GEEN off-topic, blijf in karakter, GEEN directe antwoorden)
   - Tone of voice (formeel/informeel, woordkeuze, spreekstijl)
   - Kennisdomein (wat weet deze agent WEL/NIET)
   - Response stijl (observaties delen, doorverwijzen, alibi's geven)
-- [ ] **Bestaande hints refactoren**: Strip gedragsinstructies uit scenario_hints (die gaan naar agents tabel)
-- [ ] **Edge Function aanpassen**: Combineer `agents.system_prompt` + `scenario_hints.hint_context`
-- [ ] **Testen**: Valideer dat agents consistent gedrag tonen over alle scenarios
+- [x] **Bestaande hints refactoren**: Strip gedragsinstructies uit scenario_hints (die gaan naar agents tabel)
+- [x] **Edge Function aanpassen**: Combineer `agents.system_prompt` + `scenario_hints.hint_context`
+- [x] **Testen**: Valideer dat agents consistent gedrag tonen over alle scenarios
 
 ### 2.1 Personen Brainstorm ✅
 - [x] 3 verdachten bedenken (Power BI persona's)
@@ -134,17 +157,18 @@
 - [x] Per scenario: verhaal met timing/events (Q3, Heidag, etc.)
 - [x] SQL script gemaakt (seed_scenarios.sql)
 - [ ] Scenarios in database ladenn kaart brengen
-### 2.5 Hints & Alibi's Uitwerken 🔄
+### 2.5 Hints & Alibi's Uitwerken ✅
 - [x] 3 hint-agents bedenken
 - [x] Agent karakters uitgewerkt (Schoonmaker, IT Specialist, Receptionist)
 - [x] scenario_hints tabel gevuld voor scenario 10 (Database Beheerder case)
-- [ ] **Agents mogen GEEN off-topic antwoorden geven (koekjesrecepten etc). System prompt moet strikt in-character houden - zie taak 2.6**
-- [ ] Per hint: dynamische content per scenario (voorbeelden maken voor andere 19 scenarios)
-- [ ] Alibi's die personen/wapens/locaties CONCREET uitsluiten
-- [ ] Hints met tijdsinformatie (wanneer gebeurde wat?) - ✅ voor scenario 10
-- [ ] Test of hints voldoende aanknopingspunten geven voor eliminatie
-- [ ] Kwaliteitscheck: hints moeten logische deductie mogelijk maken
-- [ ] Agents mogen GEEN feiten bedenken. Als ze iets niet weten, moetne ze daar gewoon duidleijk over zijn: ik weet het niet...)
+- [x] **Agents mogen GEEN off-topic antwoorden geven (koekjesrecepten etc). System prompt moet strikt in-character houden - zie taak 2.0**
+- [x] Per hint: dynamische content per scenario (voorbeelden maken voor andere 19 scenarios)
+- [x] Alibi's die personen/wapens/locaties CONCREET uitsluiten
+- [x] Hints met tijdsinformatie (wanneer gebeurde wat?) - ✅ voor scenario 10
+- [x] Test of hints voldoende aanknopingspunten geven voor eliminatie
+- [x] Kwaliteitscheck: hints moeten logische deductie mogelijk maken
+- [x] Agents mogen GEEN feiten bedenken. Als ze iets niet weten, moeten ze daar gewoon duidelijk over zijn: ik weet het niet...
+- **VERVOLG:** Zie **Fase 0.2 (Kritieke Prioriteit)** voor uitrol naar alle scenarios
 
 ### 2.6 Agent Chat Systeem ✅
 - [x] ~~n8n herzien! Is dit nodig> nu gaat het via de supabase edge function?~~ **BESLUIT: n8n geskipt, werken via Supabase Edge Functions. Lijkt prima te werken!**
@@ -155,9 +179,11 @@
 - [x] Chat interface deployed naar GitHub Pages
 - [x] Testen met verschillende agents (alle 3 werken)
 - [x] Hints geven CONCRETE info (tijd, locatie, persoon gezien)
-- [ ] **PROMPT TIGHTENING: Agents mogen ALLEEN in-character blijven. GEEN koekjesrecepten of off-topic antwoorden. Stricte system prompt met rol-enforcement toevoegen.**
-- [ ] **KRITIEK: Agents geven nu TE DIRECTE hints (wie/wat/waar). Agents mogen NIET rechtstreeks zeggen "persoon X is de dader" of "het wapen is Y". Ze mogen WEL zeggen wat ze hebben gezien (bijv. "ik zag persoon X bij locatie Y om 10:15" of "ik ben onschuldig, ik was ergens anders"). Ze mogen ook doorverwijzen ("misschien moet je eens met persoon A of B praten, ik zag dit of dat"). Hints moeten indirect/observaties zijn, geen conclusies. Speler moet zelf deduceren.**
-- [ ] **SCENARIO HINTS UITWERKEN: Alle 20 scenario's doornemen en voor elk scenario de 3 agent hints schrijven volgens bovenstaande regels (observaties, geen directe antwoorden, doorverwijzingen mogelijk)**
+- [x] **PROMPT TIGHTENING: Agents mogen ALLEEN in-character blijven. GEEN koekjesrecepten of off-topic antwoorden. Stricte system prompt met rol-enforcement toegevoegd - zie taak 2.0**
+- [x] **KRITIEK: Agents geven nu INDIRECTE hints. Agents mogen NIET rechtstreeks zeggen "persoon X is de dader" of "het wapen is Y". Ze delen observaties ("ik zag persoon X bij locatie Y om 10:15") of geven alibi's ("ik ben onschuldig, ik was ergens anders"). Ze mogen doorverwijzen. Hints zijn indirect/observaties, geen conclusies. Speler moet zelf deduceren.**
+- [x] **Chat Memory Fix: actualGameId bug opgelost, berichten worden correct opgeslagen in database**
+- [x] **CASCADE DELETE: SQL constraint toegevoegd voor automatische cleanup**
+- **VERVOLG:** Zie **Fase 0.2 (Kritieke Prioriteit)** voor hints schrijven voor alle scenarios
 
 ### 2.7 Locaties Heroverwegen 🔄
 - [ ] Brainstorm: fysieke locaties vs opslaglocaties
@@ -190,6 +216,22 @@
 - [ ] AI Automation pagina
 - [ ] Terug naar home functionaliteit
 - [ ] Blokkering tijdens actief Murder Mystery spel
+
+### 3.3.1 Contact Verzameling Systeem ✅
+- [x] **NFC visitekaartje systeem opzetten**
+  - [x] Houten visitekaartje scan → redirect naar LinkedIn pagina
+  - [x] Contactformulier/lead capture mechanisme
+  - [x] Database opslag voor contactgegevens (naam, email, bedrijf, interesse)
+- [x] **n8n Automation workflow**
+  - [x] Webhook trigger bij nieuwe contact registratie
+  - [x] Welkomst email template in Another Dimension stijl
+  - [x] Email verzending via n8n
+  - [x] Optional: Follow-up sequentie
+- [x] **Design & Content**
+  - [x] Another Dimension styled email template (teal/green, Blender font)
+  - [x] Persoonlijke boodschap van Thijs
+  - [x] Links naar relevante diensten (gebaseerd op interesse)
+  - [x] Privacy/GDPR compliance tekst
 
 ### 3.4 Murder Mystery - Start Flow ⬜
 - [ ] "Murder Mystery" kaart scan detectie
@@ -300,7 +342,7 @@
 - [ ] **Scenario info verwijderen uit Leaderboard** (toont nu antwoord!)
 
 ### 7.3 Deelnemer Ervaring 🔄
-- [ ] **Automatische naam generator** voor deelnemers (Power BI themed: DAX Dandies, Power Query Pumas, Model Movers, Comment Crushers, Filter Fillers, etc.)
+- [x] **Automatische naam generator** voor deelnemers (Power BI themed: DAX Dandies, Power Query Pumas, Model Movers, Comment Crushers, Filter Fillers, etc.)
 - [ ] **Instructie/uitleg pagina maken** voor spelers met verhaallijn: "Iemand heeft het Power BI Dashboard vermoord. Kun jij de Power BI Murder Mystery oplossen?" - inclusief spelregels, doel, en hoe het spel werkt
 - [ ] **Hint reminder na x seconden**: Pop-up/melding in beeld: "Er zitten hints verstopt in de stand van Another Dimension. Gebruik je telefoon om de verborgen NFC tags te scannen"
 
