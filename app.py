@@ -10,7 +10,7 @@ import os
 from supabase import create_client, Client
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Load environment variables
 load_dotenv()
@@ -47,7 +47,7 @@ POWERBI_TERMS = {
     'L': ['Lakehouse', 'Load', 'Layer', 'Legend', 'Link'],
     'M': ['Measure', 'Model', 'Matrix', 'M-code', 'Merge', 'Metric', 'Migration'],
     'P': ['Power Query', 'Parameter', 'Partition', 'Publish', 'Pipeline', 'Pivot', 'Python'],
-    'Q': ['Query', 'Q&A', 'Queue'],
+    'Q': ['Query', 'Queue'],
     'R': ['Report', 'Row', 'Relationship', 'Refresh', 'RLS', 'Ribbon', 'Range'],
     'S': ['Slicer', 'Star Schema', 'Snapshot', 'Sync', 'Schema', 'Script', 'SQL', 'Storage', 'Stream'],
     'T': ['Table', 'Tooltip', 'Template', 'Trend', 'Transform', 'Transpose', 'Trigger'],
@@ -128,6 +128,16 @@ def generate_unique_team_name(max_attempts=10):
 def generate_session_code():
     """Generate a unique 6-character session code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+def get_local_day_start_utc_iso():
+    """
+    Return start of current LOCAL day converted to UTC (naive ISO string).
+    This avoids leaderboard/date filtering issues around midnight when DB stores UTC timestamps.
+    """
+    local_now = datetime.now().astimezone()
+    local_day_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+    utc_day_start = local_day_start.astimezone(timezone.utc).replace(tzinfo=None)
+    return utc_day_start.isoformat()
 
 def get_nfc_mapping(nfc_code):
     """
@@ -373,7 +383,7 @@ def get_game_session(session_code):
             'session_code': session_code,
             'team_name': game.get('player_name', 'Team'),
             'scenario_id': scenario['id'],
-            'scenario': scenario['beschrijving'],
+            'scenario': scenario.get('situatie_beschrijving', 'Er is een probleem met het Power BI Dashboard...'),
             'situatie_beschrijving': scenario.get('situatie_beschrijving', '')
         })
     except Exception as e:
@@ -424,14 +434,14 @@ def start_game():
         'status': 'active'  # Mark as active for Edge Function auto-detect
     }).execute()
     
-    # Return scenario beschrijving
+    # Return scenario situatie (niet de volledige oplossing!)
     return jsonify({
         'success': True,
         'game_id': game.data[0]['id'],
         'session_code': session_code,
         'team_name': team_name,
         'scenario_id': scenario['id'],
-        'scenario': scenario['beschrijving'],
+        'scenario': scenario.get('situatie_beschrijving', 'Er is een probleem met het Power BI Dashboard...'),
         'situatie_beschrijving': scenario.get('situatie_beschrijving', ''),
         'message': 'Spel gestart! Los de moord op het Power BI Dashboard op.'
     })
@@ -754,14 +764,14 @@ def get_agent_hint():
 @app.route('/api/leaderboard', methods=['GET'])
 def get_leaderboard():
     """Get top 10 fastest times + laatste sessie (ONLY from today)"""
-    # Get start of today (00:00:00) for date filtering
-    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    # Get LOCAL day start converted to UTC for reliable filtering
+    day_start_utc = get_local_day_start_utc_iso()
     
-    # Get top 10 from TODAY only
-    leaderboard = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).gte('created_at', today_start.isoformat()).order('total_time_seconds', desc=False).limit(15).execute()
+    # Get top 10 from TODAY (local day, compared in UTC)
+    leaderboard = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).gte('end_time', day_start_utc).order('total_time_seconds', desc=False).limit(15).execute()
     
-    # Get laatste sessie (most recent from TODAY)
-    latest = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).gte('created_at', today_start.isoformat()).order('end_time', desc=True).limit(1).execute()
+    # Get laatste sessie (most recent completed today)
+    latest = supabase.table('games').select('id, player_name, total_time_seconds, end_time').eq('completed', True).gte('end_time', day_start_utc).order('end_time', desc=True).limit(1).execute()
     
     formatted = []
     latest_game_id = latest.data[0]['id'] if latest.data else None

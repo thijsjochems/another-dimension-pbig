@@ -183,6 +183,8 @@
 - [x] **KRITIEK: Agents geven nu INDIRECTE hints. Agents mogen NIET rechtstreeks zeggen "persoon X is de dader" of "het wapen is Y". Ze delen observaties ("ik zag persoon X bij locatie Y om 10:15") of geven alibi's ("ik ben onschuldig, ik was ergens anders"). Ze mogen doorverwijzen. Hints zijn indirect/observaties, geen conclusies. Speler moet zelf deduceren.**
 - [x] **Chat Memory Fix: actualGameId bug opgelost, berichten worden correct opgeslagen in database**
 - [x] **CASCADE DELETE: SQL constraint toegevoegd voor automatische cleanup**
+- [x] **PROMPT SNAPSHOT bewaard vóór v2 tightening**: `PROMPT_BACKUP_2026-02-22.md`
+- [ ] **PROMPT v2 evalueren in live chat** (spoiler-control, 1 clue per antwoord, rolconsistentie)
 - **VERVOLG:** Zie **Fase 0.2 (Kritieke Prioriteit)** voor hints schrijven voor alle scenarios
 
 ### 2.7 Locaties Heroverwegen 🔄
