@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Another Dimension</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts.css') }}">
+    <style>
+        :root {
+            --color-bg: #001C0F;
+            --color-primary: #54FCBC;
+            --color-secondary: #DCFFED;
+            --color-danger: #ff7a7a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: radial-gradient(circle at top, rgba(84, 252, 188, 0.08), transparent 40%), var(--color-bg);
+            color: var(--color-secondary);
+            font-family: 'Blender', sans-serif;
+            min-height: 100vh;
+            padding: 28px 18px 40px;
+        }
+
+        .container { max-width: 840px; margin: 0 auto; }
+
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            background: rgba(84, 252, 188, 0.08);
+            border: 2px solid rgba(84, 252, 188, 0.6);
+            color: var(--color-primary);
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            transition: 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(84, 252, 188, 0.18);
+            box-shadow: 0 0 14px rgba(84, 252, 188, 0.25);
+        }
+
+        .card {
+            border: 2px solid rgba(84, 252, 188, 0.35);
+            background: rgba(84, 252, 188, 0.04);
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .header img {
+            width: 58px;
+            height: 58px;
+            filter: drop-shadow(0 0 10px rgba(84, 252, 188, 0.5));
+        }
+
+        h1 {
+            color: var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.8rem;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .subtitle { opacity: 0.85; font-size: 0.98rem; }
+
+        .source-chip {
+            margin: 8px 0 20px;
+            display: inline-block;
+            padding: 7px 10px;
+            border: 1px solid rgba(84, 252, 188, 0.5);
+            border-radius: 999px;
+            font-size: 0.82rem;
+            color: var(--color-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .field { margin-bottom: 14px; }
+
+        label {
+            display: block;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            border: 2px solid rgba(84, 252, 188, 0.28);
+            background: rgba(84, 252, 188, 0.06);
+            color: var(--color-secondary);
+            font-family: 'Blender', sans-serif;
+            border-radius: 8px;
+            padding: 11px 12px;
+            font-size: 0.95rem;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: rgba(84, 252, 188, 0.12);
+        }
+
+        .interest-wrap {
+            margin: 12px 0 14px;
+            padding: 14px;
+            border: 1px solid rgba(84, 252, 188, 0.25);
+            border-radius: 10px;
+            background: rgba(84, 252, 188, 0.03);
+        }
+
+        .interest-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 14px;
+        }
+
+        .checkbox-item { display: flex; gap: 8px; align-items: center; }
+        .checkbox-item input { width: 18px; height: 18px; accent-color: var(--color-primary); }
+        .checkbox-item span { font-size: 0.93rem; }
+
+        .hidden { display: none; }
+
+        .actions { margin-top: 18px; }
+
+        button[type="submit"] {
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            background: var(--color-primary);
+            color: var(--color-bg);
+            font-family: 'Blender', sans-serif;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-size: 1rem;
+            padding: 13px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        button[type="submit"]:hover {
+            box-shadow: 0 0 16px rgba(84, 252, 188, 0.45);
+            filter: brightness(1.05);
+        }
+
+        button[type="submit"]:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        .error {
+            display: none;
+            margin-top: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 122, 122, 0.6);
+            background: rgba(255, 122, 122, 0.08);
+            color: var(--color-danger);
+            padding: 10px 12px;
+        }
+
+        .success {
+            display: none;
+            margin-top: 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(84, 252, 188, 0.45);
+            background: rgba(84, 252, 188, 0.08);
+            color: var(--color-secondary);
+            padding: 16px;
+            text-align: center;
+        }
+
+        @media (max-width: 740px) {
+            .grid, .interest-grid { grid-template-columns: 1fr; }
+            .header { align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a class="back-button" href="/">← Terug</a>
+
+        <div class="card">
+            <div class="header">
+                <img src="{{ url_for('static', filename='images/robot-mascot.png') }}" alt="Another Dimension">
+                <div>
+                    <h1>Contactformulier</h1>
+                    <p class="subtitle">Leuk dat je interesse hebt. Laat je gegevens achter, dan nemen Thijs of Jasper contact op.</p>
+                </div>
+            </div>
+
+            <div id="sourceChip" class="source-chip hidden"></div>
+
+            <form id="contactForm">
+                <input type="hidden" id="bron" name="bron" value="beurs_qr">
+
+                <div class="grid">
+                    <div class="field">
+                        <label for="voornaam">Voornaam *</label>
+                        <input id="voornaam" name="voornaam" type="text" required>
+                    </div>
+                    <div class="field">
+                        <label for="achternaam">Achternaam *</label>
+                        <input id="achternaam" name="achternaam" type="text" required>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="field">
+                        <label for="bedrijfsnaam">Bedrijfsnaam</label>
+                        <input id="bedrijfsnaam" name="bedrijfsnaam" type="text">
+                    </div>
+                    <div class="field">
+                        <label for="telefoon">Telefoonnummer</label>
+                        <input id="telefoon" name="telefoon" type="tel">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="email">E-mailadres *</label>
+                    <input id="email" name="email" type="email" required>
+                </div>
+
+                <div class="interest-wrap">
+                    <label>Ik wil graag dat je contact met me opneemt over: *</label>
+                    <div class="interest-grid">
+                        <label class="checkbox-item"><input id="ai_automation" type="checkbox"><span>AI Automation</span></label>
+                        <label class="checkbox-item"><input id="ai_training" type="checkbox"><span>AI Training</span></label>
+                        <label class="checkbox-item"><input id="powerbi_training" type="checkbox"><span>Power BI Training</span></label>
+                        <label class="checkbox-item"><input id="powerbi_development" type="checkbox"><span>Power BI Development</span></label>
+                        <label class="checkbox-item"><input id="samenwerken" type="checkbox"><span>Samenwerken</span></label>
+                        <label class="checkbox-item"><input id="andere_check" type="checkbox"><span>Andere</span></label>
+                    </div>
+
+                    <div id="andereField" class="field hidden" style="margin-top:10px;">
+                        <textarea id="interesse_overig" placeholder="Waar ben je specifiek naar op zoek?"></textarea>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="extra_info">Heb je nog iets dat je kwijt wil?</label>
+                    <textarea id="extra_info" rows="4" placeholder="Extra context, gewenste timing, vraagstuk..."></textarea>
+                </div>
+
+                <div class="actions">
+                    <button id="submitButton" type="submit">Verstuur</button>
+                    <div id="errorMessage" class="error"></div>
+                    <div id="successMessage" class="success">Bedankt! We hebben je aanvraag ontvangen en nemen snel contact op.</div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const interestMap = {
+            'ai_automation': 'ai_automation',
+            'ai-training': 'ai_training',
+            'ai_training': 'ai_training',
+            'powerbi_training': 'powerbi_training',
+            'power-bi-training': 'powerbi_training',
+            'powerbi_rapportage': 'powerbi_development',
+            'powerbi_development': 'powerbi_development',
+            'power-bi-development': 'powerbi_development',
+            'samenwerken': 'samenwerken'
+        };
+
+        function parseQueryAndPrefill() {
+            const params = new URLSearchParams(window.location.search);
+            const source = params.get('source');
+            const interesse = params.get('interesse');
+
+            if (source) {
+                const chip = document.getElementById('sourceChip');
+                chip.textContent = `Bron: ${source}`;
+                chip.classList.remove('hidden');
+                document.getElementById('bron').value = source;
+            }
+
+            if (interesse) {
+                const mapped = interestMap[interesse.toLowerCase()];
+                if (mapped) {
+                    const checkbox = document.getElementById(mapped);
+                    if (checkbox) checkbox.checked = true;
+                }
+            }
+        }
+
+        document.getElementById('andere_check').addEventListener('change', function() {
+            document.getElementById('andereField').classList.toggle('hidden', !this.checked);
+            if (!this.checked) document.getElementById('interesse_overig').value = '';
+        });
+
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const errorBox = document.getElementById('errorMessage');
+            const successBox = document.getElementById('successMessage');
+            const submitButton = document.getElementById('submitButton');
+
+            errorBox.style.display = 'none';
+            successBox.style.display = 'none';
+
+            const interestChecks = [
+                'ai_automation',
+                'ai_training',
+                'powerbi_training',
+                'powerbi_development',
+                'samenwerken',
+                'andere_check'
+            ].map(id => document.getElementById(id).checked);
+
+            if (!interestChecks.some(Boolean)) {
+                errorBox.textContent = 'Selecteer minimaal één interesse.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Versturen...';
+
+            const formData = {
+                voornaam: document.getElementById('voornaam').value.trim(),
+                achternaam: document.getElementById('achternaam').value.trim(),
+                bedrijfsnaam: document.getElementById('bedrijfsnaam').value.trim() || null,
+                telefoon: document.getElementById('telefoon').value.trim() || null,
+                email: document.getElementById('email').value.trim(),
+                bron: document.getElementById('bron').value || 'beurs_qr',
+                interesse_powerbi_training: document.getElementById('powerbi_training').checked,
+                interesse_powerbi_development: document.getElementById('powerbi_development').checked,
+                interesse_ai_training: document.getElementById('ai_training').checked,
+                interesse_ai_automation: document.getElementById('ai_automation').checked,
+                interesse_samenwerken: document.getElementById('samenwerken').checked,
+                interesse_overig: document.getElementById('andere_check').checked ? (document.getElementById('interesse_overig').value.trim() || 'Anders') : null,
+                extra_info: document.getElementById('extra_info').value.trim() || null
+            };
+
+            try {
+                const response = await fetch('/api/contact/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Er ging iets fout.');
+                }
+
+                document.getElementById('contactForm').style.display = 'none';
+                successBox.style.display = 'block';
+                setTimeout(() => { window.location.href = '/'; }, 5000);
+            } catch (error) {
+                errorBox.textContent = error.message || 'Er ging iets fout. Probeer het opnieuw.';
+                errorBox.style.display = 'block';
+                submitButton.disabled = false;
+                submitButton.textContent = 'Verstuur';
+            }
+        });
+
+        parseQueryAndPrefill();
+    </script>
+</body>
+</html>

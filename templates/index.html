@@ -38,16 +38,17 @@
         
         .header {
             text-align: center;
-            margin-bottom: 80px;
+            margin-bottom: 150px;
+            margin-top: -80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 40px;
         }
         
         .robot-logo {
-            width: 80px;
-            height: 80px;
+            width: 160px;
+            height: 160px;
             opacity: 0.6;
             filter: drop-shadow(0 0 15px rgba(84, 252, 188, 0.3));
         }
@@ -57,12 +58,13 @@
         }
         
         h1 {
-            font-size: 4rem;
+            font-size: 6rem;
             color: var(--color-primary);
             margin: 0;
-            letter-spacing: 12px;
+            letter-spacing: 15px;
             text-transform: uppercase;
-            text-shadow: 0 0 30px rgba(84, 252, 188, 0.4);
+            text-shadow: 0 0 40px rgba(84, 252, 188, 0.5);
+            line-height: 1.2;
         }
         
         .split-container {
@@ -173,7 +175,7 @@
         
         .footer-logo {
             position: fixed;
-            bottom: 20px;
+            bottom: 60px;
             left: 50%;
             transform: translateX(-50%);
             max-width: 400px;
@@ -189,14 +191,18 @@
                 grid-template-columns: 1fr;
             }
             
+            .header {
+                margin-top: 0;
+            }
+            
             h1 {
-                font-size: 2.5rem;
-                letter-spacing: 6px;
+                font-size: 5rem;
+                letter-spacing: 10px;
             }
             
             .robot-logo {
-                width: 50px;
-                height: 50px;
+                width: 80px;
+                height: 80px;
             }
         }
     </style>
@@ -234,7 +240,7 @@
                 Leaderboard
             </button>
             
-            <button class="service-button" onclick="showInfo('ai')">
+            <button class="service-button" onclick="window.location.href='/ai-automation'">
                 <svg class="icon" viewBox="0 0 24 24">
                     <rect x="3" y="11" width="18" height="10" rx="2"/>
                     <circle cx="12" cy="5" r="2"/>
@@ -245,7 +251,7 @@
                 AI Automation
             </button>
             
-            <button class="service-button" onclick="showInfo('ai-training')">
+            <button class="service-button" onclick="window.location.href='/ai-training'">
                 <svg class="icon" viewBox="0 0 24 24">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                     <path d="M2 17l10 5 10-5"/>
@@ -254,7 +260,7 @@
                 AI Training
             </button>
             
-            <button class="service-button" onclick="showInfo('portfolio')">
+            <button class="service-button" onclick="window.location.href='/powerbi-portfolio'">
                 <svg class="icon" viewBox="0 0 24 24">
                     <line x1="18" y1="20" x2="18" y2="10"/>
                     <line x1="12" y1="20" x2="12" y2="4"/>
@@ -263,7 +269,7 @@
                 Power BI Portfolio
             </button>
             
-            <button class="service-button" onclick="showInfo('training')">
+            <button class="service-button" onclick="window.location.href='/powerbi-training'">
                 <svg class="icon" viewBox="0 0 24 24">
                     <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
                     <path d="M6 12v5c3 3 9 3 12 0v-5"/>
@@ -276,6 +282,22 @@
     <img src="{{ url_for('static', filename='AD-Sticker-Shape.png') }}" alt="Another Dimension" class="footer-logo">
     
     <script>
+        // Auto-cleanup on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Clean up any active games when returning to homepage
+            fetch('/api/game/cleanup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Cleanup result:', data);
+            })
+            .catch(error => {
+                console.error('Cleanup error:', error);
+            });
+        });
+        
         // Custom cursor movement
         document.addEventListener('mousemove', (e) => {
             const cursor = document.querySelector('body::after');
@@ -353,8 +375,32 @@
         }
         
         function startGame() {
-            console.log('Starting game...');
-            window.location.href = '/team-reveal';
+            console.log('Starting new game...');
+            
+            // First create a new game session via API
+            fetch('/api/game/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Game started successfully:', data);
+                    // Save session code to localStorage
+                    localStorage.setItem('sessionCode', data.session_code);
+                    // Navigate to team reveal with session code
+                    window.location.href = `/team-reveal/${data.session_code}`;
+                } else {
+                    console.error('Failed to start game:', data);
+                    alert('Fout bij starten van het spel. Probeer opnieuw.');
+                }
+            })
+            .catch(error => {
+                console.error('Error starting game:', error);
+                alert('Fout bij starten van het spel. Probeer opnieuw.');
+            });
         }
         
         function goToScoreboard() {
@@ -423,20 +469,67 @@
                             // Already on home, do nothing
                             break;
                         case 'AI_AUTOMATION':
-                            console.log('AI_AUTOMATION NFC gescand');
-                            showInfo('ai');
+                            console.log('AI_AUTOMATION NFC gescand - navigeren naar pagina');
+                            window.location.href = '/ai-automation';
                             break;
                         case 'AI_TRAINING':
-                            console.log('AI_TRAINING NFC gescand');
-                            showInfo('ai-training');
+                            console.log('AI_TRAINING NFC gescand - navigeren naar pagina');
+                            window.location.href = '/ai-training';
                             break;
                         case 'POWERBI_PORTFOLIO':
-                            console.log('POWERBI_PORTFOLIO NFC gescand');
-                            showInfo('portfolio');
+                            console.log('POWERBI_PORTFOLIO NFC gescand - navigeren naar pagina');
+                            window.location.href = '/powerbi-portfolio';
+                            break;
+                        case 'TRAINING':
+                            console.log('TRAINING NFC gescand - navigeren naar pagina');
+                            window.location.href = '/powerbi-training';
                             break;
                         case 'POWERBI_TRAINING':
-                            console.log('POWERBI_TRAINING NFC gescand');
-                            showInfo('training');
+                            console.log('POWERBI_TRAINING NFC gescand - navigeren naar pagina');
+                            window.location.href = '/powerbi-training';
+                            break;
+                        case 'AGENTS':
+                            console.log('AGENTS NFC gescand - show reminder popup');
+                            // Show popup reminder to use phone
+                            const overlay = document.createElement('div');
+                            overlay.style.cssText = `
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background: rgba(0, 28, 15, 0.95);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                z-index: 10000;
+                                backdrop-filter: blur(5px);
+                            `;
+                            
+                            const modal = document.createElement('div');
+                            modal.style.cssText = `
+                                background: rgba(84, 252, 188, 0.05);
+                                border: 3px solid #54FCBC;
+                                border-radius: 20px;
+                                padding: 60px;
+                                max-width: 600px;
+                                text-align: center;
+                                box-shadow: 0 0 50px rgba(84, 252, 188, 0.3);
+                            `;
+                            
+                            modal.innerHTML = `
+                                <div style="font-size: 4rem; margin-bottom: 30px;">📱</div>
+                                <div style="color: #54FCBC; font-size: 2rem; font-weight: bold; margin-bottom: 20px; white-space: pre-line;">
+                                    Scan mij met je telefoon,\nweet je nog?
+                                </div>
+                                <button onclick="this.closest('[style*=fixed]').remove()" 
+                                        style="margin-top: 30px; padding: 15px 40px; background: #54FCBC; color: #001C0F; border: none; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer;">
+                                    OK
+                                </button>
+                            `;
+                            
+                            overlay.appendChild(modal);
+                            document.body.appendChild(overlay);
                             break;
                         default:
                             console.log('Onbekend special code type:', codeType);

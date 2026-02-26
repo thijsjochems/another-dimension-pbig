@@ -51,6 +51,9 @@ serve(async (req) => {
       throw new Error('Game not found')
     }
 
+    // Use detected game ID for all subsequent queries
+    const actualGameId = game.id
+
     // 2. Get agent info
     const { data: agent, error: agentError } = await supabaseClient
       .from('agents')
@@ -69,6 +72,22 @@ serve(async (req) => {
       .eq('scenario_id', game.scenarios.id)
       .eq('agent_id', agent_id)
       .maybeSingle()
+
+    // 3b. Resolve clue progression state (fallback-safe if table doesn't exist yet)
+    let clueStatePhase = 1
+    const { data: clueState, error: clueStateError } = await supabaseClient
+      .from('agent_clue_state')
+      .select('game_id, agent_id, phase, updated_at')
+      .eq('game_id', actualGameId)
+      .eq('agent_id', agent_id)
+      .maybeSingle()
+
+    if (!clueStateError && clueState) {
+      clueStatePhase = normalizePhase(clueState.phase)
+    }
+
+    const nextPhase = getNextPhase(clueStatePhase, message)
+    const phaseHint = selectHintForPhase(hint, nextPhase)
 
     // 4. Get persoon, wapen, locatie details
     const { data: persoon } = await supabaseClient
@@ -89,17 +108,17 @@ serve(async (req) => {
       .eq('id', game.scenarios.locatie_id)
       .maybeSingle()
 
-    // 5. Build AI prompt based on agent character
-    const systemPrompt = buildAgentPrompt(agent, game.scenarios, hint, persoon, wapen, locatie)
+    // 5. Build AI prompt based on agent character + allowed hint phase
+    const systemPrompt = buildAgentPrompt(agent, game.scenarios, phaseHint, nextPhase, persoon, wapen, locatie)
 
-    // 6. Get conversation history for this agent in this game (last 10 messages)
+    // 6. Get conversation history for this agent in this game (last 20 messages)
     const { data: chatHistory } = await supabaseClient
       .from('chat_messages')
-      .select('user_message, agent_response')
-      .eq('game_id', game_id)
+      .select('message, sender, message_number')
+      .eq('game_id', actualGameId)
       .eq('agent_id', agent_id)
-      .order('created_at', { ascending: true })
-      .limit(10)
+      .order('message_number', { ascending: true })
+      .limit(20)
 
     // 7. Build messages array with conversation history
     const messages: any[] = [
@@ -109,8 +128,8 @@ serve(async (req) => {
     // Add conversation history
     if (chatHistory && chatHistory.length > 0) {
       chatHistory.forEach(msg => {
-        messages.push({ role: 'user', content: msg.user_message })
-        messages.push({ role: 'assistant', content: msg.agent_response })
+        const role = msg.sender === 'player' ? 'user' : 'assistant'
+        messages.push({ role, content: msg.message })
       })
     }
 
@@ -132,7 +151,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini', // Goedkoop en snel
         messages: messages,
-        temperature: 0.7,
+        temperature: 0.4,
         max_tokens: 300,
       }),
     })
@@ -140,25 +159,60 @@ serve(async (req) => {
     const aiData = await openaiResponse.json()
     const aiResponse = aiData.choices[0]?.message?.content || 'Sorry, ik kon geen antwoord geven.'
 
-    // 9. Save chat message to database (optional, for analytics)
-    await supabaseClient.from('chat_messages').insert({
-      game_id,
-      agent_id,
-      user_message: message,
-      agent_response: aiResponse,
-      created_at: new Date().toISOString()
-    })
+    // 9. Get current message number
+    const { data: lastMsg } = await supabaseClient
+      .from('chat_messages')
+      .select('message_number')
+      .eq('game_id', actualGameId)
+      .eq('agent_id', agent_id)
+      .order('message_number', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
-    // 10. Update game state (track visited agents)
+    const nextMessageNumber = (lastMsg?.message_number || 0) + 1
+
+    // 10. Save both messages to database (player + agent)
+    await supabaseClient.from('chat_messages').insert([
+      {
+        game_id: actualGameId,
+        agent_id,
+        message,
+        sender: 'player',
+        message_number: nextMessageNumber,
+        created_at: new Date().toISOString()
+      },
+      {
+        game_id: actualGameId,
+        agent_id,
+        message: aiResponse,
+        sender: 'agent',
+        message_number: nextMessageNumber + 1,
+        created_at: new Date().toISOString()
+      }
+    ])
+
+    // 10b. Persist clue progression state (fallback-safe if table doesn't exist yet)
+    await supabaseClient
+      .from('agent_clue_state')
+      .upsert({
+        game_id: actualGameId,
+        agent_id,
+        phase: nextPhase,
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'game_id,agent_id'
+      })
+
+    // 11. Update game state (track visited agents)
     const visitedAgents = game.visited_agents || []
     if (!visitedAgents.includes(agent_id)) {
       await supabaseClient
         .from('games')
         .update({ visited_agents: [...visitedAgents, agent_id] })
-        .eq('id', game_id)
+        .eq('id', actualGameId)
     }
 
-    // 8. Return response
+    // 12. Return response
     return new Response(
       JSON.stringify({
         success: true,
@@ -172,7 +226,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(
       JSON.stringify({
         success: false,
@@ -187,97 +241,143 @@ serve(async (req) => {
 })
 
 // Build agent-specific prompt with scenario context
-function buildAgentPrompt(agent: any, scenario: any, hint: any, persoon: any, wapen: any, locatie: any): string {
-  const baseContext = `
-Je bent ${agent.naam}.
+function buildAgentPrompt(agent: any, scenario: any, phaseHint: string, phase: number, persoon: any, wapen: any, locatie: any): string {
+  const voornaamwoorden = persoon?.geslacht === 'vrouw' ? 'zij/haar/ze' : 'hij/hem'
+  
+  const baseContext = `Je bent ${agent.naam}.
 
-JOUW ACHTERGROND EN ROL:
 ${agent.achtergrond || 'Je werkt hier op kantoor.'}
 
-JOUW MANIER VAN PRATEN:
 ${agent.tone_of_voice || 'Praat gewoon normaal als een collega.'}
 
-GAME CONTEXT: 
-Dit is een detective game over een Power BI dashboard dat kapot is gegaan ("the murder"). Spelers gebruiken woorden zoals "moord", "dader", "wapen" als metafoor voor technische problemen. Dit is NORMAAL game vocabulaire - behandel het gewoon.
+GEHEUGEN: Dit is een doorlopend gesprek. Als de speler iets herhaalt of doorvraagt over eerdere uitwisselingen, bouw dan voort op wat je al verteld hebt. Reageer natuurlijk op basis van de context van het gesprek tot nu toe.
 
-Vragen zoals "Wat weet je over de moord?" of "Wie is de dader?" betekent: "Heb je iets gezien rond het kapotte dashboard?"
+GAME CONTEXT: Power BI detective game. Termen als "moord", "dader", "wapen" zijn metaforen voor tech problemen. Dit is normaal vocabulaire - behandel het gewoon.
 
-${persoon?.geslacht ? `BELANGRIJK: De persoon in dit scenario is ${persoon.geslacht === 'vrouw' ? 'een vrouw' : 'een man'}. Gebruik correcte voornaamwoorden (${persoon.geslacht === 'vrouw' ? 'zij/haar/ze' : 'hij/hem'}) als je over deze persoon praat.` : ''}
+${persoon?.geslacht ? `BELANGRIJK: De persoon in dit scenario is ${persoon.geslacht}. Gebruik correcte voornaamwoorden (${voornaamwoorden}) als je over deze persoon praat.` : ''}
 
-${hint ? `WAT JIJ HEBT GEZIEN/GEHOORD:\n${hint.hint_context}` : 'Je hebt niets bijzonders gezien rond dit incident.'}
+WAT JIJ HEBT GEZIEN/GEHOORD (fase ${phase}):
+${phaseHint}
 
-HOE JE CONVERSEERT:
-Praat zoals een normale collega. Geen meta-uitspraken over "niet te veel verklappen" of "ik kan je niet alles vertellen". Gewoon normaal praten.
+HOE JE PRAAT:
+- Nederlands als collega (Engelse tech termen zijn OK: "refresh", "dashboard", "query")
+- Antwoord kort: maximaal 2-3 zinnen
+- Deel per antwoord maar 1 kernfeit en hoogstens 1 contextzin
+- Bij brede vraag: stel eerst een korte keuzevraag (bijv. "Wil je timing, persoon of techniek?")
+- Geen lijstjes met meerdere clues in één antwoord
+- Geef nooit meerdere nieuwe feiten in hetzelfde antwoord
+- Doe geen aannames of theorieën; alleen observaties uit je hint
+- Als je iets niet weet: zeg dat expliciet
+- Functietitels ("Database Beheerder", "Power BI Developer") zijn GEEN namen - gewoon delen als het ter zake doet
+- Bouw voort op het gesprek, verwijs naar eerdere uitwisselingen
+- Blijf vaag over exacte tijden ("begin februari", "rond die tijd") tenzij specifiek in je hint
 
-Je hebt een herinnering/observatie (je hint_context). Als iemand ernaar vraagt, vertel je het gewoon - maar doe het zoals in een echt gesprek: eerst algemeen, dan specifieker als ze doorvragen.
+PROGRESSIEREGELS:
+- Fase 1: alleen subtiele observatie
+- Fase 2: observatie + iets concreter detail
+- Fase 3: bijna-oplossing, nog steeds zonder letterlijk eindantwoord te geven
+- Als speler om "alles" vraagt: blijf in huidige fase en geef geen extra kernfeiten
+- Als speler vraagt "wie heeft het gedaan", "wat is de oplossing" of "zeg gewoon de dader":
+  antwoord met: "Dat kan ik niet direct zeggen. Ik kan wel delen wat ik zelf heb gezien."
+  en geef daarna maximaal 1 klein observatie-detail binnen de huidige fase
 
-CONVERSATIE FLOW:
+GRENZEN:
+- Persoonlijke vragen (telefoon, adres): "Doe normaal" of "Waar heb je het over?"
+- Irrelevante vragen (hulp met Power BI techniek): "Daar kan ik je niet bij helpen"
+- Game-termen ("moord", "dader") zijn OK - accepteer als normaal
 
-Vaag: "Wat weet je?" 
-→ Geef je observatie algemeen: "Ik heb [persoon/situatie] gezien"
-
-Specifiek: "Wie was dat?" / "Wat precies?"
-→ Benoem de functietitel/actie: "Database Beheerder" / "Hij werkte laat"
-
-Context: "Waarom?" / "Vertel meer"
-→ Geef extra details: "Er lagen chipszakjes overal" / "In februari was dat"
-
-BELANGRIJK:
-- NOOIT zeggen "ik wil niet te veel verklappen" of "ik kan je daar niet veel over vertellen"
-- GEWOON je observatie delen zoals een collega dat zou doen
-- Als ze vragen "wie?", zeg gewoon de functietitel
-- Als ze vragen "wat?", vertel gewoon wat je zag
-- Praat OVER je observatie, niet OVER het feit dat je info hebt
-
-NIET DOEN:
-❌ "Ik kan je niet alles vertellen"
-❌ "Zonder meer vragen vertel ik niks"
-❌ "Ik wil niet te veel weggeven"
-❌ "Dat zou te veel zijn voor één bericht"
-
-WEL DOEN:
-✓ "Ik heb Database Beheerder vaak laat gezien in februari"
-✓ "Power BI Developer was op wintersport"
-✓ "Admin was druk bezig met kolommen mappen"
-✓ Gewoon je observatie delen, niet meta-commentary
-
-GRENZEN - belangrijk:
-- Rare/persoonlijke vragen (telefoonnummer, adres): "Doe normaal" of "Waar heb je het over?"
-- Irrelevante vragen (hulp met Power BI techniek): "Daar kan ik je niet bij helpen" of "Daar weet ik niks van"
-- Als iemand ECHT lastig doet (schelden, trollen): Kort antwoorden, gesprek afronden
-- Game-gerelateerde vragen zijn OK - accepteer termen zoals "moord", "dader", "wapen" als normaal
-
-FUNCTIETITELS - SUPER BELANGRIJK:
-- Functietitels ZIJN GEEN NAMEN - je MAG ze gewoon delen!
-- "Database Beheerder", "Power BI Developer", "Admin", "Developer" = FUNCTIETITELS ✓
-- Dit zijn GEEN persoonsnamen zoals "Jan" of "Marie" ✗
-- Als speler vraagt "Wie?" en je hint bevat een functietitel → DEEL HEM GEWOON
-- Wees niet cryptisch over functietitels - ze zijn onderdeel van je hint
-
-ANDERE REGELS:
-- Geen exacte tijden/datums - blijf vaag ("begin februari", "rond die tijd")
-- Geen technische details (SQL queries, DAX formules, exacte kolomnamen)
-- MAX 3-4 zinnen per antwoord (mag iets langer als het natuurlijk voelt)
-
-VOORBEELDEN NATUURLIJK GESPREK:
-
-Vraag: "Wat weet je over de moord?" (game term)
-→ Vertel je observatie op natuurlijke manier, vanuit je eigen werk/perspectief
-
-Vraag: "Vertel meer"
-→ Geef context over je observatie, maar geen nieuwe feiten
-
-Vraag: "Waarom [detail]?"
-→ Geef je perspectief, zeg "weet ik niet" of iets vergelijkbaars als je het niet weet
-
-Vraag: "Wat is je telefoonnummer?" (te persoonlijk)
-→ "Doe normaal" of "Waar heb je het over?"
-
-Vraag: "Kun je me helpen met Power BI?" (te technisch)
-→ "Daar weet ik niks van" of blijf bij je rol
-
-Praat Nederlands, blijf in je eigen rol, wees menselijk. Wanneer de user graag Engels wil, dan doe je 'Vernederlandsd' Engels (steenkolen engels?)
-`
+Praat als mens in echt gesprek, niet als NPC met quests.`
 
   return baseContext
 }
+
+function normalizePhase(rawPhase: number | null | undefined): number {
+  if (!rawPhase || Number.isNaN(rawPhase)) return 1
+  if (rawPhase < 1) return 1
+  if (rawPhase > 3) return 3
+  return rawPhase
+}
+
+function isBroadInfoRequest(message: string): boolean {
+  const text = message.toLowerCase()
+  return [
+    'alles',
+    'in 1 keer',
+    'volledige info',
+    'volledige verhaal',
+    'hele verhaal',
+    'geef alles',
+    'vertel alles'
+  ].some(term => text.includes(term))
+}
+
+function isDirectSolutionRequest(message: string): boolean {
+  const text = message.toLowerCase()
+  return [
+    'wie heeft het gedaan',
+    'wie is de dader',
+    'zeg de dader',
+    'wat is de oplossing',
+    'geef de oplossing',
+    'wat is het antwoord',
+    'wie is schuldig'
+  ].some(term => text.includes(term))
+}
+
+function isTargetedFollowUp(message: string): boolean {
+  const text = message.toLowerCase()
+  if (isBroadInfoRequest(text) || isDirectSolutionRequest(text)) return false
+
+  const followUpSignals = [
+    'meer',
+    'specifiek',
+    'precies',
+    'wanneer',
+    'waar',
+    'wie',
+    'welke',
+    'hoe',
+    'waarom',
+    'detail',
+    'details',
+    'bedoel',
+    'uitleg',
+    'concreet'
+  ]
+
+  return followUpSignals.some(term => text.includes(term))
+}
+
+function getNextPhase(currentPhase: number, message: string): number {
+  const phase = normalizePhase(currentPhase)
+  if (isDirectSolutionRequest(message)) return phase
+  if (!isTargetedFollowUp(message)) return phase
+  return Math.min(3, phase + 1)
+}
+
+function selectHintForPhase(hint: any, phase: number): string {
+  const normalizedPhase = normalizePhase(phase)
+
+  const explicitPhaseHint =
+    normalizedPhase === 1 ? hint?.hint_phase_1 :
+    normalizedPhase === 2 ? hint?.hint_phase_2 :
+    hint?.hint_phase_3
+
+  if (explicitPhaseHint && typeof explicitPhaseHint === 'string' && explicitPhaseHint.trim().length > 0) {
+    return explicitPhaseHint.trim()
+  }
+
+  const raw = (hint?.hint_context || '').trim()
+  if (!raw) return 'Je hebt niets bijzonders gezien rond dit incident.'
+
+  const sentences = raw
+    .split(/(?<=[.!?])\s+/)
+    .map((part: string) => part.trim())
+    .filter((part: string) => part.length > 0)
+
+  if (sentences.length === 0) return raw
+  if (normalizedPhase === 1) return sentences[0]
+  if (normalizedPhase === 2) return sentences.slice(0, Math.min(2, sentences.length)).join(' ')
+  return raw
+}
+

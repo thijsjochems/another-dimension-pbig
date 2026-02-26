@@ -1,0 +1,160 @@
+{
+  "name": "Beurs Contact Form → Supabase + Email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "beurs-contact",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "generate-unique-id"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "tableId": "contacts",
+        "options": {},
+        "authentication": "serviceAccount",
+        "serviceAccountConfig": {
+          "supabaseUrl": "YOUR_SUPABASE_URL",
+          "serviceKey": "YOUR_SUPABASE_SERVICE_KEY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "naam": "={{ $json.body.naam }}",
+            "bedrijf": "={{ $json.body.bedrijf }}",
+            "email": "={{ $json.body.email }}",
+            "telefoon": "={{ $json.body.telefoon }}",
+            "interesse_powerbi_training": "={{ $json.body.interesse_powerbi_training }}",
+            "interesse_powerbi_rapportage": "={{ $json.body.interesse_powerbi_rapportage }}",
+            "interesse_ai_training": "={{ $json.body.interesse_ai_training }}",
+            "interesse_ai_automation": "={{ $json.body.interesse_ai_automation }}",
+            "interesse_samenwerken": "={{ $json.body.interesse_samenwerken }}",
+            "interesse_overig": "={{ $json.body.interesse_overig }}",
+            "bron": "beurs_qr"
+          }
+        }
+      },
+      "id": "supabase-node",
+      "name": "Supabase Insert",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "thijs@anotherdimension.nl",
+        "toEmail": "={{ $json.body.email }}",
+        "subject": "Bedankt voor je interesse in Another Dimension",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #001C0F; color: #DCFFED; padding: 40px; }\n    .container { max-width: 600px; margin: 0 auto; background: rgba(84, 252, 188, 0.05); border: 2px solid rgba(84, 252, 188, 0.3); border-radius: 12px; padding: 40px; }\n    h1 { color: #54FCBC; text-align: center; }\n    .content { line-height: 1.8; font-size: 16px; }\n    .interests { background: rgba(84, 252, 188, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; }\n    .interests h3 { color: #54FCBC; margin-bottom: 15px; }\n    .interests ul { list-style: none; padding: 0; }\n    .interests li { padding: 5px 0; }\n    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(84, 252, 188, 0.2); text-align: center; font-size: 14px; opacity: 0.8; }\n    .signature { margin-top: 30px; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <h1>Bedankt {{ $json.body.naam }}!</h1>\n    \n    <div class=\"content\">\n      <p>Wat gaaf dat je interesse hebt in Another Dimension. We hebben je aanvraag in goede orde ontvangen.</p>\n      \n      <div class=\"interests\">\n        <h3>Jouw interesses:</h3>\n        <ul>\n          {{ $json.body.interesse_powerbi_training ? '<li>✓ Power BI Training</li>' : '' }}\n          {{ $json.body.interesse_powerbi_rapportage ? '<li>✓ Power BI Rapportage Ontwikkelen</li>' : '' }}\n          {{ $json.body.interesse_ai_training ? '<li>✓ AI Training</li>' : '' }}\n          {{ $json.body.interesse_ai_automation ? '<li>✓ AI Automation Ontwikkelen</li>' : '' }}\n          {{ $json.body.interesse_samenwerken ? '<li>✓ Samenwerken</li>' : '' }}\n          {{ $json.body.interesse_overig ? '<li>✓ Overig: ' + $json.body.interesse_overig + '</li>' : '' }}\n        </ul>\n      </div>\n      \n      <p>Een van ons neemt binnen 1-2 werkdagen contact met je op om te kijken hoe we elkaar kunnen helpen.</p>\n      \n      <p>In de tussentijd kun je alvast meer over ons lezen op <a href=\"https://anotherdimension.nl\" style=\"color: #54FCBC;\">anotherdimension.nl</a>.</p>\n      \n      <div class=\"signature\">\n        <p>Met vriendelijke groet,</p>\n        <p><strong>Thijs & het Another Dimension team</strong></p>\n        <p style=\"font-size: 14px; opacity: 0.8;\">thijs@anotherdimension.nl</p>\n      </div>\n    </div>\n    \n    <div class=\"footer\">\n      <p>Another Dimension - Click Less. Achieve More.</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "email-node",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "smtp": {
+          "id": "2",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Bedankt! We nemen snel contact op.' } }}"
+      },
+      "id": "response-node",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "thijs@anotherdimension.nl",
+        "toEmail": "thijs@anotherdimension.nl",
+        "subject": "🔔 Nieuwe Lead van Beurs: {{ $json.body.naam }} ({{ $json.body.bedrijf }})",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }\n    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }\n    h2 { color: #54FCBC; border-bottom: 2px solid #54FCBC; padding-bottom: 10px; }\n    .info-block { background: #f9f9f9; padding: 15px; border-left: 4px solid #54FCBC; margin: 15px 0; }\n    .label { font-weight: bold; color: #333; }\n    .value { color: #666; }\n    .interests { margin-top: 20px; }\n    .interests ul { list-style: none; padding: 0; }\n    .interests li { padding: 8px 0; border-bottom: 1px solid #eee; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <h2>🎯 Nieuwe Lead!</h2>\n    \n    <div class=\"info-block\">\n      <p><span class=\"label\">Naam:</span> <span class=\"value\">{{ $json.body.naam }}</span></p>\n      <p><span class=\"label\">Bedrijf:</span> <span class=\"value\">{{ $json.body.bedrijf }}</span></p>\n      <p><span class=\"label\">Email:</span> <span class=\"value\"><a href=\"mailto:{{ $json.body.email }}\">{{ $json.body.email }}</a></span></p>\n      <p><span class=\"label\">Telefoon:</span> <span class=\"value\">{{ $json.body.telefoon || 'Niet opgegeven' }}</span></p>\n    </div>\n    \n    <div class=\"interests\">\n      <h3 style=\"color: #333;\">Interesses:</h3>\n      <ul>\n        {{ $json.body.interesse_powerbi_training ? '<li>✓ Power BI Training</li>' : '' }}\n        {{ $json.body.interesse_powerbi_rapportage ? '<li>✓ Power BI Rapportage Ontwikkelen</li>' : '' }}\n        {{ $json.body.interesse_ai_training ? '<li>✓ AI Training</li>' : '' }}\n        {{ $json.body.interesse_ai_automation ? '<li>✓ AI Automation Ontwikkelen</li>' : '' }}\n        {{ $json.body.interesse_samenwerken ? '<li>✓ Samenwerken</li>' : '' }}\n        {{ $json.body.interesse_overig ? '<li>✓ Overig: ' + $json.body.interesse_overig + '</li>' : '' }}\n      </ul>\n    </div>\n    \n    <p style=\"margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #999; font-size: 13px;\">Lead binnengekomen via beurs QR code</p>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "notification-email-node",
+      "name": "Notify Thijs",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [650, 450],
+      "credentials": {
+        "smtp": {
+          "id": "2",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Supabase Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Insert": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Thijs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-14T00:00:00.000Z",
+  "versionId": "1"
+}

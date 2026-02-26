@@ -404,6 +404,11 @@
                     if (type === 'special') {
                         const codeType = data.code_type;
                         if (codeType === 'EXIT' || codeType === 'YES' || codeType === 'NO') {
+                            // Cleanup before going home
+                            await fetch('/api/game/cleanup', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
                             window.location.href = '/';
                         }
                     }
@@ -544,7 +549,12 @@
             }, 2000);
         }
         
-        function goHome() {
+        async function goHome() {
+            // Cleanup before going home
+            await fetch('/api/game/cleanup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
             window.location.href = '/';
         }
     </script>

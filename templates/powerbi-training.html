@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power BI Training - Another Dimension</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts.css') }}">
+    <style>
+        :root {
+            --color-bg: #001C0F;
+            --color-primary: #54FCBC;
+            --color-secondary: #DCFFED;
+            --color-dark: #1E1E1E;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--color-bg);
+            color: var(--color-secondary);
+            font-family: 'Blender', sans-serif;
+            min-height: 100vh;
+            padding: 30px 30px 100px 30px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .robot-logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px rgba(84, 252, 188, 0.4));
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(84, 252, 188, 0.4);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--color-secondary);
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+        
+        .back-button {
+            background: rgba(84, 252, 188, 0.1);
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+            padding: 12px 25px;
+            font-size: 0.95rem;
+            font-family: 'Blender', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+        
+        .back-button:hover {
+            background: rgba(84, 252, 188, 0.2);
+            box-shadow: 0 0 15px rgba(84, 252, 188, 0.3);
+        }
+        
+        .content-section {
+            background: rgba(84, 252, 188, 0.03);
+            border: 2px solid rgba(84, 252, 188, 0.3);
+            border-radius: 12px;
+            padding: 30px 25px;
+        }
+        
+        .video-container {
+            height: 45vh;
+            margin: 0 0 30px 0;
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 25px rgba(84, 252, 188, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        video {
+            height: 100%;
+            width: auto;
+            display: block;
+            background: #000;
+        }
+        
+        .text-content {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: var(--color-secondary);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .cta-section {
+            text-align: center;
+            margin-top: 35px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(84, 252, 188, 0.2);
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            background: #fff;
+            display: block;
+            box-shadow: 0 0 14px rgba(84, 252, 188, 0.28);
+        }
+        
+        .cta-text {
+            font-size: 1.1rem;
+            color: var(--color-secondary);
+            line-height: 1.6;
+        }
+        
+        .footer-logo {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 350px;
+            width: 70%;
+            opacity: 0.7;
+            filter: drop-shadow(0 0 15px rgba(84, 252, 188, 0.3));
+            z-index: 10;
+        }
+        
+        .scan-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(84, 252, 188, 0.15);
+            border: 1px solid rgba(84, 252, 188, 0.5);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--color-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .scan-indicator.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-indicator" id="scanIndicator">
+        NFC scan gedetecteerd...
+    </div>
+    
+    <div class="container">
+        <button class="back-button" onclick="goHome()">← TERUG</button>
+        
+        <div class="header">
+            <img src="{{ url_for('static', filename='robot-mascot.png') }}" alt="Robot Mascot" class="robot-logo">
+            <h1>Power BI Training</h1>
+            <p class="subtitle">Leer Power BI van A tot Z</p>
+        </div>
+        
+        <div class="content-section">
+            <div class="video-container">
+                <video loop muted autoplay playsinline>
+                    <source src="{{ url_for('static', filename='videos/Power BI Training.mp4') }}" type="video/mp4">
+                    Je browser ondersteunt geen video afspelen.
+                </video>
+            </div>
+            
+            <div class="text-content">
+                Power BI training voor iedereen. Modelleren, visualiseren, dashboards bouwen. Hands-on en praktisch.
+            </div>
+            
+            <div class="cta-section">
+                <img
+                    class="qr-code"
+                    src="https://quickchart.io/qr?size=220&text={{ url_for('contact_form', _external=True, source='powerbi-training', interesse='powerbi_training') | urlencode }}"
+                    alt="QR code naar contactformulier"
+                >
+                <div class="cta-text">
+                    Benieuwd wat we voor jou kunnen doen? Scan hier.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <img src="{{ url_for('static', filename='AD-Sticker-Shape.png') }}" alt="Another Dimension" class="footer-logo">
+    
+    <script>
+        let nfcBuffer = '';
+        let nfcTimeout = null;
+        let inactivityTimeout = null;
+        
+        // Reset inactivity timer
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(() => {
+                console.log('2 minuten inactiviteit - terug naar home');
+                goHome();
+            }, 120000); // 2 minutes
+        }
+        
+        // Reset timer on any user interaction
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('touchstart', resetInactivityTimer);
+        document.addEventListener('keydown', resetInactivityTimer);
+        
+        // Start timer on page load
+        resetInactivityTimer();
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            clearTimeout(nfcTimeout);
+
+            if (e.key.length === 1) {
+                nfcBuffer += e.key;
+            }
+
+            nfcTimeout = setTimeout(() => {
+                if (nfcBuffer.length > 4) {
+                    handleNFCScan(nfcBuffer);
+                }
+                nfcBuffer = '';
+            }, 100);
+        });
+
+        async function handleNFCScan(code) {
+            console.log('NFC scan:', code);
+            
+            const indicator = document.getElementById('scanIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 2000);
+            
+            try {
+                const response = await fetch('/api/game/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nfc_code: code })
+                });
+                
+                const data = await response.json();
+                
+                if (data.type === 'special' && data.data && data.data.code_type === 'EXIT') {
+                    console.log('EXIT gescand - terug naar home');
+                    goHome();
+                }
+            } catch (error) {
+                console.error('NFC scan error:', error);
+            }
+        }
+        
+        async function goHome() {
+            try {
+                await fetch('/api/game/cleanup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            } catch (error) {
+                console.error('Cleanup error:', error);
+            }
+            
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
