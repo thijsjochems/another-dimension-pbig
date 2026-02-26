@@ -134,9 +134,9 @@ Zoek in elke template:
 
 Vervang door:
 ```html
-<img src="{{ url_for('static', filename='images/qr-contact.png') }}" 
-     alt="Scan voor contact" 
-     style="width: 200px; height: 200px;">
+<img src="/static/images/qr-contact.png" 
+   alt="Scan voor contact" 
+   style="width: 200px; height: 200px;">
 ```
 
 ---
