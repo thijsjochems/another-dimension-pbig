@@ -245,24 +245,53 @@ def submit_contact():
     """Handle contact form submission and save to Supabase"""
     try:
         data = request.get_json()
-        
-        # Validate required fields
-        if not data.get('naam') or not data.get('bedrijf') or not data.get('email'):
-            return jsonify({'success': False, 'message': 'Naam, bedrijf en email zijn verplicht'}), 400
-        
+
+        # Support zowel oud als nieuw formulierformaat
+        voornaam = (data.get('voornaam') or '').strip()
+        achternaam = (data.get('achternaam') or '').strip()
+        naam = (data.get('naam') or '').strip()
+        if not naam:
+            naam = f"{voornaam} {achternaam}".strip()
+
+        bedrijf = (data.get('bedrijf') or data.get('bedrijfsnaam') or '').strip()
+        email = (data.get('email') or '').strip()
+
+        if not naam or not email:
+            return jsonify({'success': False, 'message': 'Naam en email zijn verplicht'}), 400
+
+        if not bedrijf:
+            bedrijf = 'Onbekend'
+
+        # Map interesses (oude + nieuwe keys)
+        interesse_powerbi_training = bool(data.get('interesse_powerbi_training'))
+        interesse_powerbi_rapportage = bool(data.get('interesse_powerbi_rapportage') or data.get('interesse_powerbi_development'))
+        interesse_ai_training = bool(data.get('interesse_ai_training'))
+        interesse_ai_automation = bool(data.get('interesse_ai_automation'))
+        interesse_samenwerken = bool(data.get('interesse_samenwerken'))
+
+        interesse_overig = (data.get('interesse_overig') or '').strip()
+        extra_info = (data.get('extra_info') or data.get('opmerking') or '').strip()
+        if extra_info:
+            if interesse_overig:
+                interesse_overig = f"{interesse_overig} | Extra: {extra_info}"
+            else:
+                interesse_overig = f"Extra: {extra_info}"
+
+        bron = (data.get('bron') or 'beurs_qr').strip()
+
         # Insert into Supabase contacts table
         contact_data = {
-            'naam': data.get('naam'),
-            'bedrijf': data.get('bedrijf'),
-            'email': data.get('email'),
+            'naam': naam,
+            'bedrijf': bedrijf,
+            'email': email,
             'telefoon': data.get('telefoon'),
-            'interesse_powerbi_training': data.get('interesse_powerbi_training', False),
-            'interesse_powerbi_rapportage': data.get('interesse_powerbi_rapportage', False),
-            'interesse_ai_training': data.get('interesse_ai_training', False),
-            'interesse_ai_automation': data.get('interesse_ai_automation', False),
-            'interesse_samenwerken': data.get('interesse_samenwerken', False),
-            'interesse_overig': data.get('interesse_overig'),
-            'bron': 'beurs_qr'
+            'interesse_powerbi_training': interesse_powerbi_training,
+            'interesse_powerbi_rapportage': interesse_powerbi_rapportage,
+            'interesse_ai_training': interesse_ai_training,
+            'interesse_ai_automation': interesse_ai_automation,
+            'interesse_samenwerken': interesse_samenwerken,
+            'interesse_overig': interesse_overig or None,
+            'bron': bron
         }
         
         # Insert into Supabase

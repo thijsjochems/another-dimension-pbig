@@ -125,18 +125,15 @@
             border-top: 1px solid rgba(84, 252, 188, 0.2);
         }
         
-        .qr-placeholder {
+        .qr-code {
             width: 200px;
             height: 200px;
             margin: 0 auto 20px;
-            border: 2px dashed var(--color-primary);
+            border: 2px solid var(--color-primary);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--color-primary);
-            font-size: 0.9rem;
-            opacity: 0.6;
+            background: #fff;
+            display: block;
+            box-shadow: 0 0 14px rgba(84, 252, 188, 0.28);
         }
         
         .cta-text {
@@ -204,9 +201,11 @@
             </div>
             
             <div class="cta-section">
-                <div class="qr-placeholder">
-                    QR CODE<br>PLACEHOLDER
-                </div>
+                <img
+                    class="qr-code"
+                    src="https://quickchart.io/qr?size=220&text={{ url_for('contact_form', _external=True, source='powerbi-portfolio', interesse='powerbi_rapportage') | urlencode }}"
+                    alt="QR code naar contactformulier"
+                >
                 <div class="cta-text">
                     Benieuwd wat we voor jou kunnen doen? Scan hier.
                 </div>

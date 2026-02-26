@@ -39,3 +39,5 @@ static/videos/
 *.avi
 *.mkv
 *.webm
+.vercel
+supabase/.temp/
