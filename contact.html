@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact - Another Dimension</title>
+  <style>
+    :root {
+      --color-bg: #001C0F;
+      --color-primary: #54FCBC;
+      --color-secondary: #DCFFED;
+      --color-card: rgba(84, 252, 188, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 20%, #083322, var(--color-bg));
+      color: var(--color-secondary);
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 760px;
+      background: var(--color-card);
+      border: 1px solid rgba(84, 252, 188, 0.35);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 1.6rem;
+    }
+
+    .sub { margin: 0 0 20px; opacity: .85; }
+
+    .chip {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 6px 10px;
+      border: 1px solid rgba(84, 252, 188, 0.6);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--color-primary);
+      background: rgba(84, 252, 188, 0.08);
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .full { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      margin: 0 0 6px;
+      font-size: 14px;
+      opacity: .95;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid rgba(84, 252, 188, 0.35);
+      border-radius: 9px;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--color-secondary);
+      outline: none;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(84, 252, 188, 0.15);
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 10px;
+      margin-top: 6px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .check input { width: auto; }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 1px solid var(--color-primary);
+      background: rgba(84, 252, 188, 0.18);
+      color: var(--color-primary);
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .msg { font-size: 14px; min-height: 20px; }
+    .ok { color: #8fffd0; }
+    .err { color: #ff9f9f; }
+
+    @media (max-width: 680px) {
+      .grid, .check-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="sourceChip" class="chip" style="display:none"></div>
+    <h1>Plan een kennismaking</h1>
+    <p class="sub">Laat je gegevens achter. We nemen snel contact op.</p>
+
+    <form id="contactForm">
+      <div class="grid">
+        <div>
+          <label for="voornaam">Voornaam *</label>
+          <input id="voornaam" required>
+        </div>
+        <div>
+          <label for="achternaam">Achternaam *</label>
+          <input id="achternaam" required>
+        </div>
+
+        <div>
+          <label for="bedrijfsnaam">Bedrijfsnaam</label>
+          <input id="bedrijfsnaam">
+        </div>
+        <div>
+          <label for="telefoon">Telefoon</label>
+          <input id="telefoon">
+        </div>
+
+        <div class="full">
+          <label for="email">E-mail *</label>
+          <input id="email" type="email" required>
+        </div>
+
+        <div class="full">
+          <label>Interesse *</label>
+          <div class="check-grid">
+            <label class="check"><input type="checkbox" id="interesse_powerbi_training"> Power BI Training</label>
+            <label class="check"><input type="checkbox" id="interesse_powerbi_rapportage"> Power BI Rapportage / Development</label>
+            <label class="check"><input type="checkbox" id="interesse_ai_training"> AI Training</label>
+            <label class="check"><input type="checkbox" id="interesse_ai_automation"> AI Automation</label>
+            <label class="check"><input type="checkbox" id="interesse_samenwerken"> Samenwerken</label>
+          </div>
+        </div>
+
+        <div class="full">
+          <label for="interesse_overig">Andere interesse</label>
+          <input id="interesse_overig">
+        </div>
+
+        <div class="full">
+          <label for="extra_info">Extra info</label>
+          <textarea id="extra_info" rows="3"></textarea>
+        </div>
+
+        <div class="full" style="display:none;">
+          <label for="website">Website</label>
+          <input id="website" autocomplete="off" tabindex="-1">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Versturen</button>
+        <div id="msg" class="msg"></div>
+      </div>
+    </form>
+  </div>
+
+  <script src="./contact-config.js"></script>
+  <script>
+    const cfg = window.CONTACT_CONFIG || {};
+    const FUNCTION_URL = cfg.functionUrl || '';
+    const SUPABASE_ANON_KEY = cfg.supabaseAnonKey || '';
+
+    const params = new URLSearchParams(window.location.search);
+    const source = params.get('source') || 'github_qr';
+    const interesseParam = params.get('interesse');
+
+    const sourceChip = document.getElementById('sourceChip');
+    sourceChip.style.display = 'inline-block';
+    sourceChip.textContent = `Bron: ${source}`;
+
+    const preselectMap = {
+      'powerbi_training': 'interesse_powerbi_training',
+      'powerbi_rapportage': 'interesse_powerbi_rapportage',
+      'powerbi_development': 'interesse_powerbi_rapportage',
+      'ai_training': 'interesse_ai_training',
+      'ai_automation': 'interesse_ai_automation',
+      'samenwerken': 'interesse_samenwerken'
+    };
+
+    if (interesseParam && preselectMap[interesseParam]) {
+      const el = document.getElementById(preselectMap[interesseParam]);
+      if (el) el.checked = true;
+    }
+
+    const form = document.getElementById('contactForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = 'msg';
+      msg.textContent = '';
+
+      if (!FUNCTION_URL || !SUPABASE_ANON_KEY) {
+        msg.className = 'msg err';
+        msg.textContent = 'Configuratie ontbreekt: vul contact-config.js in.';
+        return;
+      }
+
+      const interesseValues = [
+        'interesse_powerbi_training',
+        'interesse_powerbi_rapportage',
+        'interesse_ai_training',
+        'interesse_ai_automation',
+        'interesse_samenwerken'
+      ];
+
+      const hasAnyInteresse = interesseValues.some(id => document.getElementById(id).checked);
+      if (!hasAnyInteresse && !document.getElementById('interesse_overig').value.trim()) {
+        msg.className = 'msg err';
+        msg.textContent = 'Kies minimaal één interesse of vul "Andere interesse" in.';
+        return;
+      }
+
+      const voornaam = document.getElementById('voornaam').value.trim();
+      const achternaam = document.getElementById('achternaam').value.trim();
+      const payload = {
+        naam: `${voornaam} ${achternaam}`.trim(),
+        bedrijf: document.getElementById('bedrijfsnaam').value.trim() || 'Onbekend',
+        email: document.getElementById('email').value.trim(),
+        telefoon: document.getElementById('telefoon').value.trim(),
+        interesse_powerbi_training: document.getElementById('interesse_powerbi_training').checked,
+        interesse_powerbi_rapportage: document.getElementById('interesse_powerbi_rapportage').checked,
+        interesse_ai_training: document.getElementById('interesse_ai_training').checked,
+        interesse_ai_automation: document.getElementById('interesse_ai_automation').checked,
+        interesse_samenwerken: document.getElementById('interesse_samenwerken').checked,
+        interesse_overig: document.getElementById('interesse_overig').value.trim(),
+        bron: source,
+        website: document.getElementById('website').value.trim()
+      };
+
+      const extraInfo = document.getElementById('extra_info').value.trim();
+      if (extraInfo) {
+        payload.interesse_overig = payload.interesse_overig
+          ? `${payload.interesse_overig}\n\nExtra info: ${extraInfo}`
+          : `Extra info: ${extraInfo}`;
+      }
+
+      try {
+        const response = await fetch(FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Insert mislukt');
+        }
+
+        form.reset();
+        if (interesseParam && preselectMap[interesseParam]) {
+          const el = document.getElementById(preselectMap[interesseParam]);
+          if (el) el.checked = true;
+        }
+
+        msg.className = 'msg ok';
+        msg.textContent = 'Top, ontvangen! We nemen snel contact op.';
+      } catch (err) {
+        console.error(err);
+        msg.className = 'msg err';
+        msg.textContent = 'Opslaan mislukt. Probeer opnieuw of neem direct contact op.';
+      }
+    });
+  </script>
+</body>
+</html>
