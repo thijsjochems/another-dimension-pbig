@@ -11,6 +11,8 @@ DROP POLICY IF EXISTS "Enable insert for all users" ON public.contacts;
 DROP POLICY IF EXISTS "Enable read for authenticated users only" ON public.contacts;
 DROP POLICY IF EXISTS "contacts_insert_public" ON public.contacts;
 DROP POLICY IF EXISTS "contacts_select_authenticated" ON public.contacts;
+DROP POLICY IF EXISTS "contacts_no_direct_anon" ON public.contacts;
+DROP POLICY IF EXISTS "contacts_no_direct_authenticated" ON public.contacts;
 
 -- Block direct table access for public roles
 revoke all on table public.contacts from anon;
