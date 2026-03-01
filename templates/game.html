@@ -456,6 +456,10 @@
             display: none;
             box-shadow: 0 0 50px rgba(84, 252, 188, 0.6);
             z-index: 1000;
+            max-width: 900px;
+            width: calc(100% - 60px);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         
         .complete-box.show {
@@ -463,17 +467,55 @@
         }
         
         .complete-box h2 {
-            font-size: 3rem;
+            font-size: 3.4rem;
             margin-bottom: 30px;
             color: var(--color-primary);
             letter-spacing: 3px;
         }
         
         .complete-box p {
-            font-size: 1.5rem;
+            font-size: 1.9rem;
             margin-bottom: 20px;
             color: var(--color-primary);
             line-height: 1.8;
+        }
+
+        .complete-countdown {
+            position: absolute;
+            top: 18px;
+            right: 22px;
+            font-size: 1.4rem;
+            color: var(--color-primary);
+            opacity: 0.9;
+            letter-spacing: 1px;
+            font-family: var(--font-body);
+        }
+
+        .complete-description {
+            margin: 25px 0 10px;
+            padding: 20px;
+            border: 1px solid rgba(84, 252, 188, 0.35);
+            background: rgba(84, 252, 188, 0.06);
+            text-align: left;
+            border-radius: 4px;
+        }
+
+        .complete-description h3 {
+            margin: 0 0 10px;
+            color: var(--color-primary);
+            font-size: 1.6rem;
+            letter-spacing: 1px;
+            font-family: var(--font-heading);
+        }
+
+        .complete-description p {
+            margin: 0;
+            font-size: 1.4rem;
+            line-height: 1.7;
+            white-space: pre-line;
+            color: var(--color-primary);
+            opacity: 0.95;
+            font-family: var(--font-body);
         }
         
         /* Hint Popup Overlay */
@@ -1181,9 +1223,14 @@
         </div>
         
         <div class="complete-box" id="completeBox">
+            <div class="complete-countdown" id="completeCountdown">Leaderboard in 15...</div>
             <h2>GEFELICITEERD!</h2>
             <p id="finalTime"></p>
             <p id="penaltyInfo"></p>
+            <div class="complete-description" id="completeDescriptionBox" style="display: none;">
+                <h3>Wat er echt aan de hand was</h3>
+                <p id="completeDescriptionText"></p>
+            </div>
             <button class="big-button" onclick="showLeaderboard()">Bekijk Leaderboard</button>
         </div>
         
@@ -1203,6 +1250,9 @@
         let timerInterval = null;
         let currentStep = 'WHO'; // WHO -> WAARMEE -> WAAR
         let penalties = 0;
+        let gameLongDescription = '';
+        let completeCountdownInterval = null;
+        let completeRedirectTimeout = null;
         
         // Start game on page load
         window.onload = async () => {
@@ -1233,6 +1283,7 @@
             try {
                 // Clear any leftover notifications from previous game
                 hideNotification();
+                clearCompletionCountdown();
                 
                 // Reset penalties for new game
                 penalties = 0;
@@ -1253,6 +1304,7 @@
                         gameId = sessionData.game_id;
                         document.getElementById('scenario').innerHTML = sessionData.scenario;
                         document.getElementById('situatie').innerHTML = sessionData.situatie_beschrijving || 'Er is een probleem met het Power BI Dashboard...';
+                        gameLongDescription = sessionData.beschrijving || '';
                         
                         // Show team name
                         if (sessionData.team_name) {
@@ -1305,6 +1357,7 @@
                     localStorage.setItem('sessionCode', data.session_code);
                     document.getElementById('scenario').innerHTML = data.scenario;
                     document.getElementById('situatie').innerHTML = data.situatie_beschrijving || 'Er is een probleem met het Power BI Dashboard...';
+                    gameLongDescription = data.beschrijving || '';
                     
                     // Show team name
                     if (data.team_name) {
@@ -1465,6 +1518,16 @@
                             `Totale tijd: ${result.total_time}`;
                         document.getElementById('penaltyInfo').textContent = 
                             `Penalties: ${penalties} x 15 sec`;
+
+                        const descriptionBox = document.getElementById('completeDescriptionBox');
+                        const descriptionText = document.getElementById('completeDescriptionText');
+                        if (gameLongDescription && gameLongDescription.trim().length > 0) {
+                            descriptionText.textContent = gameLongDescription;
+                            descriptionBox.style.display = 'block';
+                        } else {
+                            descriptionText.textContent = '';
+                            descriptionBox.style.display = 'none';
+                        }
                         
                         // Verwijder groene borders en toon overlay + popup
                         setTimeout(() => {
@@ -1473,13 +1536,8 @@
                             document.getElementById('box-waar').classList.remove('correct');
                             document.getElementById('completeOverlay').classList.add('show');
                             document.getElementById('completeBox').classList.add('show');
+                            startCompletionCountdown(15);
                         }, 500);
-                        
-                        // Auto-navigatie naar leaderboard na 5 seconden
-                        setTimeout(() => {
-                            console.log('Navigating to leaderboard...');
-                            window.location.href = '/leaderboard';
-                        }, 5000);
                     } else {
                         // ALL FILLED BUT WRONG - Show red and reset
                         document.getElementById('box-who').classList.add('wrong');
@@ -1575,7 +1633,40 @@
         }
         
         function showLeaderboard() {
+            clearCompletionCountdown();
             window.location.href = '/leaderboard';
+        }
+
+        function clearCompletionCountdown() {
+            if (completeCountdownInterval) {
+                clearInterval(completeCountdownInterval);
+                completeCountdownInterval = null;
+            }
+            if (completeRedirectTimeout) {
+                clearTimeout(completeRedirectTimeout);
+                completeRedirectTimeout = null;
+            }
+        }
+
+        function startCompletionCountdown(seconds) {
+            clearCompletionCountdown();
+
+            const countdownElement = document.getElementById('completeCountdown');
+            let remaining = seconds;
+            countdownElement.textContent = `Leaderboard in ${remaining}...`;
+
+            completeCountdownInterval = setInterval(() => {
+                remaining -= 1;
+                if (remaining >= 0) {
+                    countdownElement.textContent = `Leaderboard in ${remaining}...`;
+                }
+            }, 1000);
+
+            completeRedirectTimeout = setTimeout(() => {
+                clearCompletionCountdown();
+                console.log('Navigating to leaderboard...');
+                window.location.href = '/leaderboard';
+            }, seconds * 1000);
         }
         
         let currentNotificationAction = null;

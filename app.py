@@ -413,7 +413,8 @@ def get_game_session(session_code):
             'team_name': game.get('player_name', 'Team'),
             'scenario_id': scenario['id'],
             'scenario': scenario.get('situatie_beschrijving', 'Er is een probleem met het Power BI Dashboard...'),
-            'situatie_beschrijving': scenario.get('situatie_beschrijving', '')
+            'situatie_beschrijving': scenario.get('situatie_beschrijving', ''),
+            'beschrijving': scenario.get('beschrijving', '')
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -472,6 +473,7 @@ def start_game():
         'scenario_id': scenario['id'],
         'scenario': scenario.get('situatie_beschrijving', 'Er is een probleem met het Power BI Dashboard...'),
         'situatie_beschrijving': scenario.get('situatie_beschrijving', ''),
+        'beschrijving': scenario.get('beschrijving', ''),
         'message': 'Spel gestart! Los de moord op het Power BI Dashboard op.'
     })
 
