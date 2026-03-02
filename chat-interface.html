@@ -259,6 +259,7 @@
         const statusDiv = document.getElementById('status');
         const agentNameDiv = document.getElementById('agentName');
         const agentRoleDiv = document.getElementById('agentRole');
+        let currentAgentName = 'Agent';
 
         // Initialize
         async function init() {
@@ -282,7 +283,8 @@
                 }
 
                 const agent = agents[0];
-                agentNameDiv.innerHTML = `${getAgentHeaderIcon(agent.naam)}<span>${agent.naam}</span>`;
+                currentAgentName = agent.naam || 'Agent';
+                agentNameDiv.innerHTML = `${getAgentHeaderIcon(agent.naam)} <span>${currentAgentName}</span>`;
                 agentRoleDiv.textContent = agent.rol;
 
                 statusDiv.textContent = 'Klaar om te chatten!';
@@ -384,7 +386,7 @@
 
             const label = document.createElement('div');
             label.className = 'message-label';
-            label.textContent = type === 'user' ? 'Jij' : agentNameDiv.textContent;
+            label.textContent = type === 'user' ? 'Jij' : currentAgentName;
 
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';

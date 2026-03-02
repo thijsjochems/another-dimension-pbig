@@ -476,7 +476,7 @@ function buildSafeFallbackResponse(userMessage: string, phaseHint: string): stri
   if (isDirectSolutionRequest(userMessage)) {
     return `Dat kan ik niet direct zeggen. Ik kan wel delen wat ik zelf heb gezien: ${safeDetail}`
   }
-  return `Wat ik zeker weet: ${safeDetail}`
+  return `Wat ik heb gezien: ${safeDetail}`
 }
 
 function extractPrimaryDetail(text: string): string {
