@@ -96,6 +96,10 @@ serve(async (req) => {
       .eq('id', game.scenarios.persoon_id)
       .maybeSingle()
 
+    const { data: personenLijst } = await supabaseClient
+      .from('personen')
+      .select('naam')
+
     const { data: wapen } = await supabaseClient
       .from('wapens')
       .select('*')
@@ -151,13 +155,20 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini', // Goedkoop en snel
         messages: messages,
-        temperature: 0.4,
+        temperature: 0.2,
         max_tokens: 300,
       }),
     })
 
     const aiData = await openaiResponse.json()
-    const aiResponse = aiData.choices[0]?.message?.content || 'Sorry, ik kon geen antwoord geven.'
+    const aiRawResponse = aiData.choices[0]?.message?.content || ''
+    const aiResponse = sanitizeAgentResponse({
+      rawResponse: aiRawResponse,
+      phaseHint,
+      userMessage: message,
+      scenarioPersonName: (persoon?.naam || '').toString(),
+      allPersonNames: (personenLijst || []).map((row: any) => (row?.naam || '').toString()).filter((name: string) => name.length > 0),
+    })
 
     // 9. Get current message number
     const { data: lastMsg } = await supabaseClient
@@ -243,6 +254,38 @@ serve(async (req) => {
 // Build agent-specific prompt with scenario context
 function buildAgentPrompt(agent: any, scenario: any, phaseHint: string, phase: number, persoon: any, wapen: any, locatie: any): string {
   const voornaamwoorden = persoon?.geslacht === 'vrouw' ? 'zij/haar/ze' : 'hij/hem'
+  const isSchoonmaker = Number(agent?.id) === 1 || (agent?.naam || '').toLowerCase().includes('schoonmaker')
+  const isReceptionist = Number(agent?.id) === 2 || (agent?.naam || '').toLowerCase().includes('receptionist')
+  const isStagiair = Number(agent?.id) === 3 || (agent?.naam || '').toLowerCase().includes('stagiair')
+
+  let rolSpecifiekePraatregels = ''
+
+  if (isSchoonmaker) {
+    rolSpecifiekePraatregels += `
+- Jij bent de Schoonmaker: hou het bewust minder technisch en wat vager
+- Gebruik liever gewone woorden dan vaktermen
+- Voorbeeld: zeg "OneRide" of "dat wolkje waar bestanden staan" in plaats van "OneDrive"
+- Voorbeeld: zeg "dat filterding" of "dat zijpaneel" in plaats van exacte technische schermnamen
+- Laat technische details over aan anderen; jij deelt vooral wat je hebt gezien`
+  }
+
+  if (isReceptionist) {
+    rolSpecifiekePraatregels += `
+- Jij bent de Receptionist: wees warm, menselijk en niet-beschuldigend
+- Zeg NOOIT direct dat iemand de dader is
+- Benoem wél de functietitel van de betrokken persoon als dat helpt voor duidelijkheid (bijv. "Power BI Developer", "Financial Controller")
+- Spreek in twijfelvorm: "Zou het dan toch ... zijn?", "Dat kan ik me bijna niet voorstellen"
+- Koppel observaties aan gevoel en context, niet aan harde conclusies
+- Beschuldig of adresseer de speler NOOIT als veroorzaker (dus niet: "jij was bezig met...")
+- Formuleer incident-acties altijd in derde persoon met functietitel/naam van de betrokken persoon`
+  }
+
+  if (isStagiair) {
+    rolSpecifiekePraatregels += `
+- Jij bent de Stagiair: je bent slim maar onzeker, soms een beetje nerveus
+- Vermijd te stellige eindconclusies; gebruik twijfel: "dat moet het toch zijn?"
+- Houd het menselijk en voorzichtig, bijvoorbeeld: "zeg maar niet dat ik dit zei"`
+  }
   
   const baseContext = `Je bent ${agent.naam}.
 
@@ -254,6 +297,11 @@ GEHEUGEN: Dit is een doorlopend gesprek. Als de speler iets herhaalt of doorvraa
 
 GAME CONTEXT: Power BI detective game. Termen als "moord", "dader", "wapen" zijn metaforen voor tech problemen. Dit is normaal vocabulaire - behandel het gewoon.
 
+BETROKKEN PERSOON IN DIT SCENARIO:
+${persoon?.naam ? `- ${persoon.naam}` : '- onbekend'}
+
+Gebruik deze functietitel/naam gerust om de speler te helpen begrijpen over wie je het hebt, maar zonder harde schuldclaim.
+
 ${persoon?.geslacht ? `BELANGRIJK: De persoon in dit scenario is ${persoon.geslacht}. Gebruik correcte voornaamwoorden (${voornaamwoorden}) als je over deze persoon praat.` : ''}
 
 WAT JIJ HEBT GEZIEN/GEHOORD (fase ${phase}):
@@ -264,19 +312,30 @@ HOE JE PRAAT:
 - Antwoord kort: maximaal 2-3 zinnen
 - Deel per antwoord maar 1 kernfeit en hoogstens 1 contextzin
 - Bij brede vraag: stel eerst een korte keuzevraag (bijv. "Wil je timing, persoon of techniek?")
+- Als de speler al een keuze geeft ("timing", "persoon", "techniek"), geef direct antwoord en stel GEEN nieuwe keuzevraag terug
 - Geen lijstjes met meerdere clues in één antwoord
 - Geef nooit meerdere nieuwe feiten in hetzelfde antwoord
 - Doe geen aannames of theorieën; alleen observaties uit je hint
+- Gebruik uitsluitend informatie die expliciet in "WAT JIJ HEBT GEZIEN/GEHOORD" staat; verzin NOOIT extra details
+- Noem geen extra processtappen, oorzaken of objecten die niet in de fasehint staan
+- Als gevraagd detail (timing/persoon/techniek) niet in de fasehint staat: zeg dat expliciet en geef 1 wél-bekend detail uit de fasehint
+- Bij "vertel meer" of doorvragen: geef een korte herformulering of een iets concreter detail UIT DEZELFDE fasehint, maar voeg geen nieuwe feiten toe
+- Als je in de huidige fase niets extra's kunt toevoegen: zeg dat eerlijk en herhaal 1 bestaand detail uit de fasehint
 - Als je iets niet weet: zeg dat expliciet
 - Functietitels ("Database Beheerder", "Power BI Developer") zijn GEEN namen - gewoon delen als het ter zake doet
+- Verzin NOOIT nieuwe functietitels of personen; gebruik alleen de functietitel/persoon die in dit scenario is gegeven
 - Bouw voort op het gesprek, verwijs naar eerdere uitwisselingen
 - Blijf vaag over exacte tijden ("begin februari", "rond die tijd") tenzij specifiek in je hint
+- De speler is de onderzoeker: spreek de speler NOOIT aan als dader/veroorzaker
+- Gebruik voor incident-acties altijd derde persoon ("de betrokken persoon", functietitel of naam), niet "jij/je" richting speler
+${rolSpecifiekePraatregels}
 
 PROGRESSIEREGELS:
 - Fase 1: alleen subtiele observatie
 - Fase 2: observatie + iets concreter detail
 - Fase 3: bijna-oplossing, nog steeds zonder letterlijk eindantwoord te geven
 - Als speler om "alles" vraagt: blijf in huidige fase en geef geen extra kernfeiten
+- Gebruik de vaste weigeringstekst alleen bij directe oplossingsvraag; niet bij normale vragen als "wat weet je" of "vertel meer"
 - Als speler vraagt "wie heeft het gedaan", "wat is de oplossing" of "zeg gewoon de dader":
   antwoord met: "Dat kan ik niet direct zeggen. Ik kan wel delen wat ik zelf heb gezien."
   en geef daarna maximaal 1 klein observatie-detail binnen de huidige fase
@@ -329,6 +388,10 @@ function isTargetedFollowUp(message: string): boolean {
   if (isBroadInfoRequest(text) || isDirectSolutionRequest(text)) return false
 
   const followUpSignals = [
+    'timing',
+    'persoon',
+    'personen',
+    'techniek',
     'meer',
     'specifiek',
     'precies',
@@ -379,5 +442,110 @@ function selectHintForPhase(hint: any, phase: number): string {
   if (normalizedPhase === 1) return sentences[0]
   if (normalizedPhase === 2) return sentences.slice(0, Math.min(2, sentences.length)).join(' ')
   return raw
+}
+
+function sanitizeAgentResponse(params: {
+  rawResponse: string,
+  phaseHint: string,
+  userMessage: string,
+  scenarioPersonName: string,
+  allPersonNames: string[],
+}): string {
+  const { rawResponse, phaseHint, userMessage, scenarioPersonName, allPersonNames } = params
+
+  const fallback = buildSafeFallbackResponse(userMessage, phaseHint)
+  if (!rawResponse || !rawResponse.trim()) return fallback
+
+  let response = rawResponse.trim()
+
+  if (hasDisallowedPersonMention(response, scenarioPersonName, allPersonNames)) {
+    return fallback
+  }
+
+  response = stripRepeatedChoiceQuestion(response, userMessage)
+
+  if (!hasSufficientHintOverlap(response, phaseHint)) {
+    return fallback
+  }
+
+  return response
+}
+
+function buildSafeFallbackResponse(userMessage: string, phaseHint: string): string {
+  const safeDetail = extractPrimaryDetail(phaseHint)
+  if (isDirectSolutionRequest(userMessage)) {
+    return `Dat kan ik niet direct zeggen. Ik kan wel delen wat ik zelf heb gezien: ${safeDetail}`
+  }
+  return `Wat ik zeker weet: ${safeDetail}`
+}
+
+function extractPrimaryDetail(text: string): string {
+  const raw = (text || '').trim()
+  if (!raw) return 'ik heb hier op dit moment geen extra details over.'
+
+  const sentence = raw
+    .split(/(?<=[.!?])\s+/)
+    .map((part: string) => part.trim())
+    .find((part: string) => part.length > 0)
+
+  return sentence || raw
+}
+
+function stripRepeatedChoiceQuestion(response: string, userMessage: string): string {
+  const user = userMessage.toLowerCase()
+  const isChoiceInput = ['timing', 'persoon', 'personen', 'techniek'].some((term) => user.includes(term))
+  const isTellMore = ['vertel meer', 'meer', 'wat weet', 'wat zag', 'wat dan'].some((term) => user.includes(term))
+
+  if (!isChoiceInput && !isTellMore) return response
+
+  return response
+    .replace(/\s*wil je meer weten over[^?.!]*\?/gi, '')
+    .replace(/\s*wil je iets weten over[^?.!]*\?/gi, '')
+    .trim()
+}
+
+function hasDisallowedPersonMention(response: string, scenarioPersonName: string, allPersonNames: string[]): boolean {
+  const text = response.toLowerCase()
+  const allowed = (scenarioPersonName || '').toLowerCase().trim()
+
+  return allPersonNames.some((name) => {
+    const n = name.toLowerCase().trim()
+    if (!n) return false
+    if (allowed && n === allowed) return false
+    return text.includes(n)
+  })
+}
+
+function hasSufficientHintOverlap(response: string, phaseHint: string): boolean {
+  const hintTokens = tokenizeForComparison(phaseHint)
+  if (hintTokens.size === 0) return true
+
+  const responseTokens = tokenizeForComparison(response)
+  if (responseTokens.size === 0) return false
+
+  let overlap = 0
+  responseTokens.forEach((token) => {
+    if (hintTokens.has(token)) overlap += 1
+  })
+
+  const ratio = overlap / Math.max(1, responseTokens.size)
+  return ratio >= 0.18
+}
+
+function tokenizeForComparison(text: string): Set<string> {
+  const stopwords = new Set([
+    'de', 'het', 'een', 'en', 'of', 'dat', 'dit', 'dan', 'wel', 'niet', 'voor', 'met', 'van',
+    'als', 'maar', 'zijn', 'was', 'werd', 'door', 'bij', 'nog', 'ook', 'die', 'ik', 'je', 'jij',
+    'hij', 'zij', 'ze', 'we', 'op', 'in', 'te', 'om', 'er', 'aan', 'tot', 'naar', 'uit', 'kan',
+  ])
+
+  return new Set(
+    (text || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9_\-\s]/gi, ' ')
+      .split(/\s+/)
+      .map((token) => token.trim())
+      .filter((token) => token.length >= 4 && !stopwords.has(token))
+  )
 }
 

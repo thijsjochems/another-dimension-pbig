@@ -1,0 +1,4 @@
+static/videos/*.mp4
+venv/
+__pycache__/
+.git/

@@ -68,6 +68,16 @@
         .header h1 {
             font-size: 1.5rem;
             margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .agent-header-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
         }
 
         .header .role {
@@ -272,7 +282,7 @@
                 }
 
                 const agent = agents[0];
-                agentNameDiv.textContent = `🕵️ ${agent.naam}`;
+                agentNameDiv.innerHTML = `${getAgentHeaderIcon(agent.naam)}<span>${agent.naam}</span>`;
                 agentRoleDiv.textContent = agent.rol;
 
                 statusDiv.textContent = 'Klaar om te chatten!';
@@ -288,6 +298,37 @@
             } catch (error) {
                 showError('Fout bij laden: ' + error.message);
             }
+        }
+
+        function getAgentHeaderIcon(agentName) {
+            const name = (agentName || '').toLowerCase();
+
+            if (name.includes('schoonmaker')) {
+                return `<svg class="agent-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="7" y="8" width="10" height="11" rx="2"></rect>
+                    <path d="M9 8V6.5a3 3 0 0 1 6 0V8"></path>
+                    <path d="M15.5 13.5c1.8-.2 3.2-.9 4.5-2"></path>
+                </svg>`;
+            }
+
+            if (name.includes('receptionist')) {
+                return `<svg class="agent-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 5h4l2 3-2 3H7z"></path>
+                    <path d="M13 8h5a3 3 0 0 1 3 3"></path>
+                    <path d="M13 11h3"></path>
+                </svg>`;
+            }
+
+            if (name.includes('stagiair')) {
+                return `<svg class="agent-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 9h12v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"></path>
+                    <path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17"></path>
+                    <path d="M8 5c0 1 .8 1.4.8 2.4"></path>
+                    <path d="M11 5c0 1 .8 1.4.8 2.4"></path>
+                </svg>`;
+            }
+
+            return `🕵️`;
         }
 
         // Send message
