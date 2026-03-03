@@ -313,8 +313,8 @@ HOE JE PRAAT:
 - Nederlands als collega (Engelse tech termen zijn OK: "refresh", "dashboard", "query")
 - Antwoord kort: maximaal 2-3 zinnen
 - Deel per antwoord maar 1 kernfeit en hoogstens 1 contextzin
-- Bij brede vraag: stel eerst een korte keuzevraag (bijv. "Wil je timing, persoon of techniek?")
-- Als de speler al een keuze geeft ("timing", "persoon", "techniek"), geef direct antwoord en stel GEEN nieuwe keuzevraag terug
+- Bij brede vraag: stel eerst een korte keuzevraag (bijv. "Wil je meer weten over een locatie, persoon of wapen??")
+- Als de speler al een keuze geeft ("locatie", "persoon", "wapen"), geef direct antwoord en stel GEEN nieuwe keuzevraag terug
 - Geen lijstjes met meerdere clues in één antwoord
 - Geef nooit meerdere nieuwe feiten in hetzelfde antwoord
 - Doe geen aannames of theorieën; alleen observaties uit je hint
@@ -468,7 +468,8 @@ function sanitizeAgentResponse(params: {
 
   response = stripRepeatedChoiceQuestion(response, userMessage)
 
-  if (!hasSufficientHintOverlap(response, phaseHint)) {
+  const shouldEnforceHintGrounding = requiresStrictHintGrounding(userMessage)
+  if (shouldEnforceHintGrounding && !hasSufficientHintOverlap(response, phaseHint)) {
     return fallback
   }
 
@@ -476,12 +477,62 @@ function sanitizeAgentResponse(params: {
 }
 
 function buildSafeFallbackResponse(userMessage: string, phaseHint: string, agentName: string, agentRole: string): string {
+  if (isSmallTalkMessage(userMessage)) {
+    return buildSmallTalkResponse(agentName, agentRole)
+  }
+
   const safeDetail = extractPrimaryDetail(phaseHint)
   const personaPrefix = getPersonaFallbackPrefix(agentName, agentRole)
   if (isDirectSolutionRequest(userMessage)) {
     return `Dat kan ik niet direct zeggen. Ik kan wel delen wat ik zelf heb gezien: ${safeDetail}`
   }
   return `${personaPrefix} ${safeDetail}`
+}
+
+function requiresStrictHintGrounding(userMessage: string): boolean {
+  const text = (userMessage || '').toLowerCase().trim()
+  if (!text) return false
+
+  if (isSmallTalkMessage(text)) return false
+
+  const factSeekingSignals = [
+    'wie', 'waar', 'wanneer', 'hoe', 'waarom', 'wat',
+    'hint', 'clue', 'timing', 'persoon', 'personen', 'techniek',
+    'vertel', 'meer', 'specifiek', 'detail', 'details', 'uitleg',
+    'oplossing', 'dader'
+  ]
+
+  return factSeekingSignals.some((term) => text.includes(term))
+}
+
+function isSmallTalkMessage(message: string): boolean {
+  const text = (message || '').toLowerCase().trim()
+  if (!text) return true
+
+  const smallTalkSignals = [
+    'yo', 'yooo', 'hey', 'hoi', 'hallo', 'sup', 'alles goed', 'gaat ie',
+    'hoe gaat', 'goedemorgen', 'goedenavond', 'goedemiddag'
+  ]
+
+  return smallTalkSignals.some((term) => text.includes(term))
+}
+
+function buildSmallTalkResponse(agentName: string, agentRole: string): string {
+  const raw = `${agentName || ''} ${agentRole || ''}`.toLowerCase()
+
+  if (raw.includes('schoonmaker')) {
+    return 'Ha, hoi! Ik loop hier gewoon m\'n rondje. Wil je dat ik vertel wat ik heb opgemerkt?'
+  }
+
+  if (raw.includes('receptionist')) {
+    return 'Hoi! Fijn dat je er bent. Zullen we inzoomen op timing, persoon of techniek?'
+  }
+
+  if (raw.includes('stagiair')) {
+    return 'Yo, hey! Ik heb wel iets gezien trouwens. Wil je timing, persoon of techniek?'
+  }
+
+  return 'Hoi! Zeg maar waar je op wilt inzoomen: timing, persoon of techniek.'
 }
 
 function getPersonaFallbackPrefix(agentName: string, agentRole: string): string {
