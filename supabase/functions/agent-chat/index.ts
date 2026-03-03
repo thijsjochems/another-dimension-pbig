@@ -315,6 +315,8 @@ HOE JE PRAAT:
 - Deel per antwoord maar 1 kernfeit en hoogstens 1 contextzin
 - Bij brede vraag: stel eerst een korte keuzevraag (bijv. "Wil je meer weten over een locatie, persoon of wapen??")
 - Als de speler al een keuze geeft ("locatie", "persoon", "wapen"), geef direct antwoord en stel GEEN nieuwe keuzevraag terug
+- Vraag "wat heb je gezien" of "wat weet je" is een normale vraag: antwoord direct met 1 observatie uit de fasehint
+- Gebruik de weigeringstekst NOOIT bij zulke normale informatievragen
 - Geen lijstjes met meerdere clues in één antwoord
 - Geef nooit meerdere nieuwe feiten in hetzelfde antwoord
 - Doe geen aannames of theorieën; alleen observaties uit je hint
@@ -373,16 +375,29 @@ function isBroadInfoRequest(message: string): boolean {
 }
 
 function isDirectSolutionRequest(message: string): boolean {
-  const text = message.toLowerCase()
-  return [
-    'wie heeft het gedaan',
-    'wie is de dader',
-    'zeg de dader',
-    'wat is de oplossing',
-    'geef de oplossing',
-    'wat is het antwoord',
-    'wie is schuldig'
-  ].some(term => text.includes(term))
+  const text = normalizeInformalText(message)
+
+  if (
+    text.includes('wat heb je gezien') ||
+    text.includes('wat zag je') ||
+    text.includes('wat weet je') ||
+    text.includes('vertel me wat je hebt gezien')
+  ) {
+    return false
+  }
+
+  const patterns = [
+    /\bwie heeft het gedaan\b/,
+    /\bwie is (de )?dader\b/,
+    /\bzeg( gewoon)? (de )?dader\b/,
+    /\bwat is (de )?oplossing\b/,
+    /\bgeef (de )?oplossing\b/,
+    /\bwat is het antwoord\b/,
+    /\bgeef het antwoord\b/,
+    /\bwie is schuldig\b/
+  ]
+
+  return patterns.some((pattern) => pattern.test(text))
 }
 
 function isTargetedFollowUp(message: string): boolean {
@@ -506,15 +521,24 @@ function requiresStrictHintGrounding(userMessage: string): boolean {
 }
 
 function isSmallTalkMessage(message: string): boolean {
-  const text = (message || '').toLowerCase().trim()
+  const text = normalizeInformalText(message)
   if (!text) return true
 
   const smallTalkSignals = [
-    'yo', 'yooo', 'hey', 'hoi', 'hallo', 'sup', 'alles goed', 'gaat ie',
+    'yo', 'hey', 'hoi', 'hallo', 'sup', 'alles goed', 'gaat ie',
     'hoe gaat', 'goedemorgen', 'goedenavond', 'goedemiddag'
   ]
 
   return smallTalkSignals.some((term) => text.includes(term))
+}
+
+function normalizeInformalText(input: string): string {
+  return (input || '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/(.)\1{2,}/g, '$1$1')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function buildSmallTalkResponse(agentName: string, agentRole: string): string {
