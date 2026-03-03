@@ -166,6 +166,8 @@ serve(async (req) => {
       rawResponse: aiRawResponse,
       phaseHint,
       userMessage: message,
+      agentName: (agent?.naam || '').toString(),
+      agentRole: (agent?.rol || '').toString(),
       scenarioPersonName: (persoon?.naam || '').toString(),
       allPersonNames: (personenLijst || []).map((row: any) => (row?.naam || '').toString()).filter((name: string) => name.length > 0),
     })
@@ -448,12 +450,14 @@ function sanitizeAgentResponse(params: {
   rawResponse: string,
   phaseHint: string,
   userMessage: string,
+  agentName: string,
+  agentRole: string,
   scenarioPersonName: string,
   allPersonNames: string[],
 }): string {
-  const { rawResponse, phaseHint, userMessage, scenarioPersonName, allPersonNames } = params
+  const { rawResponse, phaseHint, userMessage, agentName, agentRole, scenarioPersonName, allPersonNames } = params
 
-  const fallback = buildSafeFallbackResponse(userMessage, phaseHint)
+  const fallback = buildSafeFallbackResponse(userMessage, phaseHint, agentName, agentRole)
   if (!rawResponse || !rawResponse.trim()) return fallback
 
   let response = rawResponse.trim()
@@ -471,12 +475,31 @@ function sanitizeAgentResponse(params: {
   return response
 }
 
-function buildSafeFallbackResponse(userMessage: string, phaseHint: string): string {
+function buildSafeFallbackResponse(userMessage: string, phaseHint: string, agentName: string, agentRole: string): string {
   const safeDetail = extractPrimaryDetail(phaseHint)
+  const personaPrefix = getPersonaFallbackPrefix(agentName, agentRole)
   if (isDirectSolutionRequest(userMessage)) {
     return `Dat kan ik niet direct zeggen. Ik kan wel delen wat ik zelf heb gezien: ${safeDetail}`
   }
-  return `Wat ik heb gezien: ${safeDetail}`
+  return `${personaPrefix} ${safeDetail}`
+}
+
+function getPersonaFallbackPrefix(agentName: string, agentRole: string): string {
+  const raw = `${agentName || ''} ${agentRole || ''}`.toLowerCase()
+
+  if (raw.includes('schoonmaker')) {
+    return 'Wat ik heb gezien is dit, denk ik:'
+  }
+
+  if (raw.includes('receptionist')) {
+    return 'Voor zover ik weet:'
+  }
+
+  if (raw.includes('stagiair')) {
+    return 'Eerlijk? Dit is wat ik zag:'
+  }
+
+  return 'Wat ik heb gezien:'
 }
 
 function extractPrimaryDetail(text: string): string {
@@ -529,7 +552,7 @@ function hasSufficientHintOverlap(response: string, phaseHint: string): boolean 
   })
 
   const ratio = overlap / Math.max(1, responseTokens.size)
-  return ratio >= 0.18
+  return ratio >= 0.1
 }
 
 function tokenizeForComparison(text: string): Set<string> {
