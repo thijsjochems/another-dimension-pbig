@@ -313,8 +313,8 @@ HOE JE PRAAT:
 - Nederlands als collega (Engelse tech termen zijn OK: "refresh", "dashboard", "query")
 - Antwoord kort: maximaal 2-3 zinnen
 - Deel per antwoord maar 1 kernfeit en hoogstens 1 contextzin
-- Bij brede vraag: stel eerst een korte keuzevraag (bijv. "Wil je meer weten over een locatie, persoon of wapen??")
-- Als de speler al een keuze geeft ("locatie", "persoon", "wapen"), geef direct antwoord en stel GEEN nieuwe keuzevraag terug
+- Bij brede vraag: stel eerst een korte keuzevraag (bijv. "Wil je timing, persoon of techniek?")
+- Als de speler al een keuze geeft ("timing", "persoon", "techniek"), geef direct antwoord en stel GEEN nieuwe keuzevraag terug
 - Vraag "wat heb je gezien" of "wat weet je" is een normale vraag: antwoord direct met 1 observatie uit de fasehint
 - Gebruik de weigeringstekst NOOIT bij zulke normale informatievragen
 - Geen lijstjes met meerdere clues in één antwoord
@@ -360,6 +360,8 @@ function normalizePhase(rawPhase: number | null | undefined): number {
   if (rawPhase > 3) return 3
   return rawPhase
 }
+
+type MessageIntent = 'smalltalk' | 'info_request' | 'direct_solution_request'
 
 function isBroadInfoRequest(message: string): boolean {
   const text = message.toLowerCase()
@@ -430,7 +432,8 @@ function isTargetedFollowUp(message: string): boolean {
 
 function getNextPhase(currentPhase: number, message: string): number {
   const phase = normalizePhase(currentPhase)
-  if (isDirectSolutionRequest(message)) return phase
+  const intent = classifyMessageIntent(message)
+  if (intent !== 'info_request') return phase
   if (!isTargetedFollowUp(message)) return phase
   return Math.min(3, phase + 1)
 }
@@ -472,7 +475,9 @@ function sanitizeAgentResponse(params: {
 }): string {
   const { rawResponse, phaseHint, userMessage, agentName, agentRole, scenarioPersonName, allPersonNames } = params
 
-  const fallback = buildSafeFallbackResponse(userMessage, phaseHint, agentName, agentRole)
+  const intent = classifyMessageIntent(userMessage)
+
+  const fallback = buildSafeFallbackResponse(phaseHint, agentName, agentRole, intent)
   if (!rawResponse || !rawResponse.trim()) return fallback
 
   let response = rawResponse.trim()
@@ -483,7 +488,7 @@ function sanitizeAgentResponse(params: {
 
   response = stripRepeatedChoiceQuestion(response, userMessage)
 
-  const shouldEnforceHintGrounding = requiresStrictHintGrounding(userMessage)
+  const shouldEnforceHintGrounding = intent === 'info_request' && requiresStrictHintGrounding(userMessage)
   if (shouldEnforceHintGrounding && !hasSufficientHintOverlap(response, phaseHint)) {
     return fallback
   }
@@ -491,17 +496,24 @@ function sanitizeAgentResponse(params: {
   return response
 }
 
-function buildSafeFallbackResponse(userMessage: string, phaseHint: string, agentName: string, agentRole: string): string {
-  if (isSmallTalkMessage(userMessage)) {
+function buildSafeFallbackResponse(phaseHint: string, agentName: string, agentRole: string, intent: MessageIntent): string {
+  if (intent === 'smalltalk') {
     return buildSmallTalkResponse(agentName, agentRole)
   }
 
   const safeDetail = extractPrimaryDetail(phaseHint)
-  const personaPrefix = getPersonaFallbackPrefix(agentName, agentRole)
-  if (isDirectSolutionRequest(userMessage)) {
-    return `Dat kan ik niet direct zeggen. Ik kan wel delen wat ik zelf heb gezien: ${safeDetail}`
+  if (intent === 'direct_solution_request') {
+    return `${pickVariant(getSolutionRefusalVariants(agentName, agentRole))} ${safeDetail}`
   }
+
+  const personaPrefix = getPersonaFallbackPrefix(agentName, agentRole)
   return `${personaPrefix} ${safeDetail}`
+}
+
+function classifyMessageIntent(message: string): MessageIntent {
+  if (isSmallTalkMessage(message)) return 'smalltalk'
+  if (isDirectSolutionRequest(message)) return 'direct_solution_request'
+  return 'info_request'
 }
 
 function requiresStrictHintGrounding(userMessage: string): boolean {
@@ -557,6 +569,46 @@ function buildSmallTalkResponse(agentName: string, agentRole: string): string {
   }
 
   return 'Hoi! Zeg maar waar je op wilt inzoomen: timing, persoon of techniek.'
+}
+
+function getSolutionRefusalVariants(agentName: string, agentRole: string): string[] {
+  const raw = `${agentName || ''} ${agentRole || ''}`.toLowerCase()
+
+  if (raw.includes('schoonmaker')) {
+    return [
+      'Dat weet ik echt niet zeker, maar ik kan wel delen wat ik zag:',
+      'Nee joh, dat kan ik niet zeggen. Wat ik wel zag was:',
+      'Ik ga daar niet hard op gokken, maar ik heb dit wel gezien:'
+    ]
+  }
+
+  if (raw.includes('receptionist')) {
+    return [
+      'Dat kan ik niet met zekerheid zeggen. Wat ik wél heb gezien is:',
+      'Zo direct wil ik niemand aanwijzen. Wel heb ik dit gezien:',
+      'Daar kan ik geen harde uitspraak over doen. Ik zag wel het volgende:'
+    ]
+  }
+
+  if (raw.includes('stagiair')) {
+    return [
+      'Poeh, dat durf ik niet te zeggen. Ik zag wel dit:',
+      'Dat weet ik niet honderd procent, maar ik heb dit gezien:',
+      'Geen idee of dat zo is, maar dit viel me op:'
+    ]
+  }
+
+  return [
+    'Dat kan ik niet direct zeggen. Wat ik wel heb gezien is:',
+    'Daar kan ik geen hard antwoord op geven. Ik zag wel dit:',
+    'Ik kan de oplossing niet geven, maar ik kan wel dit delen:'
+  ]
+}
+
+function pickVariant(options: string[]): string {
+  if (!options || options.length === 0) return ''
+  const idx = Math.floor(Math.random() * options.length)
+  return options[idx]
 }
 
 function getPersonaFallbackPrefix(agentName: string, agentRole: string): string {
