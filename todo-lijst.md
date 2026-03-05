@@ -65,8 +65,24 @@
 - [ ] Hints valideren: indirect genoeg? Speelbaar?
 - [ ] Hints in database invoeren (scenario_hints tabel)
 - [ ] Testen met echte gameplay: leidt het tot deductie?
+- [ ] **ROL-VERDELING AGENT HINTS afdwingen**:
+  - Receptionist hint primair over **DADER/PERSOON**
+  - Schoonmaker hint primair over **LOCATIE**
+  - Stagiair hint primair over **WAPEN/OORZAAK**
+  - Per scenario controleren op overlap en onderscheid (start met scenario 34 en 35)
 
 **STATUS:** Te checken komende week
+
+### 0.3 Agent Chat Stabilisatie (natuurlijker gesprek) 🔄
+**DOEL**: Behoud van scenario-striktheid én menselijker chatgedrag met geheugen.
+
+**UITLEG & PLAN:** Zie **[AGENT_CHAT_STABILIZATION.md](AGENT_CHAT_STABILIZATION.md)**
+
+**KERNPUNTEN:**
+- Intent-routing verbeteren (smalltalk / info-vraag / oplossingsvraag)
+- Weigeringstekst alleen bij echte oplossingsvraag
+- Conversatie-anker behouden bij doorvragen
+- Fallback minder generiek en minder herhalend
 
 ---
 
