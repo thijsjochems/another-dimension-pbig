@@ -195,6 +195,14 @@
             color: var(--color-secondary);
             display: none;
         }
+
+        .scenario-content {
+            display: inline-block;
+            transform: scale(2);
+            transform-origin: top center;
+            line-height: 1.3;
+            will-change: transform;
+        }
         
         .scenario-box.dev-mode {
             display: block;
@@ -1288,7 +1296,7 @@
                         console.log('Session data:', sessionData);
                         
                         gameId = sessionData.game_id;
-                        document.getElementById('scenario').innerHTML = sessionData.scenario;
+                        renderScenario(sessionData.scenario);
                         document.getElementById('situatie').innerHTML = sessionData.situatie_beschrijving || 'Er is een probleem met het Power BI Dashboard...';
                         gameLongDescription = sessionData.beschrijving || '';
                         
@@ -1326,7 +1334,7 @@
                         gameId = errorData.game_id;
                         // Try to load scenario info
                         if (errorData.scenario) {
-                            document.getElementById('scenario').innerHTML = errorData.scenario;
+                            renderScenario(errorData.scenario);
                         }
                     } else {
                         showNotification('⚠️ Actief Spel', 'Er is al een actief spel. Scan EXIT om te stoppen, of gebruik Force Reset knop.', 'error');
@@ -1341,7 +1349,7 @@
                     gameId = data.game_id;
                     console.log('✅ New game started with ID:', gameId);
                     localStorage.setItem('sessionCode', data.session_code);
-                    document.getElementById('scenario').innerHTML = data.scenario;
+                    renderScenario(data.scenario);
                     document.getElementById('situatie').innerHTML = data.situatie_beschrijving || 'Er is een probleem met het Power BI Dashboard...';
                     gameLongDescription = data.beschrijving || '';
                     
@@ -1363,6 +1371,12 @@
                 console.error('❌ Error starting game:', error);
                 showNotification('❌ Fout', 'Kon geen verbinding maken met server', 'error');
             }
+        }
+
+        function renderScenario(scenarioHtml) {
+            const scenarioElement = document.getElementById('scenario');
+            if (!scenarioElement) return;
+            scenarioElement.innerHTML = `<div class="scenario-content">${scenarioHtml || ''}</div>`;
         }
         
         function startTimer() {
