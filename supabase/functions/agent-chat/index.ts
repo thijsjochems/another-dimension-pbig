@@ -338,6 +338,7 @@ PROGRESSIEREGELS:
 - Fase 1: alleen subtiele observatie
 - Fase 2: observatie + iets concreter detail
 - Fase 3: bijna-oplossing, nog steeds zonder letterlijk eindantwoord te geven
+- Bij normale informatievragen of doorvragen (bijv. "wat heb je gezien", "vertel meer", "timing/persoon/techniek") mag je 1 fase opschuiven
 - Als speler om "alles" vraagt: blijf in huidige fase en geef geen extra kernfeiten
 - Gebruik de vaste weigeringstekst alleen bij directe oplossingsvraag; niet bij normale vragen als "wat weet je" of "vertel meer"
 - Als speler vraagt "wie heeft het gedaan", "wat is de oplossing" of "zeg gewoon de dader":
@@ -403,10 +404,14 @@ function isDirectSolutionRequest(message: string): boolean {
 }
 
 function isTargetedFollowUp(message: string): boolean {
-  const text = message.toLowerCase()
+  const text = normalizeInformalText(message)
   if (isBroadInfoRequest(text) || isDirectSolutionRequest(text)) return false
 
   const followUpSignals = [
+    'wat heb je gezien',
+    'wat zag je',
+    'wat weet je',
+    'vertel',
     'timing',
     'persoon',
     'personen',
@@ -427,13 +432,17 @@ function isTargetedFollowUp(message: string): boolean {
     'concreet'
   ]
 
-  return followUpSignals.some(term => text.includes(term))
+  if (followUpSignals.some(term => text.includes(term))) return true
+
+  // Vang ook korte, normale informatievragen op zodat hints sneller progressen.
+  return text.endsWith('?')
 }
 
 function getNextPhase(currentPhase: number, message: string): number {
   const phase = normalizePhase(currentPhase)
   const intent = classifyMessageIntent(message)
   if (intent !== 'info_request') return phase
+  if (isBroadInfoRequest(message)) return phase
   if (!isTargetedFollowUp(message)) return phase
   return Math.min(3, phase + 1)
 }
@@ -678,8 +687,12 @@ function hasSufficientHintOverlap(response: string, phaseHint: string): boolean 
     if (hintTokens.has(token)) overlap += 1
   })
 
+  if (responseTokens.size <= 8) {
+    return overlap >= 1
+  }
+
   const ratio = overlap / Math.max(1, responseTokens.size)
-  return ratio >= 0.1
+  return ratio >= 0.08 || overlap >= 2
 }
 
 function tokenizeForComparison(text: string): Set<string> {
